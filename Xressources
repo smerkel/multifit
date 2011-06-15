@@ -1,0 +1,163 @@
+!---- Built from http://www.designmatrix.com/services/XResources_example.html
+!---- Background colors; the IDL default is LightGrey.
+!---- A dark blue-grey.
+Idl*background: #A0B0BF
+!---- Foreground (text) colors; the IDL default is black.
+Idl*foreground: black
+
+Idl*fontList: times-bold
+!---- Color around selected ("armed") widgets except for file selection box.
+Idl*HighlightColor: yellow
+!---- Width of border around "armed" widgets and (oddly) around label widgets.
+Idl*highlightThickness: 1
+!---- Border around widgets, useful to illustrate widget hierarchy.
+!Idl*BorderWidth: 1
+!---- Border around widgets; default is black.
+!Idl*BorderColor: black
+!---- Affects margins around button labels, including margin color of
+!---- upper level pull-down menu items.  Default is about 3.
+Idl*MarginWidth: 3
+!---- Width of beveled edges for all buttons, sliders, and text widget window
+!---- borders and scroll bars.  A value of 0 produces a 2-D "flat" look.
+!Idl*shadowThickness: 1
+
+!-------------------------------------------------------------------------------
+!---- Resources specific to widget classes.
+
+!---- For push buttons (e.g., toolbars) and dropbox selections. Also
+!---- for the lowest levels of a menubar hierachy unless overidden by
+!---- Widget_Base, Rname_MBar=foo and Idl*foo*background is set.  The file
+!---- selection dialog box (Dialog_Pickfile) doesn't conform to XmPushButton
+!---- properties. It uses generic Idl properties unless overidden by
+!---- XmFileSelectionBox or XmPushButtonGadget.
+Idl*XmPushButton*background: #A0B0BF
+Idl*XmPushButton*foreground: black
+!---- Oddly this affects fonts in the lower levels of the menubar hierachy,
+!---- toolbar buttons, and buttons on other widgets.
+Idl*XmPushButton*fontList: helvetica
+!---- Color when button is pushed.
+Idl*XmPushButton*armColor: mintcream
+!---- Margins around button labels; overrides Idl*MarginWidth (if greater?).
+Idl*XmPushButton.marginLeft: 0
+Idl*XmPushButton.marginRight: 0 !---- Width of beveled edges for just buttons. (See also XmPushButtonGadget.)
+!Idl*XmPushButton*shadowThickness: 4
+
+!---- Width of beveled edges of button gadgets (e.g., in file selection
+!---- dialog boxes).
+!Idl*XmPushButtonGadget*shadowThickness: 4
+
+!---- For pull-down menus except the actual selections which are PushButtons. 
+Idl*XmCascadeButton.shadowThickness: 1
+! Idl*XmCascadeButton.background: lavender
+! Idl*XmCascadeButton.foreground: red
+
+!---- Separator for buttons (Widget_Button, /Separator) and after CW_PDMenu.
+Idl*XmSeparator*background: black
+Idl*XmSeparator*height: 2
+!Idl*XmSeparator.orientation: vertical
+Idl*XmSeparator.shadowThickness: 0
+
+!---- For text widgets.
+Idl*XmText*background: white
+!---- Fixed width (non-proportional) fonts are recommended for columnar text.
+Idl*XmText*fontList: courier
+!Idl*XmText*fontList: courier-bold
+!Idl*XmText*fontList: fixed
+!---- Example to make the "armed" highlight really obvious.
+Idl*XmText.highlightThickness: 1
+!---- Width of beveled edges for just text widget windows and scroll bars.
+!Idl*XmText*shadowThickness: 1
+
+!---- For text widget scroll bars.
+Idl*XmScrollBar*background: darkorange
+
+!---- For any window with scroll bars.
+!---- Space between the data pane and the scroll bars; default is about 5
+!Idl*XmScrolledWindow.spacing: 10
+Idl*XmScrolledWindow.background: yellow
+!---- Overrides Idl*XmScrollBar*background
+Idl*XmScrolledWindow*XmScrollBar*background: blue
+
+!---- For drop lists.
+Idl*XmCascadeButtonGadget.shadowThickness: 3
+
+!---- For slider widgets.
+Idl*XmScale*background: darkorange
+
+!---- For label widgets. 
+Idl*XmLabel*background: grey
+Idl*XmLabel*foreground: darkred
+!---- Overrides Idl*highlightThickness for label widgets.
+!Idl*XmLabel*highlightThickness: 0
+
+!---- For list widgets.
+!---- Affects scrolled lists in color table and file selection dialog boxes.
+Idl*XmList*background: lightyellow
+Idl*XmList*foreground: darkgreen
+!---- Idl*XmFileSelectionBox*HighlightColor overrides this.
+Idl*XmList*HighlightColor: purple
+
+!---- For text field widgets. 
+!---- Affects Filter and Selection fields of file selection dialog box..
+Idl*XmTextField*background: white
+Idl*XmTextField*foreground: darkblue
+!---- Idl*XmFileSelectionBox*HighlightColor overrides this.
+Idl*XmTextField*HighlightColor: purple
+Idl*XmTextField.highlightThickness: 5
+
+!---- For file selection dialog boxes (Dialog_Pickfile).
+!---- See also XmList for list widgets.
+!---- Overrides Idl*background and Idl*XmScrollBar*background 
+!Idl*XmFileSelectionBox*background: lightslateblue
+!---- Overrides Idl*fontList.
+Idl*XmFileSelectionBox*fontList: times-roman
+!---- Color around selected ("armed") widgets in file selection boxes.
+!---- Overrides Idl*HighlightColor.
+Idl*XmFileSelectionBox*HighlightColor: white
+!---- Width and height of the entire file selection widget.
+!---- Default width for IDL is 400.
+Idl*XmFileSelectionBox.width: 600
+Idl*XmFileSelectionBox.height: 600
+!---- Width of borders for buttons, scroll bars, list and text field windows. 
+Idl*XmFileSelectionBox*shadowThickness: 4
+!---- Width of beveled edges on just file selection box buttons.
+Idl*XmFileSelectionBox*XmPushButtonGadget*shadowThickness: 4
+!---- Color around file selection dialog box widgets except buttons.
+Idl*XmFileSelectionBox*BorderColor: red
+!---- Thickness of border around file selection box widgets except buttons.
+Idl*XmFileSelectionBox*BorderWidth: 2
+!---- Affects just file selection dialog box list widgets.
+Idl*XmFileSelectionBox*XmList*background: wheat
+Idl*XmFileSelectionBox*XmList*HighlightColor: orange
+Idl*XmFileSelectionBox*XmScrolledWindow*XmScrollBar*background: pink
+!---- Affects just file selection dialog box text fields (Filter and Selection).
+Idl*XmFileSelectionBox*XmTextField*background: wheat3
+Idl*XmFileSelectionBox*XmTextField*HighlightColor: darkblue
+!---- Label for file selection filter; default is Filter.
+Idl*XmFileSelectionBox*filterLabelString: My App Filter
+!---- Label default is Directory.
+Idl*XmFileSelectionBox*dirListLabelString: My App Directory
+!---- Label default is Files.
+Idl*XmFileSelectionBox*fileListLabelString: My App Files
+!---- Label default is Selection.
+Idl*XmFileSelectionBox*selectionLabelString: My App Selection
+!---- Label for left button; default is OK.
+Idl*XmFileSelectionBox*OkLabelString: Okeedokee
+!---- Label for middle button; default is Filter.
+Idl*XmFileSelectionBox*applyLabelString: Apply My App filter
+!---- Label for right button; default is Cancel.
+Idl*XmFileSelectionBox*cancelLabelString: Never Mind !---- ???
+Idl*XmFileSelectionBox*dirTextLabelString: Enter My App path name:
+
+!---- Affects widget bases (groups) that are bounded by a frame (/Frame).
+!---- Overrides all child widget settings unless specified as subclasses.
+!---- If you want "framed" widget groups to be in a unique color background,
+!---- try these.
+!Idl*XmFrame*background: tan
+!Idl*XmFrame*foreground: brown
+!---- To affect child widgets, specify them as subclasses, e.g.:
+!Idl*XmFrame*XmPushButton*background: #A6C0AE
+!Idl*XmFrame*XmPushButton*foreground: black
+!Idl*XmFrame*XmText*background: lightblue
+!Idl*XmFrame*XmScale*background: darkorange
+!Idl*XmFrame*XmScrollBar*background: gold

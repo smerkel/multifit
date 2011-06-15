@@ -1,0 +1,47 @@
+; RESET IDL Session
+.RESET_SESSION
+
+; Compile project files                                                                                                                                          
+.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/intformat.pro'  
+.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/getindex.pro' 
+.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/minmaxval.pro'       
+.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/utils.pro'
+.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/mpfitfun.pro'
+.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/mpfitpeak.pro'
+.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/mpfit.pro'
+.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/binarydata.pro'
+.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/chifiles.pro'
+.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/compareFit1DWindow.pro'
+.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/compareFitWindow.pro'
+.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/createModelWindow.pro'
+.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/encode_key.pro'
+.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/fdecomp.pro'
+.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/fitAutoWindow.pro'
+.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/fitJCPDSWindow.pro'
+.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/fitMultiplePeaks.pro'
+.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/fitPatternModel.pro'
+.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/fitPatternObject.pro'
+.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/fitpeaks.pro'
+.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/fitSubPatternObject.pro'
+.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/fitwindow.pro'
+.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/fourier.pro'
+.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/gaussNpeaksbg.pro'                                                                                                                             
+.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/gettok.pro'                                                                                                                                       
+.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/gui.pro'                                                                                                                                  
+.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/JCPDSObject.pro'
+.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/peakModel.pro'
+.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/plot.pro'
+.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/plotResultsWindow.pro'
+.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/plotwindow.pro'
+.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/printdataesg.pro'
+.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/showprogress.pro'
+.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/subPatternModel.pro'
+.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/testpick.pro'
+.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/multifit.pro'
+
+; Resolve all routines
+RESOLVE_ALL, /CONTINUE_ON_ERROR
+
+; Create the project save file
+SAVE, /ROUTINES, FILENAME='/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/multifit.sav', /VERBOSE
+

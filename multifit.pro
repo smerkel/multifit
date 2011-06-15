@@ -1,0 +1,5 @@
+
+
+pro multifit
+  gui
+end
