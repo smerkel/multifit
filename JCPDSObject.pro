@@ -1,3 +1,23 @@
+; *******************************************************************
+; Multfit efficient processing of 2D diffraction images
+; Copyright (C) 2000-2011 S. Merkel, Universite Lille 1
+; http://merkel.zoneo.net/Multifit/
+; 
+; This program is free software; you can redistribute it and/or
+; modify it under the terms of the GNU General Public License
+; as published by the Free Software Foundation; either version 2
+; of the License, or (at your option) any later version.
+; 
+; This program is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with this program; if not, write to the Free Software
+; Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+;
+; *******************************************************************
 
 PRO JCPDSObject__DEFINE 
 	struct = { JCPDSObject, set: 0, name:'', comment:'', npeaks: 0, symmetry: 0, h: PTR_NEW(), k: PTR_NEW(), l: PTR_NEW(), d0: PTR_NEW(), I0: PTR_NEW(), K0: 0.0, dK0: 0.0, dK0dT: 0.0, dK0dTdP: 0.0, alphaT:0.0, dAlphaT:0.0, a0: 0.0, b0: 0.0, c0: 0.0, alpha0: 0.0, beta0:0.0, gamma0: 0.0, v0: 0.0}

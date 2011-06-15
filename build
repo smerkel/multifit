@@ -1,47 +1,68 @@
+; *******************************************************************
+; Multfit efficient processing of 2D diffraction images
+; Copyright (C) 2000-2011 S. Merkel, Universite Lille 1
+; http://merkel.zoneo.net/Multifit/
+; 
+; This program is free software; you can redistribute it and/or
+; modify it under the terms of the GNU General Public License
+; as published by the Free Software Foundation; either version 2
+; of the License, or (at your option) any later version.
+; 
+; This program is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with this program; if not, write to the Free Software
+; Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+;
+; *******************************************************************
+
 ; RESET IDL Session
 .RESET_SESSION
 
 ; Compile project files                                                                                                                                          
-.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/intformat.pro'  
-.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/getindex.pro' 
-.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/minmaxval.pro'       
-.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/utils.pro'
-.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/mpfitfun.pro'
-.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/mpfitpeak.pro'
-.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/mpfit.pro'
-.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/binarydata.pro'
-.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/chifiles.pro'
-.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/compareFit1DWindow.pro'
-.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/compareFitWindow.pro'
-.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/createModelWindow.pro'
-.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/encode_key.pro'
-.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/fdecomp.pro'
-.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/fitAutoWindow.pro'
-.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/fitJCPDSWindow.pro'
-.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/fitMultiplePeaks.pro'
-.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/fitPatternModel.pro'
-.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/fitPatternObject.pro'
-.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/fitpeaks.pro'
-.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/fitSubPatternObject.pro'
-.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/fitwindow.pro'
-.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/fourier.pro'
-.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/gaussNpeaksbg.pro'                                                                                                                             
-.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/gettok.pro'                                                                                                                                       
-.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/gui.pro'                                                                                                                                  
-.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/JCPDSObject.pro'
-.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/peakModel.pro'
-.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/plot.pro'
-.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/plotResultsWindow.pro'
-.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/plotwindow.pro'
-.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/printdataesg.pro'
-.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/showprogress.pro'
-.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/subPatternModel.pro'
-.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/testpick.pro'
-.COMPILE '/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/multifit.pro'
+.COMPILE 'intformat.pro'  
+.COMPILE 'getindex.pro' 
+.COMPILE 'minmaxval.pro'       
+.COMPILE 'utils.pro'
+.COMPILE 'mpfitfun.pro'
+.COMPILE 'mpfitpeak.pro'
+.COMPILE 'mpfit.pro'
+.COMPILE 'binarydata.pro'
+.COMPILE 'chifiles.pro'
+.COMPILE 'compareFit1DWindow.pro'
+.COMPILE 'compareFitWindow.pro'
+.COMPILE 'createModelWindow.pro'
+.COMPILE 'encode_key.pro'
+.COMPILE 'fdecomp.pro'
+.COMPILE 'fitAutoWindow.pro'
+.COMPILE 'fitJCPDSWindow.pro'
+.COMPILE 'fitMultiplePeaks.pro'
+.COMPILE 'fitPatternModel.pro'
+.COMPILE 'fitPatternObject.pro'
+.COMPILE 'fitpeaks.pro'
+.COMPILE 'fitSubPatternObject.pro'
+.COMPILE 'fitwindow.pro'
+.COMPILE 'fourier.pro'
+.COMPILE 'gaussNpeaksbg.pro'                                                                                                                             
+.COMPILE 'gettok.pro'                                                                                                                                       
+.COMPILE 'gui.pro'                                                                                                                                  
+.COMPILE 'JCPDSObject.pro'
+.COMPILE 'peakModel.pro'
+.COMPILE 'plot.pro'
+.COMPILE 'plotResultsWindow.pro'
+.COMPILE 'plotwindow.pro'
+.COMPILE 'printdataesg.pro'
+.COMPILE 'showprogress.pro'
+.COMPILE 'subPatternModel.pro'
+.COMPILE 'testpick.pro'
+.COMPILE 'multifit.pro'
 
 ; Resolve all routines
 RESOLVE_ALL, /CONTINUE_ON_ERROR
 
 ; Create the project save file
-SAVE, /ROUTINES, FILENAME='/home/smerkel/Programmes/IDL/Multifit/Multifit4.3/multifit.sav', /VERBOSE
+SAVE, /ROUTINES, FILENAME='multifit.sav', /VERBOSE
 

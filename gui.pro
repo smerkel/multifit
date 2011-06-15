@@ -1,3 +1,23 @@
+; *******************************************************************
+; Multfit efficient processing of 2D diffraction images
+; Copyright (C) 2000-2011 S. Merkel, Universite Lille 1
+; http://merkel.zoneo.net/Multifit/
+; 
+; This program is free software; you can redistribute it and/or
+; modify it under the terms of the GNU General Public License
+; as published by the Free Software Foundation; either version 2
+; of the License, or (at your option) any later version.
+; 
+; This program is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with this program; if not, write to the Free Software
+; Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+;
+; *******************************************************************
 
 
 ; ******************************************************************
@@ -129,77 +149,6 @@ endelse
 WIDGET_CONTROL,  DEFAULT_FONT=mainfont
 end
 
-
-;  ****************************************** Test key **************
-
-function checkcode, email, key, code
-email = strtrim(strlowcase(email),2)
-key = strtrim(key,2)
-code = strtrim(code,2)
-if (strlen(email) eq 0) then return, 3
-if (strlen(key) eq 0) then return, 3
-str = key + email
-strb = byte(str)
-nc = N_ELEMENTS(strb)
-testcode = ''
-for i=0,nc-1 do begin
-	; enc += string(long(strb[i]),FORMAT='(I03)')
-	testcode += strtrim(string(fix(long(strb[i])*3 mod 10)),2)
-endfor
-if (strcmp(code,testcode) ne 1) then return, 4
-keyb = byte(key)
-nc = N_ELEMENTS(keyb)
-expir = ''
-for i=0,nc-1 do begin
-	digit = fix(long(keyb[i])-48); digit
-	tmp = digit-3
-	if (tmp lt 0) then tmp=10+tmp
-	expir += strtrim(tmp,2)
-endfor
-;print, 'key: ', key
-;print, 'email: ', email
-;print, 'code: ', code
-;print, 'expiration: ', expir
-date = systime(/julian)
-;print, 'date: ', date
-if (expir lt date) then return, 2
-return, 1
-end
-
-function registrationcheck
-email = GETENV('SMLILLE_MULTIFIT_USER')
-key = GETENV('SMLILLE_MULTIFIT_KEY')
-code = GETENV('SMLILLE_MULTIFIT_CODE')
-check = checkcode(email, key, code)
-if (check ne 1) then begin
-	if (check eq 2) then txt = "Your key is expired"
-	if (check eq 3) then txt = "Not registered yet"
-	if (check eq 4) then txt = "Key is invalid"
-	messages = strarr(3)
-	messages[0] = "Registration check returned the following message"
-	messages[1] = "   '" + txt + "'"
-	messages[2] = "please contact the author for more information"
-	Result = DIALOG_MESSAGE(messages, /ERROR, /center)
-	return, 0
-endif
-return, 1
-end
-
-function getExpiration, key
-keyb = byte(key)
-nc = N_ELEMENTS(keyb)
-decode = ''
-for i=0,nc-1 do begin
-	digit = fix(long(keyb[i])-48); digit
-	tmp = digit-3
-	if (tmp lt 0) then tmp=10+tmp
-	decode += strtrim(tmp,2)
-endfor
-CALDAT, decode, Month1, Day1, Year1
-mm = ['jan', 'fev', 'mar', 'avr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
-return, mm[Month1-1] + " " + strtrim(string(Day1),2) + ", " + strtrim(string(Year1),2)
-end
-
 ; ****************************************** about window **************
 
 PRO aboutWindow_event, ev
@@ -208,10 +157,6 @@ END
 
 pro aboutWindow, base
 common fonts, titlefont, boldfont, mainfont, avFontHeight
-email = GETENV('SMLILLE_MULTIFIT_USER')
-key = GETENV('SMLILLE_MULTIFIT_KEY')
-code = GETENV('SMLILLE_MULTIFIT_CODE')
-registered = checkcode(email, key, code)
 basedialog = WIDGET_BASE(/COLUMN, /MODAL, GROUP_LEADER=base, Title='About Multifit')
 infobase =  WIDGET_BASE(basedialog,/COLUMN)
 la = WIDGET_LABEL(infobase, VALUE='Multifit', /ALIGN_LEFT, font=titlefont)
@@ -221,17 +166,6 @@ la = WIDGET_LABEL(infobase, VALUE='Multifit is a software to process multiple di
 la = WIDGET_LABEL(infobase, VALUE='Copyright S. Merkel, Universite Lille 1, France', /ALIGN_LEFT)
 la = WIDGET_LABEL(infobase, VALUE='http://merkel.ZoneO.net/Multifit/', /ALIGN_LEFT)
 la = WIDGET_LABEL(infobase, VALUE='', /ALIGN_LEFT)
-registrationinfo =  WIDGET_BASE(basedialog,/COLUMN, frame=1, /BASE_ALIGN_CENTER )
-la = WIDGET_LABEL(registrationinfo, VALUE='Registration', /align_left, font=boldfont)
-la = WIDGET_LABEL(registrationinfo, VALUE='', /ALIGN_CENTER)
-if (registered gt 2) then begin
-	la = WIDGET_LABEL(registrationinfo, VALUE='This version is not registered yet', /ALIGN_CENTER)
-endif else begin
-	expiration = getExpiration(key)
-	la = WIDGET_LABEL(registrationinfo, VALUE='Registered for: '+strtrim(email,2), /ALIGN_LEFT)
-	la = WIDGET_LABEL(registrationinfo, VALUE='Expiration: '+strtrim(expiration,2), /ALIGN_LEFT)
-endelse
-la = WIDGET_LABEL(registrationinfo, VALUE='', /ALIGN_CENTER)
 buttons = WIDGET_BASE(basedialog,/ROW, /GRID_LAYOUT, /ALIGN_CENTER)
 ok = WIDGET_BUTTON(buttons, VALUE='Ok', UVALUE='OK', xsize=80)
 WIDGET_CONTROL, basedialog, /REALIZE
@@ -1357,13 +1291,6 @@ listSets = Widget_List(listBase, VALUE='', UVALUE='LISTSETS',YSIZE=15, XSIZE=15)
 mapplot = WIDGET_BUTTON(listBase, VALUE='Mapplot', UVALUE='MAPPLOT')
 plotactive = WIDGET_BUTTON(listBase, VALUE='Plot', UVALUE='PLOTONESET')
 log = WIDGET_TEXT(bottom, XSIZE=60, YSIZE=22, /ALIGN_CENTER, /EDITABLE, /WRAP, /SCROLL)
-; If we are not registered, disabling many of the menu items
-registered = registrationcheck()
-if (registered ne 1) then begin
-	toclear = [fit2d_bttn3, fit2d_bttn4, maud_bttn1, data_bttn3, fit_bttn1, fit_bttn3, fit_bttn5 , fit_bttn6, fit_bttn7]
-	n = N_ELEMENTS(toclear)
-	for i=0, n-1 do WIDGET_CONTROL, toclear[i], set_uvalue='FORBIDDEN'
-endif
 
 stash = {base: base, outputDirLa: outputDirLa,  inputDirLa: inputDirLa, defaultBase: defaultBase, bottom:bottom, listBase: listBase, listLa:listLa, log:log, inputDirText:inputDirText, outputDirText:outputDirText, waveText:waveText, ipDistanceText: ipDistanceText, listSets: listSets, mapplot:mapplot, plotactive:plotactive, inputDirBu:inputDirBu, outputDirBu:outputDirBu, pathBase: pathBase}
 WIDGET_CONTROL, base, SET_UVALUE=stash
