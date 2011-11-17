@@ -160,8 +160,8 @@ case self.symmetry of
 	else: return, "Illegal symmetry code"
 endcase
 self.v0 = self.a0 * self.b0* self.c0
-if (self.symmetry eq 2) then self.v0 = self.v0*Math.sqrt(3.)/2.;
-if (self.symmetry eq 5) then self.v0 = self.v0*Math.sin(self.beta0*!PI/180.);
+if (self.symmetry eq 2) then self.v0 = self.v0*sqrt(3.)/2.;
+if (self.symmetry eq 5) then self.v0 = self.v0*sin(self.beta0*!PI/180.);
 if ((self.symmetry eq 6) or (self.symmetry eq 7)) then self.v0 = self.v0* sqrt(1.-(cos(self.alpha0*!PI/180.))^2 $
 				 - (cos(self.beta0*!PI/180.))^2 - (cos(self.gamma0*!PI/180.))^2 + $
 				 2.*cos(self.alpha0*!PI/180.)*cos(self.beta0*!PI/180.)*cos(self.gamma0*!PI/180.))

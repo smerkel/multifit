@@ -82,6 +82,7 @@ end
 pro FitPatternObject::optimizeWithCurrentDataset, log, plotlevel, widthfactor
 for i=0, self.nsubpat-1 do begin
 	thisplotlevel = plotlevel
+	; print, "Here, working on nsubpattern ", i
 	(*(self.subpatterns))(i)->optimizeWithCurrentDataset, log, thisplotlevel, widthfactor, (i+1)
 endfor
 end

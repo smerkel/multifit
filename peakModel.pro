@@ -25,7 +25,7 @@
 ; array of objects peaks
 
 PRO PeakModel__DEFINE 
-	struct = { PeakModel, nterms : 0, peakprofile:0, twotheta: PTR_NEW(), intensity: PTR_NEW(), hwidth: PTR_NEW(), weightGL: PTR_NEW() } 
+	struct = { PeakModel, nterms : 0, peakprofile:0, thistwotheta: PTR_NEW(), thisintensity: PTR_NEW(), thishwidth: PTR_NEW(), thisweightGL: PTR_NEW() } 
 END
 
 ; Init method
@@ -45,19 +45,19 @@ return, 1
 end
 
 FUNCTION PeakModel::initPseudoVoigt
-	self.weightGL = PTR_NEW(fltarr(self.nterms*2+1))
-	(*self.weightGL)(0) = 0.5
+	self.thisweightGL = PTR_NEW(fltarr(self.nterms*2+1))
+	(*self.thisweightGL)(0) = 0.5
 	for i=1, self.nterms*2 do begin
-		(*self.weightGL)(i) = 0.
+		(*self.thisweightGL)(i) = 0.
 	endfor
 return, 1
 end
 
 FUNCTION PeakModel::fromData, log, ndata, dataazimuth, datatwotheta, dataintensity, datahwidth
 	; Creating peak models: Fourier transform of experimental data
-	self.twotheta = PTR_NEW(fltarr(self.nterms*2+1))
-	self.intensity = PTR_NEW(fltarr(self.nterms*2+1))
-	self.hwidth = PTR_NEW(fltarr(self.nterms*2+1))
+	self.thistwotheta = PTR_NEW(fltarr(self.nterms*2+1))
+	self.thisintensity = PTR_NEW(fltarr(self.nterms*2+1))
+	self.thishwidth = PTR_NEW(fltarr(self.nterms*2+1))
 	az = dataazimuth(0:(ndata-1))*!pi/360.
 	theta = datatwotheta(0:(ndata-1))
 	int = dataintensity(0:(ndata-1))
@@ -66,28 +66,28 @@ FUNCTION PeakModel::fromData, log, ndata, dataazimuth, datatwotheta, dataintensi
 	sigma = 0.0001*(theta)
 	guess = fltarr(self.nterms*2+1)
 	guess[0] = mean(theta)
-	*(self.twotheta) = MPFITFUN('FOURIER', az, theta, sigma, guess, /quiet)
+	*(self.thistwotheta) = MPFITFUN('FOURIER', az, theta, sigma, guess, /quiet)
 	logit, log, '  2 theta model is ready'
 	; Model for intensities
 	sigma = 0.0001*(int)
 	guess = fltarr(self.nterms*2+1)
 	guess[0] = mean(int)
-	*(self.intensity) = MPFITFUN('FOURIER', az, int, sigma, guess, /quiet)
+	*(self.thisintensity) = MPFITFUN('FOURIER', az, int, sigma, guess, /quiet)
 	logit, log, '  Intensity model is ready'
 	; Model for peak width 
 	sigma = 0.0001*(w)
 	guess = fltarr(self.nterms*2+1)
 	guess[0] = mean(w)
-	*(self.hwidth) = MPFITFUN('FOURIER', az, w, sigma, guess, /quiet)
+	*(self.thishwidth) = MPFITFUN('FOURIER', az, w, sigma, guess, /quiet)
 	logit, log, '  Half-width model is ready'
 RETURN, 1
 END
 
 FUNCTION PeakModel::fromDataNoLog, ndata, dataazimuth, datatwotheta, dataintensity, datahwidth
 	; Creating peak models: Fourier transform of experimental data
-	self.twotheta = PTR_NEW(fltarr(self.nterms*2+1))
-	self.intensity = PTR_NEW(fltarr(self.nterms*2+1))
-	self.hwidth = PTR_NEW(fltarr(self.nterms*2+1))
+	self.thistwotheta = PTR_NEW(fltarr(self.nterms*2+1))
+	self.thisintensity = PTR_NEW(fltarr(self.nterms*2+1))
+	self.thishwidth = PTR_NEW(fltarr(self.nterms*2+1))
 	az = dataazimuth(0:(ndata-1))*!pi/360.
 	theta = datatwotheta(0:(ndata-1))
 	int = dataintensity(0:(ndata-1))
@@ -96,50 +96,56 @@ FUNCTION PeakModel::fromDataNoLog, ndata, dataazimuth, datatwotheta, dataintensi
 	sigma = 0.0001*(theta)
 	guess = fltarr(self.nterms*2+1)
 	guess[0] = mean(theta)
-	*(self.twotheta) = MPFITFUN('FOURIER', az, theta, sigma, guess, /quiet)
+	*(self.thistwotheta) = MPFITFUN('FOURIER', az, theta, sigma, guess, /quiet)
 	; Model for intensities
 	sigma = 0.0001*(int)
 	guess = fltarr(self.nterms*2+1)
 	guess[0] = mean(int)
-	*(self.intensity) = MPFITFUN('FOURIER', az, int, sigma, guess, /quiet)
+	*(self.thisintensity) = MPFITFUN('FOURIER', az, int, sigma, guess, /quiet)
 	; Model for peak width 
 	sigma = 0.0001*(w)
 	guess = fltarr(self.nterms*2+1)
 	guess[0] = mean(w)
-	*(self.hwidth) = MPFITFUN('FOURIER', az, w, sigma, guess, /quiet)
+	*(self.thishwidth) = MPFITFUN('FOURIER', az, w, sigma, guess, /quiet)
 RETURN, 1
 END
 
 ; Fit of the weight between gaussian and lorentzian. It is put separatly 
 ; it is only use with the pseudo-voigt peak profile
 FUNCTION PeakModel::fitWeightGL, ndata, dataazimuth, dataweightgl
-	self.weightGL = PTR_NEW(fltarr(self.nterms*2+1))
+	self.thisweightGL = PTR_NEW(fltarr(self.nterms*2+1))
 	az = dataazimuth(0:(ndata-1))*!pi/360.
 	we = dataweightgl(0:(ndata-1))
 	sigma = (we)+0.01
 	guess = fltarr(self.nterms*2+1)
 	guess[0] = mean(we)
-	*(self.weightGL) = MPFITFUN('FOURIER', az, we, sigma, guess, /quiet)
+	*(self.thisweightGL) = MPFITFUN('FOURIER', az, we, sigma, guess, /quiet)
 RETURN, 1
 END
 
 FUNCTION PeakModel::intensity, az
-	y = fourier(az*!pi/360., *(self.intensity))
+  ; print, "Here, PeakModel::intensity", az
+	y = fourier(az*!pi/360., *(self.thisintensity))
+  ; print, "ready to return, PeakModel::intensity", az
+  ; print, "Returning:intensity ", y
 	return, y
 END
 
 FUNCTION PeakModel::twotetha, az
-	y = fourier(az*!pi/360., *(self.twotheta))
+  ; print, "Here, PeakModel::twotetha", az
+	y = fourier(az*!pi/360., *(self.thistwotheta))
+  ; print, "ready to return, PeakModel::twotetha", az
+  ; print, "Returning: ", y
 	return, y
 END
 
 FUNCTION PeakModel::hwidth, az
-	y = fourier(az*!pi/360., *(self.hwidth))
+	y = fourier(az*!pi/360., *(self.thishwidth))
 	return, y
 END
 
 FUNCTION PeakModel::weightGL, az
-	y = fourier(az*!pi/360., *(self.weightGL))
+	y = fourier(az*!pi/360., *(self.thisweightGL))
 	return, y
 END
 
@@ -147,22 +153,22 @@ FUNCTION PeakModel::readFromAscii, lun
 	on_ioerror, bad
 	self.nterms = fix(readascii(lun,com="#"))
 	self.peakprofile = fix(readascii(lun,com="#"))
-	self.twotheta = PTR_NEW(fltarr(self.nterms*2+1))
-	self.intensity = PTR_NEW(fltarr(self.nterms*2+1))
-	self.hwidth = PTR_NEW(fltarr(self.nterms*2+1))
-	self.weightGL = PTR_NEW(fltarr(self.nterms*2+1))
+	self.thistwotheta = PTR_NEW(fltarr(self.nterms*2+1))
+	self.thisintensity = PTR_NEW(fltarr(self.nterms*2+1))
+	self.thishwidth = PTR_NEW(fltarr(self.nterms*2+1))
+	self.thisweightGL = PTR_NEW(fltarr(self.nterms*2+1))
 	for i=0, self.nterms*2 do begin
-		(*self.twotheta)(i) = float(readascii(lun,com='#'))
+		(*self.thistwotheta)(i) = float(readascii(lun,com='#'))
 	endfor
 	for i=0, self.nterms*2 do begin
-		(*self.intensity)(i) = float(readascii(lun,com='#'))
+		(*self.thisintensity)(i) = float(readascii(lun,com='#'))
 	endfor
 	for i=0, self.nterms*2 do begin
-		(*self.hwidth)(i) = float(readascii(lun,com='#'))
+		(*self.thishwidth)(i) = float(readascii(lun,com='#'))
 	endfor
 	if (self.peakprofile eq 1) then begin
 		for i=0, self.nterms*2 do begin
-			(*self.weightGL)(i) = float(readascii(lun,com='#'))
+			(*self.thisweightGL)(i) = float(readascii(lun,com='#'))
 		endfor
 	endif
 RETURN, 1
@@ -176,20 +182,20 @@ FUNCTION PeakModel::saveToAscii, lun
 	printf, lun, STRING(self.peakprofile, /PRINT)
 	printf, lun, '# Fourier coefficients for 2 theta'
 	for i=0, self.nterms*2 do begin
-		printf, lun, STRING((*self.twotheta)(i), /PRINT)
+		printf, lun, STRING((*self.thistwotheta)(i), /PRINT)
 	endfor
 	printf, lun, '# Fourier coefficients for intensities'
 	for i=0, self.nterms*2 do begin
-		printf, lun, STRING((*self.intensity)(i), /PRINT)
+		printf, lun, STRING((*self.thisintensity)(i), /PRINT)
 	endfor
 	printf, lun, '# Fourier coefficients for half-widths'
 	for i=0, self.nterms*2 do begin
-		printf, lun, STRING((*self.hwidth)(i), /PRINT)
+		printf, lun, STRING((*self.thishwidth)(i), /PRINT)
 	endfor
 	if (self.peakprofile eq 1) then begin
 		printf, lun, '# Fourier coefficients for weight between Gauss and Lorentz'
 		for i=0, self.nterms*2 do begin
-			printf, lun, STRING((*self.weightGL)(i), /PRINT)
+			printf, lun, STRING((*self.thisweightGL)(i), /PRINT)
 		endfor
 	endif
 RETURN, 1

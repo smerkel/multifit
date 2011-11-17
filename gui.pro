@@ -160,7 +160,7 @@ common fonts, titlefont, boldfont, mainfont, avFontHeight
 basedialog = WIDGET_BASE(/COLUMN, /MODAL, GROUP_LEADER=base, Title='About Multifit')
 infobase =  WIDGET_BASE(basedialog,/COLUMN)
 la = WIDGET_LABEL(infobase, VALUE='Multifit', /ALIGN_LEFT, font=titlefont)
-la = WIDGET_LABEL(infobase, VALUE='Multifit v4.4, build 5, compiled 15 June 2011', /ALIGN_LEFT)
+la = WIDGET_LABEL(infobase, VALUE='Multifit v4.4, build 6, compiled 17 November 2011', /ALIGN_LEFT)
 la = WIDGET_LABEL(infobase, VALUE='', /ALIGN_LEFT)
 la = WIDGET_LABEL(infobase, VALUE='Multifit is a software to process multiple diffraction images', /ALIGN_LEFT)
 la = WIDGET_LABEL(infobase, VALUE='Copyright S. Merkel, Universite Lille 1, France', /ALIGN_LEFT)
@@ -216,7 +216,7 @@ PRO readparams, base, log, inputDirText, outputDirText, waveText, ipDistanceText
 common workdirectory, workdirectory
 filename=dialog_pickfile(title='Filename', path=workdirectory, DIALOG_PARENT=base, DEFAULT_EXTENSION='.par', FILTER=['*.par'])
 if (filename ne '') then begin
-  print, "Want to open ", filename
+  ; print, "Want to open ", filename
 	openr, lun, filename, /get_lun
 	while ~ EOF(lun) do begin
 		row = ""

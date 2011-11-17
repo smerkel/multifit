@@ -122,11 +122,20 @@ indexdelta = WHERE(alpha  EQ (*self.deltarange)(i))
 fit = fltarr(self.npeaks, 4)
 ; print, "Starting value"
 for peak = 0, self.npeaks -1 do begin
-	fit(peak,0) = (*(self.peakmodel))(peak)->twotetha((*self.deltarange)(i))
-	fit(peak,1) = (*(self.peakmodel))(peak)->intensity((*self.deltarange)(i))
-	fit(peak,2) = (*(self.peakmodel))(peak)->hwidth((*self.deltarange)(i))
-	if (self.peakprofile eq 1) then fit(peak,3) = minmaxval(0,1,(*(self.peakmodel))(peak)->weightGL((*self.deltarange)(i))) ; Weight between gaussian and Lorentzian
-	; print, fit(peak,*)
+  ; print, "Peak ", peak
+  ; print, "Starting value",  fit[peak,*]
+  ; help, (*(self.peakmodel)) 
+  ; help, (*(self.peakmodel))[peak]
+	fit[peak,0] = (*(self.peakmodel))[peak]->twotetha((*self.deltarange)(i))
+	; print, fit[peak,0]
+	; print, "Intensity", (*(self.peakmodel))[peak]->intensity((*self.deltarange)(i))
+	fit[peak,1] = (*(self.peakmodel))[peak]->intensity((*self.deltarange)(i))
+  ; print, fit[peak,1]
+	fit[peak,2] = (*(self.peakmodel))[peak]->hwidth((*self.deltarange)(i))
+  ; print, fit[peak,2]
+	; print, fit[peak,*]
+	if (self.peakprofile eq 1) then fit[peak,3] = minmaxval(0,1,(*(self.peakmodel))(peak)->weightGL((*self.deltarange)(i))) ; Weight between gaussian and Lorentzian
+	; print, fit[peak,*]
 endfor
 ; temporary values of intensity vs 2theta restricted to the right interval
 ; We use the largest peak width as a reference, and put a minimum of 
