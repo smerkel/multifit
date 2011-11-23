@@ -92,6 +92,18 @@ FUNCTION SubPatternModel::fromFile, log, filename, peakprofile
 	ENDWHILE
 	close, lun
 	free_lun, lun
+	; 23 nov 2011
+	; Last line may not have been processed properly
+	if (n_elements(result) gt 1) then BEGIN
+	 azimuth(count) = float(result(0))
+    for i=0,self.npeaks-1 do begin
+      twotheta(i,count) = float(result(i*ncolperpeak+1))
+      intensity(i,count) = float(result(i*ncolperpeak+3))
+      hwidth(i,count) = float(result(i*ncolperpeak+4))
+    endfor
+    count = count + 1
+	endif
+	; End modification 23 nov 2011
 	; Ok, data has been read. We have to create a list of azimuth angles for 
 	; which we have data and create a model for each peak
 	; Let's make sure we do have data for more than a few orientations...
