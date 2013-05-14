@@ -64,7 +64,7 @@ FUNCTION SubPatternModel::fromFile, log, filename, peakprofile
 	ncolperpeak = 4
 	logit, log, 'Reading data from ' + filename
 	; The Read_ascii command is giving me non consistent shit from one file 
-	; to the next. I just wrote my own.
+	; to the next. I just wrote my own. 
 	OPENR, lun, filename, /GET_LUN
 	header = STRARR(2)
 	READF, lun, header
@@ -120,9 +120,8 @@ FUNCTION SubPatternModel::fromFile, log, filename, peakprofile
 		testit = (*self.peakinfo)(i)->setPeakProfile(peakprofile)
 	endfor
 RETURN, 1
-END
-
-
+END 
+  
 FUNCTION SubPatternModel::readFromAscii, lun
 	on_ioerror, bad
 	row = readascii(lun,com='#')

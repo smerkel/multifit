@@ -89,6 +89,84 @@ endfor
 return, 1
 end
 
+;Build from a .dat file 
+;reads and assigns the values from a .dat file to a subpattern object 
+;most of it is copied/adapted from customized read ascii in subpatternmodel.pro
+;added 13/05/2013 N Hilairet 
+function FitSubPatternObject::fromDat, log, filename, peakprofile
+ncolperpeak = 4
+logit, log, 'Reading data from ' + filename
+; The Read_ascii command is giving me non consistent shit from one file 
+; to the next. I just wrote my own. 
+OPENR, lun, filename, /GET_LUN
+header = STRARR(2)
+READF, lun, header
+row = STRARR(1)
+READF, lun, row
+result = STRSPLIT(row, /extract)
+npfloat = 1.0*(n_elements(result)-1)/ncolperpeak
+if (fix(npfloat) ne npfloat) then return, "Wrong number of columns. You probably did not save the peak half-widths."
+self.npeaks = (n_elements(result)-1)/ncolperpeak
+azimuth = FLTARR(400)
+twotheta = FLTARR(self.npeaks,400)
+hwidth = FLTARR(self.npeaks,400)
+intensity = FLTARR(self.npeaks,400)
+count = 0
+WHILE (NOT EOF(lun)) DO BEGIN
+  azimuth(count) = float(result(0))
+  for i=0,self.npeaks-1 do begin
+      twotheta(i,count) = float(result(i*ncolperpeak+1))
+      intensity(i,count) = float(result(i*ncolperpeak+3))
+      hwidth(i,count) = float(result(i*ncolperpeak+4))
+  endfor
+  READF, lun, row
+  result = STRSPLIT(row, /extract)
+  count = count + 1 
+ENDWHILE
+close, lun
+free_lun, lun
+; Last line may not have been processed properly
+if (n_elements(result) gt 1) then BEGIN
+  azimuth(count) = float(result(0))
+  for i=0,self.npeaks-1 do begin
+      twotheta(i,count) = float(result(i*ncolperpeak+1))
+      intensity(i,count) = float(result(i*ncolperpeak+3))
+      hwidth(i,count) = float(result(i*ncolperpeak+4))
+  endfor
+  count = count + 1
+endif
+; Let's make sure we do have data for more than a few orientations...
+if (count lt 5) then return, "You do not have enough data in there! I found" + STRING(count,/print) + " datapoints. You need at least 5."
+; Azimuth angles are converted to INTEGERS! This is critical for comparisons later.
+self.deltarange=PTR_NEW(intarr(count))
+*(self.deltarange)=fix(azimuth(0:count-1))
+; end of copy from subpatternmodel.pro
+
+self.ndelta = count     
+self.peakprofile = peakprofile
+
+self.twotheta=PTR_NEW(fltarr(self.npeaks,self.ndelta))
+self.intensity=PTR_NEW(fltarr(self.npeaks,self.ndelta))
+self.hwidth=PTR_NEW(fltarr(self.npeaks,self.ndelta))
+self.weightGL=PTR_NEW(fltarr(self.npeaks,self.ndelta))
+self.limits=PTR_NEW(fltarr(self.ndelta,2))
+self.bgcoefs=PTR_NEW(fltarr(self.ndelta,2))
+
+; passing values
+; NB: this function is intended for building .fit files suitables for polydefix, which does not need weightGL, 
+; limits and bgcoeffs so dummy values (1's) are assigned
+for i=0,self.npeaks-1 do begin
+  (*self.twotheta)[i,*] = twotheta[i,0:count-1]
+  (*self.intensity)[i,*] = intensity[i,0:count-1]
+  (*self.hwidth)[i,*] = hwidth[i,0:count-1]
+  (*self.weightGL)=replicate(1,self.npeaks,self.ndelta)
+  (*self.limits)=replicate(1,self.ndelta,2)
+  (*self.bgcoefs)=replicate(1,self.ndelta,2)
+endfor
+
+return, 1
+end
+
 ; Cleanup method
 pro FitSubPatternObject::Cleanup
 end

@@ -160,7 +160,7 @@ common fonts, titlefont, boldfont, mainfont, avFontHeight
 basedialog = WIDGET_BASE(/COLUMN, /MODAL, GROUP_LEADER=base, Title='About Multifit')
 infobase =  WIDGET_BASE(basedialog,/COLUMN)
 la = WIDGET_LABEL(infobase, VALUE='Multifit', /ALIGN_LEFT, font=titlefont)
-la = WIDGET_LABEL(infobase, VALUE='Multifit v4.4, build 7, compiled 23 November 2011', /ALIGN_LEFT)
+la = WIDGET_LABEL(infobase, VALUE='Multifit v4.4, build 8, compiled 14th may 2013', /ALIGN_LEFT)
 la = WIDGET_LABEL(infobase, VALUE='', /ALIGN_LEFT)
 la = WIDGET_LABEL(infobase, VALUE='Multifit is a software to process multiple diffraction images', /ALIGN_LEFT)
 la = WIDGET_LABEL(infobase, VALUE='Copyright S. Merkel, Universite Lille 1, France', /ALIGN_LEFT)
@@ -1211,6 +1211,7 @@ CASE ev.id OF
 		'FITONESETAUTO': fitAutoWindow, stash.base, 1
 		'FITMULTIPLESETAUTO': fitAutoWindow, stash.base, 2
 		'FITONESETJCPDS': fitJCPDSWindow, stash.base
+		'DATFILESTOFITFILE': createFitfromdatWindow, stash.base
 		'COMPAREFIT': compareFitWindow, stash.base
 		'COMPAREFIT1D': compareFit1DWindow, stash.base
 		'PLOTFIT': plotResultsWindow, stash.base
@@ -1258,6 +1259,7 @@ fit_bttn3 = WIDGET_BUTTON(fit_menu, VALUE='Create a fit model', UVALUE='MODELONE
 fit_bttn5 = WIDGET_BUTTON(fit_menu, VALUE='Fit one image: automatic', UVALUE='FITONESETAUTO', /SEPARATOR)
 fit_bttn6 = WIDGET_BUTTON(fit_menu, VALUE='Fit multiple images: automatic', UVALUE='FITMULTIPLESETAUTO')
 fit_bttn7 = WIDGET_BUTTON(fit_menu, VALUE='Fit one image: from JCPDS', UVALUE='FITONESETJCPDS', /SEPARATOR)
+fit_bttn8 = WIDGET_BUTTON(fit_menu, VALUE='Convert manual .dats for polydefix', UVALUE='DATFILESTOFITFILE', /SEPARATOR)
 fitres_bttn1 = WIDGET_BUTTON(fit_menu, VALUE='Compare results with active dataset: mapplot', UVALUE='COMPAREFIT', /SEPARATOR)
 fitres_bttn2 = WIDGET_BUTTON(fit_menu, VALUE='Compare results with active dataset: 2-D plots', UVALUE='COMPAREFIT1D')
 fitres_bttn3 = WIDGET_BUTTON(fit_menu, VALUE='Plot Results', UVALUE='PLOTFIT', /SEPARATOR)

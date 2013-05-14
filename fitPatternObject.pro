@@ -40,6 +40,7 @@ endfor
 return, 1
 end
 
+
 ; build from a JCPDS guess
 ; We assume that the data is available over the all delta range
 ; we assume that peak intensity is the intensity at where we find the peak
@@ -64,6 +65,22 @@ endfor
 return, 1
 end
 
+;Build from chosen .dat files (1 dat file = 1 subpattern) for direct use into polydefix
+;assumes gaussian peak profile since polydefix does not take into account the peak profiles 
+;added 13th may 2013 N. Hilairet
+function FitPatternObject::fromDat, log, ninputfiles, outputdirectory, inputfiles       
+self.nsubpat = ninputfiles
+self.peakprofile = 0    ; assume gaussian 
+self.subpatterns = PTR_NEW(OBJARR(self.nsubpat))
+for i=0, self.nsubpat-1, 1 do begin
+  filename = outputdirectory + inputfiles(i)
+    print, 'working on inputfile', filename
+  (*(self.subpatterns))(i) = OBJ_NEW('FitSubPatternObject')
+  test = (*(self.subpatterns))(i)->fromDat(log, filename, self.peakprofile)
+  if (test ne 1) then return, test
+endfor
+return, 1
+end
 
 ; Cleanup method
 pro FitPatternObject::Cleanup

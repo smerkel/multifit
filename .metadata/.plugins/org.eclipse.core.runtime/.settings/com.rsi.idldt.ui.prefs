@@ -1,0 +1,12 @@
+#Wed Nov 23 13:10:53 CET 2011
+IDL_DEVICE=X
+IDL_VALUES=true
+coolItemsOrder=org.eclipse.ui.workbench.file\:com.rsi.idldt.ui.textedit.toolbar\:com.rsi.idldt.ui.toolbar.debugTools
+CHROMACODING_VALUES=true
+IDLDT_VALUES=true
+IDL_START_DIR=/home/nadege/IDLWorkspace81
+IDL_QUIET=0
+IDL_PATH=+/home/nadege/IDLWorkspace81\:+/home/nadege/IDLWorkspace81/mca\:<IDL_DEFAULT>
+eclipse.preferences.version=1
+IDL_CPU_VECTOR_ENABLE=1
+IDL_PATH_CACHE_DISABLE=0
