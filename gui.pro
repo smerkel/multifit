@@ -561,6 +561,24 @@ WIDGET_CONTROL, basedialog, /REALIZE
 XMANAGER, 'convertmultiplechi', basedialog
 END
 
+;PRO createmultiplefitfromdat, base, log
+;common files, extension, directory, outputdirectory
+;common inputinfo, string
+;basedialog = WIDGET_BASE(/COLUMN, /MODAL, GROUP_LEADER=base)
+;nameBase =  WIDGET_BASE(basedialog,COLUMN=2, /GRID_LAYOUT, FRAME=1)
+;nSpLabel = WIDGET_LABEL(nameBase, VALUE='number of subpatterns', /ALIGN_LEFT)
+;nSpText = WIDGET_TEXT(nameBase, XSIZE=5, /EDITABLE)
+;extButtons = WIDGET_BASE(basedialog,/ROW, /GRID_LAYOUT, /ALIGN_CENTER)
+;ok = WIDGET_BUTTON(extButtons, VALUE='Ok', UVALUE='OK', xsize=80)
+;cancel = WIDGET_BUTTON(extButtons, VALUE='Cancel', UVALUE='CANCEL', xsize=80)
+;stash = {log:log, nSpText:nSpText}
+;WIDGET_CONTROL, basedialog, SET_UVALUE=stash
+;WIDGET_CONTROL, basedialog, /REALIZE
+;XMANAGER, 'createmultiplefitfromdat', basedialog
+;END
+
+
+
 ; ****************************************** SETUP INPUT (DATA) FILES **************
 
 pro oneInputFile, widget, log
@@ -1259,7 +1277,7 @@ fit_bttn3 = WIDGET_BUTTON(fit_menu, VALUE='Create a fit model', UVALUE='MODELONE
 fit_bttn5 = WIDGET_BUTTON(fit_menu, VALUE='Fit one image: automatic', UVALUE='FITONESETAUTO', /SEPARATOR)
 fit_bttn6 = WIDGET_BUTTON(fit_menu, VALUE='Fit multiple images: automatic', UVALUE='FITMULTIPLESETAUTO')
 fit_bttn7 = WIDGET_BUTTON(fit_menu, VALUE='Fit one image: from JCPDS', UVALUE='FITONESETJCPDS', /SEPARATOR)
-fit_bttn8 = WIDGET_BUTTON(fit_menu, VALUE='Convert manual .dats for polydefix', UVALUE='DATFILESTOFITFILE', /SEPARATOR)
+fit_bttn8 = WIDGET_BUTTON(fit_menu, VALUE='Write .dats into .fit file(s)', UVALUE='DATFILESTOFITFILE', /SEPARATOR)
 fitres_bttn1 = WIDGET_BUTTON(fit_menu, VALUE='Compare results with active dataset: mapplot', UVALUE='COMPAREFIT', /SEPARATOR)
 fitres_bttn2 = WIDGET_BUTTON(fit_menu, VALUE='Compare results with active dataset: 2-D plots', UVALUE='COMPAREFIT1D')
 fitres_bttn3 = WIDGET_BUTTON(fit_menu, VALUE='Plot Results', UVALUE='PLOTFIT', /SEPARATOR)
