@@ -83,6 +83,12 @@ xStart = getIndex(thetamin,  twotheta, ntheta)
 xEnd = getIndex(thetamax,  twotheta, ntheta)
 index = 0
 nplots = 0
+; If X data is in reverse order, switch the beginning and the end indices
+if (xStart gt xEnd) then begin
+    tt = xEnd
+    xEnd = xStart
+    xStart = tt
+endif
 toplot = fltarr(nalpha, xEnd-xStart+1)
 
                                 ; retrieving data and storing in new array

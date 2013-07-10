@@ -30,11 +30,21 @@
 ; *******************************************************************
 
 function getIndex, x, twotheta, ntheta
-index = 0
-for i = 0, (ntheta-1) do begin
-    if (x gt twotheta(i)) then begin
+; test the direction of the array
+if (twotheta[0] lt twotheta[1]) then begin
+  index = 0
+  for i = 0, (ntheta-1) do begin
+    if (x gt twotheta[i]) then begin
         index = i
     endif
-endfor
+  endfor
+endif else begin
+  index = 0
+  for i = 0, (ntheta-1) do begin
+    if (x lt twotheta[i]) then begin
+      index = i
+    endif
+  endfor
+endelse
 return, index
 end
