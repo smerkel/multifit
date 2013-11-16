@@ -33,7 +33,7 @@ END
 PRO fitit, stash
 common rawdata, nalpha, ntheta, alpha, twotheta, data
 common fitit, def, base, draw
-common fitoptions, basescale, smallDetection, nLoop, startSmall, endSmall 
+common fitoptions, basescale, smallDetection, nLoop, startSmall, endSmall
 ; Get list of spectra to fit
 tofit = WIDGET_INFO(stash.listID, /LIST_SELECT)
 if (tofit(0) eq -1) then begin
@@ -65,6 +65,20 @@ if (WIDGET_INFO(stash.halfwidthBut, /BUTTON_SET) eq 1) then halfwidth = 1 else h
 if (WIDGET_INFO(stash.negIntensity, /BUTTON_SET) eq 1) then stopNegIntensity = 1 else stopNegIntensity = 0
 if (WIDGET_INFO(stash.tooWide, /BUTTON_SET) eq 1) then stopTooWide = 1 else stopTooWide = 0
 if (WIDGET_INFO(stash.intensityChge, /BUTTON_SET) eq 1) then stopIntensityChge = 1 else stopIntensityChge = 0
+if (WIDGET_INFO(stash.badData, /BUTTON_SET) eq 1) then testBadData = 1 else testBadData = 0
+
+
+; Parsing options regarding 2 theta restrictions
+twothetarestriction = 0
+minTwoTheta = min(twotheta)
+maxTwoTheta = max(twotheta)
+if ((WIDGET_INFO(stash.twothetarestriction, /BUTTON_SET) eq 1)) then begin
+    twothetarestriction = 1 
+    WIDGET_CONTROL, stash.minTwoThetaVa, GET_VALUE=value
+    minTwoTheta = float(value[0])
+    WIDGET_CONTROL, stash.maxTwoThetaVa, GET_VALUE=value
+    maxTwoTheta = float(value[0])
+endif
 ; create plot window if necessary 
 if (def ne 1) then begin
     base = WIDGET_BASE(Title='Fits',/TLB_SIZE_EVENTS, GROUP_LEADER=stash.base) 
@@ -87,7 +101,7 @@ endif
 WIDGET_CONTROL, draw, GET_VALUE = index 
 WSET, index
 ; Call fitting routine
-fitnpeaks, ntofit, tofit, profile, halfwidth, stopNegIntensity, stopTooWide, stopIntensityChge, /AUTOMATIC, /AUTOCHECK, /SIDEBG
+fitnpeaks, ntofit, tofit, profile, halfwidth, stopNegIntensity, stopTooWide, stopIntensityChge, testBadData, twothetarestriction, minTwoTheta, maxTwoTheta, /AUTOMATIC, /AUTOCHECK, /SIDEBG
 END
 
 
@@ -131,7 +145,7 @@ PRO fitWindow_event, ev
 WIDGET_CONTROL, ev.TOP, GET_UVALUE=stash
 WIDGET_CONTROL, ev.ID, GET_UVALUE=uval
 CASE ev.id OF
-	stash.base: resizefitwindow, stash.base, stash
+	;stash.base: resizefitwindow, stash.base, stash
 	else: begin
 		CASE uval OF
 			'FIT': fitit, stash
@@ -204,21 +218,33 @@ restrictregionBase = WIDGET_BASE(optTricks,/ROW)
 restrictregionLa = Widget_Label(restrictregionBase, Value='Base restriction factor')
 restrictregionVa = WIDGET_TEXT(restrictregionBase, VALUE='5.0',/ALIGN_LEFT, XSIZE=10, /EDITABLE)
 ; what is a small peak?
-smallPeakBase = WIDGET_BASE(optTricks,/ROW)
-smallPeakLa = Widget_Label(smallPeakBase, Value='Small peak detection factor')
-smallPeakVa = WIDGET_TEXT(smallPeakBase, VALUE='10.0',/ALIGN_LEFT, XSIZE=10, /EDITABLE)
+; smallPeakBase = WIDGET_BASE(optTricks,/ROW)
+smallPeakLa = Widget_Label(restrictregionBase, Value='Small peak detection factor')
+smallPeakVa = WIDGET_TEXT(restrictregionBase, VALUE='10.0',/ALIGN_LEFT, XSIZE=10, /EDITABLE)
 ; loops
 loopsBase = WIDGET_BASE(optTricks,/ROW)
 loopsLa = Widget_Label(loopsBase , Value='Number of loops')
 loopsVa = WIDGET_TEXT(loopsBase , VALUE='10',/ALIGN_LEFT, XSIZE=10, /EDITABLE)
-loopsSmallBase = WIDGET_BASE(optTricks,/ROW)
-loopsSmallLa = Widget_Label(loopsSmallBase, Value='Fit small peaks between loop')
-loopsSStartVa = WIDGET_TEXT(loopsSmallBase, VALUE='3',/ALIGN_LEFT, XSIZE=10, /EDITABLE)
-loopsSmallLa2 = Widget_Label(loopsSmallBase, Value='and')
-loopsSEndVa = WIDGET_TEXT(loopsSmallBase, VALUE='7',/ALIGN_LEFT, XSIZE=10, /EDITABLE)
+; loopsSmallBase = WIDGET_BASE(optTricks,/ROW)
+loopsSmallLa = Widget_Label(loopsBase, Value='Fit small peaks between loop')
+loopsSStartVa = WIDGET_TEXT(loopsBase, VALUE='3',/ALIGN_LEFT, XSIZE=10, /EDITABLE)
+loopsSmallLa2 = Widget_Label(loopsBase, Value='and')
+loopsSEndVa = WIDGET_TEXT(loopsBase, VALUE='7',/ALIGN_LEFT, XSIZE=10, /EDITABLE)
+
+; *************** Restrict 2theta range 
+restricrange = WIDGET_BASE(allOptions,/COLUMN, FRAME=1)
+interruptBase = Widget_Base(restricrange, /NonExclusive,/ROW)
+twothetarestriction = Widget_Button(interruptBase, Value='Fixed two theta range', UVALUE='')
+Widget_Control, twothetarestriction, Set_Button=0
+rangeBase = WIDGET_BASE(restricrange,/ROW)
+la = Widget_Label(rangeBase, Value='Min 2theta')
+minTwoThetaVa = WIDGET_TEXT(rangeBase, VALUE='10',/ALIGN_LEFT, XSIZE=10, /EDITABLE)
+la = Widget_Label(rangeBase , Value='Max 2theta')
+maxTwoThetaVa = WIDGET_TEXT(rangeBase, VALUE='20',/ALIGN_LEFT, XSIZE=10, /EDITABLE)
 
 ; *************** Stop
-interrupt = WIDGET_BASE(allOptions,/COLUMN, FRAME=1)
+interrupt2 = WIDGET_BASE(allOptions,/ROW, FRAME=1)
+interrupt = WIDGET_BASE(interrupt2,/COLUMN)
 adhocLa = Widget_Label(interrupt, Value='Interrupt automatic fitting when')
 interruptBase = Widget_Base(interrupt, /NonExclusive)
 negIntensity = Widget_Button(interruptBase, Value='Negative intensity peak', UVALUE='')
@@ -227,6 +253,12 @@ tooWide = Widget_Button(interruptBase, Value='Large change in half-width', UVALU
 Widget_Control, tooWide, Set_Button=1
 intensityChge = Widget_Button(interruptBase, Value='Large change in intensity', UVALUE='')
 Widget_Control, intensityChge, Set_Button=1
+interrupt3 = WIDGET_BASE(interrupt2,/COLUMN)
+adhocLa = Widget_Label(interrupt3, Value='Test for')
+interruptBase2 = Widget_Base(interrupt3, /NonExclusive)
+badData = Widget_Button(interruptBase2, Value='Bad data', UVALUE='')
+Widget_Control, badData, Set_Button=1
+
 
 ; *************** ACTION BUTTONS
 butBase = WIDGET_BASE(base,/ROW, /ALIGN_CENTER)
@@ -238,11 +270,25 @@ stash = {base:base, titleLa:titleLa, top:top, butBase:butBase, dataBase: dataBas
          gauss:gauss, voigt:voigt, lorentz:lorentz, halfwidthBut:halfwidthBut,$
          restrictregionVa: restrictregionVa, smallPeakVa:smallPeakVa, loopsVa:loopsVa, $
          loopsSStartVa:loopsSStartVa, loopsSEndVa:loopsSEndVa, $
-         negIntensity:negIntensity, tooWide:tooWide, intensityChge:intensityChge} 
+         negIntensity:negIntensity, tooWide:tooWide, intensityChge:intensityChge, $
+         badData: badData, $
+         twothetarestriction:twothetarestriction, minTwoThetaVa:minTwoThetaVa, maxTwoThetaVa:maxTwoThetaVa} 
 
 WIDGET_CONTROL, base, SET_UVALUE=stash
 WIDGET_CONTROL, base, /REALIZE
 ; forcing a resize event
-resizefitwindow, base, stash
+; resizefitwindow, base, stash
+; 
+; Resizing list height
+widget_control, base, TLB_GET_SIZE=size
+tmpsize = widget_info(stash.titleLa, /GEOMETRY)
+tmpsize2 = widget_info(stash.butBase, /GEOMETRY)
+ysize = size[1]-(tmpsize2.SCR_YSIZE + (2*tmpsize2.MARGIN))-(tmpsize.SCR_YSIZE + (2*tmpsize.MARGIN))
+
+tmpsize = widget_info(stash.listBase, /GEOMETRY)
+tmpsize2 = widget_info(stash.listID, /GEOMETRY)
+ysize = ysize-2*tmpsize2.MARGIN-2*tmpsize.YPAD
+widget_control, stash.listID, SCR_YSIZE=ysize, /UPDATE
+
 XMANAGER, 'fitWindow', base
 END

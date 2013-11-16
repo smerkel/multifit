@@ -72,10 +72,22 @@ return, fitted
 end
 
 ; let the use define a zone to perform the fit
-function findzone, manual, theta, minx, ytmp, xx, yy, thetatmp
+function findzone, manual, theta, minx, ytmp, xx, yy, thetatmp, testBadData
 common datafindzone, xr, xl     ; this keep the last input from the user in memory for the next time
-common datafit, fit, fitcenter  ; results from fits of peak position, are used to re-center fitting zone
-if (manual eq 1) then begin
+common datafit, fit, fitcenter, twothetarestriction, minTwoTheta, maxTwoTheta  ; results from fits of peak position, are used to re-center fitting zone, if two theta is restricted, it is saved here
+
+; If there is a restriction on two theta, we enforce it
+if (twothetarestriction eq 1) then begin
+  xmin = theta2pixels(theta, N_ELEMENTS(theta), minTwoTheta)
+  xmax = theta2pixels(theta, N_ELEMENTS(theta), maxTwoTheta)
+  if (xmin gt xmax) then begin
+    tt = xmin
+    xmin = xmax
+    xmax = tt
+  endif
+  xl = xmin
+  xr = xmax
+endif else if (manual eq 1) then begin
     doit = 1
     miny = min(ytmp)-0.05*(max(ytmp)-min(ytmp))
     maxy = max(ytmp)+0.05*(max(ytmp)-min(ytmp))
@@ -88,7 +100,7 @@ if (manual eq 1) then begin
       -min(ytmp(0:fix(N_ELEMENTS(ytmp)/3)))
     minmaxyD = max(ytmp(fix(2.*N_ELEMENTS(ytmp)/3.):(N_ELEMENTS(ytmp)-1)))$
       -min(ytmp(fix(2.*N_ELEMENTS(ytmp)/3.):(N_ELEMENTS(ytmp)-1)))
-    if ((minmaxy lt 1) or (minmaxyG lt 1) or (minmaxyD lt 1)) then begin
+    if ((testBadData eq 1) and ((minmaxy lt 1) or (minmaxyG lt 1) or (minmaxyD lt 1))) then begin
         info = againDialog(Label="Bad data, keep going?")
         if (info eq 0) then begin
             doit = 0
@@ -135,9 +147,9 @@ end
 ;  - stopTooWide: 1 to stop automatic fitting if peak width changes by more than 2
 ;  - stopIntensityChge: 1 to stop automatic fitting if intensity changes by more than 2
 ; 05/2011 new parameters: stopNegIntensity, stopTooWide, stopIntensityChge
-function fitalpha, i, npeaks, center0, width, auto, position, intensity, halfwidth, good, hardbg, sidebg, peakmodel, stopNegIntensity, stopTooWide, stopIntensityChge, AUTOCHECK = autocor
+function fitalpha, i, npeaks, center0, width, auto, position, intensity, halfwidth, good, hardbg, sidebg, peakmodel, stopNegIntensity, stopTooWide, stopIntensityChge, testBadData, AUTOCHECK = autocor
 common rawdata, nalpha, ntheta, alpha, twotheta, data
-common datafit, fit, fitcenter
+common datafit, fit, fitcenter, twothetarestriction, minTwoTheta, maxTwoTheta
 common anythingdoneyet, anythingdoneyet
 if (keyword_set(autocor)) then autocorrect = 1 else autocorrect = 0
 ytemp = data(i,*)
@@ -147,11 +159,12 @@ ytmp = ytemp(minx:maxx)
 xtmp = findgen(maxx-minx)+minx
 completed = 0
 thetatmp = twotheta(minx:maxx)
+
                                 ; manual adjustment of peak positions ??
 if ((auto eq 0) or (i eq 0) or (anythingdoneyet eq 0)) then manual = 1 else  manual = 0
 while (completed eq 0) do begin
                                 ; narrow the zone to fit
-    test = findzone(manual, thetatmp, minx, ytmp, xx, yy, restrictheta)
+    test = findzone(manual, thetatmp, minx, ytmp, xx, yy, restrictheta, testBadData)
     if (test eq 0) then return, 0
                                 ; is there any data to fit?
     minmaxy = max(yy)-min(yy)
@@ -159,7 +172,7 @@ while (completed eq 0) do begin
                -min(yy(0:fix(N_ELEMENTS(yy)/3)))
     minmaxyD = max(yy(fix(2.*N_ELEMENTS(yy)/3.):(N_ELEMENTS(yy)-1)))$
                -min(yy(fix(2.*N_ELEMENTS(yy)/3.):(N_ELEMENTS(yy)-1)))
-    if ((minmaxy lt 1) or (minmaxyG lt 1) or (minmaxyD lt 1)) then begin
+    if ((testBadData eq 1) and ((minmaxy lt 1) or (minmaxyG lt 1) or (minmaxyD lt 1))) then begin
         plot, xx, yy, background=255, color=0, yrange = [min(yy),max(yy)]
         info = againDialog(Label="Bad data, keep going?")
         if (info eq 0) then begin
@@ -266,14 +279,19 @@ end
 ;  - stopNegIntensity: 1 to stop automatic fitting if negative intensities
 ;  - stopTooWide: 1 to stop automatic fitting if peak width changes by more than 2
 ;  - stopIntensityChge: 1 to stop automatic fitting if intensity changes by more than 2
-; 05/2011 new parameters: stopNegIntensity, stopTooWide, stopIntensityChge
+;  - twothetarestriction: 1 to restrict the two theta range,
+;  - testBadData: 1 test for bad data (weak intensities relative to average) before defining interval
+;  - minTwoTheta, maxTwoTheta, 2theta range
+; 11/2013 new options to restrict the 2theta range
+; 11/2013 new options to remove bad data check
 ; *******************************************************************
 
 
-pro fitNpeaks, npeaks, include, peakmodel, savehalfwidth, stopNegIntensity, stopTooWide, stopIntensityChge, AUTOMATIC = automatic, AUTOCHECK = autocor, $
+pro fitNpeaks, npeaks, include, peakmodel, savehalfwidth, stopNegIntensity, stopTooWide, stopIntensityChge, testBadData, twothetarestrictionPar, minTwoThetaPar, maxTwoThetaPar, AUTOMATIC = automatic, AUTOCHECK = autocor, $
                BG = backgd, SIDEBG = sidebg
 common rawdata, nalpha, ntheta, alpha, twotheta, data
 common anythingdoneyet, anythingdoneyet
+common datafit, fit, fitcenter, twothetarestriction, minTwoTheta, maxTwoTheta
 if (keyword_set(automatic)) then auto = 1 else auto = 0
 if (keyword_set(autocor)) then autocorrect = 1 else autocorrect = 0
 if (keyword_set(backgd)) then hardbg = 1 else hardbg = 0
@@ -281,45 +299,60 @@ if (keyword_set(sidebg)) then sidebg = 1 else sidebg = 0
 if (not keyword_set(alphamin)) then alphamin = alpha(0)
 if (not keyword_set(alphamax)) then alphamax = alpha(nalpha-1)
 
-                                ; init arrays
+; init common parameters for 2 theta restriction
+twothetarestriction = twothetarestrictionPar
+minTwoTheta = minTwoThetaPar
+maxTwoTheta = maxTwoThetaPar
+ 
+; init arrays
 position = fltarr(npeaks,nalpha)
 intensity = fltarr(npeaks,nalpha)
 halfwidth = fltarr(npeaks,nalpha)
 good = intarr(nalpha)
-                                ; start of the loop on alpha values...
+
+; start of the loop on alpha values...
 anythingdoneyet = 0
 for i=0, nalpha-1 do begin
     test = where(include eq i)
     if (test(0) ge 0) then begin
-                                ; If it is the first spectrum to fit, we need to get an interval from the user...
-        if (anythingdoneyet eq 0) then begin
-			miny = min(data(i,*)) - 0.05*(max(data(i,*))-min(data(i,*)))
-			maxy = max(data(i,*)) + 0.05*(max(data(i,*))-min(data(i,*)))
-			minx = min(twotheta)
-			maxx = max(twotheta)
-			!X.STYLE = 1
-			!Y.STYLE = 1
-			!P.NOERASE = 0
-            plot,twotheta,data(i,*), background=255, color=0, yrange=[miny,maxy]
-			xleg = minx+0.05*(maxx-minx)
-			yleg = maxy-0.04*(maxy-miny)
-			xyouts, xleg,yleg, "Click on left side of peaks",  color = 0, charsize=1.5, charthick=2
-            cursor,xl,yl,/down
-			xleg = minx+0.05*(maxx-minx)
-			yleg = maxy-0.08*(maxy-miny)
-			xyouts, xleg,yleg, "Click on right side of peaks",  color = 0, charsize=1.5, charthick=2
-            cursor,xr,yr,/down
-            xl = theta2pixels(twotheta, ntheta, xl)
-            xr = theta2pixels(twotheta, ntheta, xr)
-            width = abs(fix((xr-xl)/2))+1
-            center0 = fix((xr+xl)/2)
-        endif
-        if ((autocorrect eq 0) or (anythingdoneyet eq 0)) then begin
-            keepgoing = fitalpha(i, npeaks, center0, width, auto, position, intensity, halfwidth, good, hardbg, sidebg, peakmodel, stopNegIntensity, stopTooWide, stopIntensityChge)
-        endif else begin
-            keepgoing = fitalpha(i, npeaks, center0, width, auto, position, intensity, halfwidth, good, hardbg, sidebg, peakmodel, stopNegIntensity, stopTooWide, stopIntensityChge, /AUTOCHECK)
-        endelse
-        if (keepgoing eq 0) then goto, FITCANCELLED
+        ; If 2 theta is restricted, we do so
+        if (twothetarestriction eq 1) then begin
+          xl = minTwoTheta
+          xl = theta2pixels(twotheta, ntheta, xl)
+          xr = maxTwoTheta
+          xr = theta2pixels(twotheta, ntheta, xr)
+          width = abs(fix((xr-xl)/4))+1
+          center0 = fix((xr+xl)/2)
+          ; print, "We had a restriction for ", minTwoTheta, maxTwoTheta
+        ; If it is the first spectrum to fit, we need to get an interval from the user...
+        endif else if (anythingdoneyet eq 0) then begin
+          miny = min(data(i,*)) - 0.05*(max(data(i,*))-min(data(i,*)))
+          maxy = max(data(i,*)) + 0.05*(max(data(i,*))-min(data(i,*)))
+          minx = min(twotheta)
+          maxx = max(twotheta)
+          !X.STYLE = 1
+          !Y.STYLE = 1
+          !P.NOERASE = 0
+          plot,twotheta,data(i,*), background=255, color=0, yrange=[miny,maxy]
+          xleg = minx+0.05*(maxx-minx)
+          yleg = maxy-0.04*(maxy-miny)
+          xyouts, xleg,yleg, "Click on left side of peaks",  color = 0, charsize=1.5, charthick=2
+          cursor,xl,yl,/down
+          xleg = minx+0.05*(maxx-minx)
+          yleg = maxy-0.08*(maxy-miny)
+          xyouts, xleg,yleg, "Click on right side of peaks",  color = 0, charsize=1.5, charthick=2
+          cursor,xr,yr,/down
+          xl = theta2pixels(twotheta, ntheta, xl)
+          xr = theta2pixels(twotheta, ntheta, xr)
+          width = abs(fix((xr-xl)/2))+1
+          center0 = fix((xr+xl)/2)
+       endif
+       if ((autocorrect eq 0) or (anythingdoneyet eq 0)) then begin
+            keepgoing = fitalpha(i, npeaks, center0, width, auto, position, intensity, halfwidth, good, hardbg, sidebg, peakmodel, stopNegIntensity, stopTooWide, stopIntensityChge, testBadData)
+       endif else begin
+            keepgoing = fitalpha(i, npeaks, center0, width, auto, position, intensity, halfwidth, good, hardbg, sidebg, peakmodel, stopNegIntensity, stopTooWide, stopIntensityChge, testBadData, /AUTOCHECK)
+       endelse
+       if (keepgoing eq 0) then goto, FITCANCELLED
     endif
 endfor
                                 ; oooof, we are done with the fits, just need to format the results...

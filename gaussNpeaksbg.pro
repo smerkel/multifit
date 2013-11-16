@@ -647,10 +647,10 @@ plotmax = max(y)+.1*(max(y)-min(y))
 xmin = min(scaledtheta)
 xmax = max(scaledtheta)
 plot, scaledtheta, y, background=255, color = 0, xrange=[xmin,xmax], yrange = [plotmin,plotmax], ystyle=1, xstyle=1
-xleg = xmax-0.3*(xmax-xmin)
+xleg = xmax-0.5*(xmax-xmin)
 yleg = plotmax-0.05*(plotmax-plotmin)
 ; print, xleg, yleg
-xyouts, xleg,yleg, "alpha = "+STRING(alpha,format='(F6.1)'),  color = 0, charsize=2, charthick=3
+xyouts, xleg,yleg, "az = "+STRING(alpha,format='(F6.1)'),  color = 0, charsize=2, charthick=3
 yleg = plotmax-0.10*(plotmax-plotmin)
 xyouts, xleg,yleg, "scale fac. x = "+STRING(scaling,format='(I3)'),  color = 0, charsize=1.5, charthick=2
 ; global fit
