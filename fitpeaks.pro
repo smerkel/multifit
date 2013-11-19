@@ -466,6 +466,43 @@ if (outfile ne '') then begin
     else $
       printf, lun, '# delta, then 2 theta, d, and intensity (and maybe relative weight gauss/lorentz) for each peak'
     thispeak=-1
+    minI = min(abs(results(*,2,*)))
+    maxI = max(abs(results(*,2,*)))
+    print, maxI 
+    if (maxI gt 1000.) then begin
+      fmtI = '(f20.2)'
+    endif else if (maxI lt 1.) then begin
+        fmtI = '(f20.15)'
+    endif else begin
+        fmtI = '(f20.5)'
+    endelse
+    minW = min(abs(results(*,3,*)))
+    maxW = max(abs(results(*,3,*)))
+    if (maxW gt 1000.) then begin
+      fmtW = '(f20.2)'
+    endif else if (maxI lt 1.) then begin
+      fmtW = '(f20.15)'
+    endif else begin
+      fmtW = '(f20.8)'
+    endelse
+    minT = min(abs(results(*,0,*)))
+    maxT = max(abs(results(*,0,*)))
+    if (maxT gt 1000.) then begin
+      fmtT = '(f20.2)'
+    endif else if (maxI lt 1.) then begin
+      fmtT = '(f20.15)'
+    endif else begin
+      fmtT = '(f20.8)'
+    endelse
+    minD = min(abs(results(*,1,*)))
+    maxD = max(abs(results(*,1,*)))
+    if (maxD gt 1000.) then begin
+      fmtD = '(f20.2)'
+    endif else if (maxI lt 1.) then begin
+      fmtD = '(f20.15)'
+    endif else begin
+      fmtD = '(f20.8)'
+    endelse
     for i=0, nalpha-1 do begin
         test = where(include eq i)
         if (test(0) ge 0) then begin
@@ -473,11 +510,11 @@ if (outfile ne '') then begin
             if (good(i) eq 1) then begin
                 toprint = string(format='(f8.2)', alpha(i))
                 for j=0, npeaks -1 do begin
-                    toprint = toprint + " " + string(format='(f12.4)', results(thispeak,0,j))
-                    toprint = toprint + " " + string(format='(f8.4)', results(thispeak,1,j))
-                    toprint = toprint + " " + string(format='(f20.2)', results(thispeak,2,j))
+                    toprint = toprint + " " + string(format=fmtT, results(thispeak,0,j))
+                    toprint = toprint + " " + string(format=fmtD, results(thispeak,1,j))
+                    toprint = toprint + " " + string(format=fmtI, results(thispeak,2,j))
                     if (savehalfwidth eq 1) then $
-                      toprint = toprint + " " + string(format='(f16.8)', results(thispeak,3,j))
+                      toprint = toprint + " " + string(format=fmtW, results(thispeak,3,j))
                 endfor
                 printf, lun, toprint
             endif
