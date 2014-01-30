@@ -88,6 +88,32 @@ pro plotinteractive1D_exportps, event
   endif
 end
 
+; export to in chiplot unction
+pro plotinteractive1D_exportchi, event
+  common default, defaultdir
+  widget_control, event.top, get_uvalue=pstate
+  ; state = {xdata: xdata, ydata:ydata, ncolumns: ncolumns, tlb: tlb, w_id:w_id, draw:draw, status:status, xlabel:xlabel, ylabel:ylabel, title: title, xmin:xmin, xmax:xmax, ymin:ymin, ymax:ymax, sc_xmin:0.0, sc_xmax:0.0, sc_ymin:0.0, sc_ymax:0.0, scaling:0, plotlegend: plotlegend, legend: legend}
+  if ((*pstate).ncolumns gt 1) then Result = DIALOG_MESSAGE( "You have several datasets. Only the first will be saved.", DIALOG_PARENT=(*pstate).tlb, /INFORMATION, TITLE="Multifit warning")
+  ; fix the extension
+  filters = [['*.chi'], ['CHI']]
+  ; pick a filename
+  filename = DIALOG_PICKFILE(dialog_parent = (*pstate).tlb, filter=filters, /write , TITLE='Save dataset as...', path=defaultdir, get_path = newdefaultdir);
+  ; if OK was pressed
+  if (filename ne '') then begin
+    ; export the content of the active window to chiplot
+    openw, lun, filename, /get_lun
+    printf, lun, "Chi file created by Multifit"
+    printf, lun, " X data"
+    printf, lun, " Y data"
+    printf, lun, n_elements((*pstate).xdata)
+    for i=0,n_elements((*pstate).xdata)-1 do printf, lun, (*pstate).xdata[i], (*pstate).ydata[0,i]
+    free_lun, lun
+    ; set the new default path
+    defaultdir = newdefaultdir
+  endif
+end
+
+
 ; ***************************************************************************
 ; handling of mouse events
 ; ***************************************************************************
@@ -261,6 +287,7 @@ pro plotinteractive1D, base, xdata, sendydata, title = title, xlabel = xlabel, y
   file_bttn1 = WIDGET_BUTTON(file_menu, VALUE='Export plot to GIF', event_pro = 'plotinteractive1D_exportgif' )
   file_bttn2 = WIDGET_BUTTON(file_menu, VALUE='Export plot to JPEG', event_pro = 'plotinteractive1D_exportjpg' )
   file_bttn3 = WIDGET_BUTTON(file_menu, VALUE='Export plot to PS', event_pro = 'plotinteractive1D_exportps' )
+  file_bttn4 = WIDGET_BUTTON(file_menu, VALUE='Export data in chi format', event_pro ='plotinteractive1D_exportchi', /SEPARATOR)
   file_bttn4 = WIDGET_BUTTON(file_menu, VALUE='Close window', event_pro ='plotinteractive1D_cleanupmenu', /SEPARATOR)
   ; other
   status = widget_label(tlb, value=' ', /dynamic_resize)

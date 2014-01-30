@@ -161,7 +161,7 @@ common fonts, titlefont, boldfont, mainfont, avFontHeight
 basedialog = WIDGET_BASE(/COLUMN, /MODAL, GROUP_LEADER=base, Title='About Multifit')
 infobase =  WIDGET_BASE(basedialog,/COLUMN)
 la = WIDGET_LABEL(infobase, VALUE='Multifit', /ALIGN_LEFT, font=titlefont)
-la = WIDGET_LABEL(infobase, VALUE='Multifit v4.4, build 8, compiled 14th may 2013', /ALIGN_LEFT)
+la = WIDGET_LABEL(infobase, VALUE='Multifit v4.4, Compiled January 30th 2014', /ALIGN_LEFT)
 la = WIDGET_LABEL(infobase, VALUE='', /ALIGN_LEFT)
 la = WIDGET_LABEL(infobase, VALUE='Multifit is a software to process multiple diffraction images', /ALIGN_LEFT)
 la = WIDGET_LABEL(infobase, VALUE='Copyright S. Merkel, Universite Lille 1, France', /ALIGN_LEFT)
