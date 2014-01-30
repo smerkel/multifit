@@ -103,8 +103,8 @@ pro plotinteractive1D_exportchi, event
     ; export the content of the active window to chiplot
     openw, lun, filename, /get_lun
     printf, lun, "Chi file created by Multifit"
-    printf, lun, " X data"
-    printf, lun, " Y data"
+    printf, lun, (*pstate).xlabel
+    printf, lun, (*pstate).ylabel
     printf, lun, n_elements((*pstate).xdata)
     for i=0,n_elements((*pstate).xdata)-1 do printf, lun, (*pstate).xdata[i], (*pstate).ydata[0,i]
     free_lun, lun
