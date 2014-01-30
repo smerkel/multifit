@@ -105,6 +105,7 @@ PRO load_defaults_startup
 common fonts, titlefont, boldfont, mainfont, avFontHeight
 common files, extension, directory, outputdirectory
 common experiment, wavelength, detectordistance
+common default, defaultdir
 ; default color palette and font for plots
 OS   = strupcase(!VERSION.OS)
 OS   = strmid(OS,0,3)

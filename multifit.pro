@@ -1,4 +1,4 @@
-; *******************************************************************
+gg; *******************************************************************
 ; Multfit efficient processing of 2D diffraction images
 ; Copyright (C) 2000-2011 S. Merkel, Universite Lille 1
 ; http://merkel.zoneo.net/Multifit/

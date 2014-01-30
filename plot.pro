@@ -72,8 +72,8 @@ endif else begin
     legendesep = fix(legendeskip)
 endelse
 if (thetait eq 0) then begin
-    thetamin = twotheta(0)
-    thetamax = twotheta(ntheta-1)
+    thetamin = min(twotheta)
+    thetamax = max(twotheta)
 endif else begin
     thetamin = float(thetamin)
     thetamax = float(thetamax)

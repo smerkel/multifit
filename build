@@ -22,7 +22,8 @@
 ; RESET IDL Session
 .RESET_SESSION
 
-; Compile project files                                                                                                                                          
+; Compile project files                                                                                                                  
+.COMPILE 'plotinteractive1d.pro'                                                                                                                                          
 .COMPILE 'intformat.pro'  
 .COMPILE 'getindex.pro' 
 .COMPILE 'minmaxval.pro'       
