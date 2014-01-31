@@ -53,7 +53,7 @@ end
 pro changeFitFile, fitFileEntry
 common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
 common fitresults, fitdata
-result=dialog_pickfile(title='Select fit results', path=outputdirectory, DIALOG_PARENT=base, DEFAULT_EXTENSION='.fit', FILTER=['*.fit'])
+result=dialog_pickfile(title='Select fit results', path=outputdirectory, DIALOG_PARENT=base, FILTER=['*.fit','*.*'], /must_exist)
 if (result ne '') then begin
 	FDECOMP, result, disk, dir, name, qual, version
 	filename = outputdirectory + name + "." + Qual

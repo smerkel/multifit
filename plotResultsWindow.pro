@@ -135,7 +135,7 @@ common plotresults, def, base, draw, fitdata
 common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
 common fonts, titlefont, boldfont, mainfont, avFontHeight
 ; Load fit data
-result=dialog_pickfile(title='Select fit results', path=outputdirectory, DIALOG_PARENT=parent, DEFAULT_EXTENSION='.fit', FILTER=['*.fit'])
+result=dialog_pickfile(title='Select fit results', path=outputdirectory, DIALOG_PARENT=parent, FILTER=['*.fit'], /must_exist)
 if (result eq '') then return
 FDECOMP, result, disk, dir, name, qual, version
 filename = outputdirectory + name + "." + Qual

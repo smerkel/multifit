@@ -30,7 +30,7 @@
 
 PRO loadfitmodel, base, widget
 common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
-	result=dialog_pickfile(title='Select input file', path=outputdirectory, DIALOG_PARENT=base, DEFAULT_EXTENSION='.mdl', FILTER=['*.mdl','*.fit'])
+	result=dialog_pickfile(title='Select input file', path=outputdirectory, DIALOG_PARENT=base, FILTER=['*.mdl','*.fit','*.*'], /must_exist)
 	if (result ne '') then begin
 		FDECOMP, result, disk, dir, name, qual, version
 		filename = outputdirectory + name + "." + Qual

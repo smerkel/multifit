@@ -399,7 +399,7 @@ PRO fitJCPDSWindow, parent
 common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
 test = 0
 while (test eq 0) do begin
-	result=dialog_pickfile(title='Enter JCPDS card', path=jcpdsdirectory, DIALOG_PARENT=parent)
+	result=dialog_pickfile(title='Enter JCPDS card', path=jcpdsdirectory, DIALOG_PARENT=parent, filter=['*.jcpds', '*.*'], /must_exist)
 	if (result ne '') then begin
 		FDECOMP, result, disk, dir, name, qual, version
 		jcpdsdirectory = disk+dir

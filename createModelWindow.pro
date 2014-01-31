@@ -25,7 +25,7 @@
 PRO addInputModelWindow, base, listinput
 common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
 common inputModelFiles, inputfiles, ninputfiles
-result=dialog_pickfile(title='Select input file(s)', path=outputdirectory, DIALOG_PARENT=base, DEFAULT_EXTENSION='.dat', FILTER=['*.dat'])
+result=dialog_pickfile(title='Select input file(s)', path=outputdirectory, DIALOG_PARENT=base, FILTER=['*.dat','*.*'], /must_exist)
 if (result ne '') then begin
 	FDECOMP, result, disk, dir, name, qual, version
 	filename = outputdirectory + name + "." + Qual

@@ -59,7 +59,6 @@
 .COMPILE 'printdataesg.pro'
 .COMPILE 'showprogress.pro'
 .COMPILE 'subPatternModel.pro'
-.COMPILE 'testpick.pro'
 .COMPILE 'multifit.pro'
 
 ; Resolve all routines
