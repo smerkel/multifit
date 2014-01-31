@@ -29,7 +29,7 @@
 ;
 
 PRO loadfitmodel, base, widget
-	common files, extension, directory, outputdirectory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
 	result=dialog_pickfile(title='Select input file', path=outputdirectory, DIALOG_PARENT=base, DEFAULT_EXTENSION='.mdl', FILTER=['*.mdl','*.fit'])
 	if (result ne '') then begin
 		FDECOMP, result, disk, dir, name, qual, version
@@ -61,7 +61,7 @@ PRO loadfitmodel, base, widget
 END
 
 PRO fitauto,  fitwindow, base, listSets, fitmodel, plot0, plot1, plot2, mapplot, noplot, wVa, autosaveY, autosaveN, stoponerrorY, stoponerrorN
-	common files, extension, directory, outputdirectory
+  common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
 	common inputfiles, inputfiles, activeset
 	common fitresults, fitdata
 	common rawdata, nalpha, ntheta, alpha, twotheta, data
@@ -132,7 +132,7 @@ PRO fitauto,  fitwindow, base, listSets, fitmodel, plot0, plot1, plot2, mapplot,
 		txt = "Working on " + STRING(inputfiles(tofit(i)),/PRINT)
 		WIDGET_CONTROL, log, SET_VALUE=txt, /APPEND
 		; Loading the dataset
-		file =  directory +inputfiles(tofit(i))
+		file =  datadirectory +inputfiles(tofit(i))
 		res = readfile(file)
 		activeset = tofit(i)
 		if (res ne 1) then begin

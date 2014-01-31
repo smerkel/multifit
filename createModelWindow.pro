@@ -23,7 +23,7 @@
 ; ******************************  GUI THAT CONTROLS THE MODEL WINDOW ***************
 
 PRO addInputModelWindow, base, listinput
-common files, extension, directory, outputdirectory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
 common inputModelFiles, inputfiles, ninputfiles
 result=dialog_pickfile(title='Select input file(s)', path=outputdirectory, DIALOG_PARENT=base, DEFAULT_EXTENSION='.dat', FILTER=['*.dat'])
 if (result ne '') then begin
@@ -58,7 +58,7 @@ WIDGET_CONTROL, listinput, SET_VALUE=inputfiles
 END   
 
 PRO createModel, base, log, gauss, lorentz, voigt
-common files, extension, directory, outputdirectory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
 common inputModelFiles, inputfiles, ninputfiles
 if (WIDGET_INFO(gauss, /BUTTON_SET) eq 1) then begin
     profile = 0

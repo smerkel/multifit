@@ -48,7 +48,7 @@
 ; ******************************  GUI THAT CONTROLS THE CONVERSION WINDOW ***************
 
 PRO addInputConvertWindow, base, listinput
-common files, extension, directory, outputdirectory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
 common inputModelFiles, inputfiles, ninputfiles
 result=dialog_pickfile(title='Select input file(s)', path=outputdirectory, DIALOG_PARENT=base, DEFAULT_EXTENSION='.dat', FILTER=['*.dat'])
 if (result ne '') then begin
@@ -88,7 +88,7 @@ END
 ;  - saves the fitpatternObject to an ascii file in .fit format
 ;  - the "multiples" variable is set to the .dat file names for a given diffraction number
 PRO makefitfiles, base, log, multiples, fitfilename
-common files, extension, directory, outputdirectory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
 common inputModelFiles, inputfiles, ninputfiles
 
 testdata = OBJ_NEW('fitPatternObject')
@@ -119,7 +119,7 @@ END
 ;  - creates a fitPatternObject containing one subPatternObject per .dat file
 ;  - saves the fitpatternObject to an ascii file in .fit format
 PRO makefitfile, base, log
-common files, extension, directory, outputdirectory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
 common inputModelFiles, inputfiles, ninputfiles
 
 testdata = OBJ_NEW('fitPatternObject')
@@ -142,7 +142,7 @@ END
 ;this procedure converts several sets of .dat files (one set per diffraction) 
 ;into one .fit file per diffraction (see top of this file for full explanation)
 PRO multiplefitsfromdats, base, log, starti, endi, ndg, interv, rootname
-common files, extension, directory, outputdirectory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
 common inputModelFiles, inputfiles, ninputfiles
 
 ; for some reason an array is passed instead of a single element - need to select the first element of it 

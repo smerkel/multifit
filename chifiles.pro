@@ -63,10 +63,10 @@ end
 pro read_one, name
 common rawdata, nalpha, ntheta, alpha, twotheta, data
 common datainfo, filenames, alphastart, alphaend, intervalle, date
-common files, extension, directory, outputdirectory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
 inputname = name
 nalpha = 1
-file = directory + name  + extension
+file = datadirectory + name  + extension
 file = STRCOMPRESS(file, /REMOVE_ALL)
 ; print, "Reading ", file
 ntheta = ndata(filedata = fltarr(nalpha,ntheta))
@@ -77,7 +77,7 @@ data(0,*) = tmp(1,*)
 twotheta = tmp(0,*)
 alpha(0) = 0.0
 ; saving basic informations about the data
-filenames = directory + name
+filenames = datadirectory + name
 alphastart = 0.0
 alphaend = 0.0
 intervalle = 0
@@ -98,11 +98,11 @@ end
 function read_all, name, izero, iend, istep, log
 common rawdata, nalpha, ntheta, alpha, twotheta, data
 common datainfo, filenames, alphastart, alphaend, intervalle, date
-common files, extension, directory, outputdirectory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
 ON_IOERROR, BADINPUT
 nalphatmp = fix((iend-izero)/istep+1)
 nalpha = nalphatmp[0]
-file = directory + name + "_" + STRING(izero) + extension
+file = datadirectory + name + "_" + STRING(izero) + extension
 file = STRCOMPRESS(file, /REMOVE_ALL)
 fileinfo = FILE_TEST(file)
 if (fileinfo ne 1) then begin
@@ -120,7 +120,7 @@ endloop = (nalpha(0)-1)
 for i = 1, endloop do begin
     alpha(i) = izero + i*istep
     ii = fix(alpha(i))
-    file = directory + name + "_" + STRING(ii) + extension
+    file = datadirectory + name + "_" + STRING(ii) + extension
     file = STRCOMPRESS(file, /REMOVE_ALL)
     ; logit, log, "Reading " + file
     fileinfo = FILE_TEST(file)
@@ -131,7 +131,7 @@ for i = 1, endloop do begin
     data(i,*) = tmp(1,*)
 endfor
                                 ; saving basic informations about the data
-filenames = directory + name
+filenames = datadirectory + name
 alphastart = izero
 alphaend = iend
 intervalle = istep
@@ -155,12 +155,12 @@ end
 function read_all_fixed_digits, name, izero, iend, idigits, log
 common rawdata, nalpha, ntheta, alpha, twotheta, data
 common datainfo, filenames, alphastart, alphaend, intervalle, date
-common files, extension, directory, outputdirectory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
 ON_IOERROR, BADINPUT
 istep = 1
 nalphatmp = fix((iend-izero)/istep+1)
 nalpha = nalphatmp[0]
-filebase = directory + name + "_"
+filebase = datadirectory + name + "_"
 fileindex = intformat(izero,idigits);
 file = strtrim(filebase) + strtrim(fileindex) + extension
 file = STRCOMPRESS(file, /REMOVE_ALL)
@@ -191,7 +191,7 @@ for i = 1, endloop do begin
     data(i,*) = tmp(1,*)
 endfor
                                 ; saving basic informations about the data
-filenames = directory + name
+filenames = datadirectory + name
 alphastart = izero
 alphaend = iend
 intervalle = 1

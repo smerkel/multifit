@@ -20,12 +20,12 @@
 ; *******************************************************************
 
 function savedata, file
-common files, extension, directory, outputdirectory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
 common datainfo, filenames, alphastart, alphaend, intervalle, date
 common rawdata, nalpha, ntheta, alpha, twotheta, data
 ON_IOERROR, IOERROR
 
-filename = directory + file
+filename = datadirectory + file
 openw, /XDR, 1, filename
 ; basic info
 writeu, 1, strlen(filenames)

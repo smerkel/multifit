@@ -25,11 +25,23 @@
 ; uses
 ;
 
-function readdefault
-common jcpds, jcpds_directory
-common workdirectory, workdirectory
+pro readdefault
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
+common experiment, wavelength, detectordistance
+common id6, ID6_psize, ID6_center
 defaultdir = GETENV('HOME')
-jcpds_directory = GETENV('HOME')
+; set default values
+datadirectory = defaultdir
+outputdirectory = defaultdir
+defaultdirectory = defaultdir
+jcpdsdirectory = defaultdir
+id6directory = defaultdir
+extension = '.chi'
+wavelength=0.4000
+detectordistance=200.
+ID6_psize = 0.2
+ID6_center = 1500
+
 ; If we are using UNIX, try to see if we saved a default file
 if (STRUPCASE(!VERSION.OS_FAMILY) eq 'UNIX') then begin
   default = GETENV('HOME') + "/" + ".multifit"
@@ -42,70 +54,60 @@ if (STRUPCASE(!VERSION.OS_FAMILY) eq 'UNIX') then begin
       if (nn gt 1) then begin
         label = STRUPCASE(word[0])
         CASE label OF
-          "WORK_DIRECTORY:": defaultdir = word[1]
-          "JCPDS_DIRECTORY:": jcpds_directory = word[1]
+          "WORK_DIRECTORY:": defaultdirectory = word[1]
+          "JCPDS_DIRECTORY:": jcpdsdirectory = word[1]
+          "DATA_DIRECTORY:": datadirectory = word[1]
+          "OUTPUT_DIRECTORY:": outputdirectory = word[1]
+          "ID6_DIRECTORY:": id6directory = word[1]
+          "EXTENSTION:": extension = word[1]
+          "WAVELENGTH:": wavelength = float(word[1])
+          "DETECTORDISTANCE:": detectordistance = float(word[1])
+          "ID6_PIXELSIZE:": ID6_psize = float(word[1])
+          "ID6_CENTER:": ID6_center = float(word[1])
           else:
         endcase
       endif
     endwhile
     free_lun, lun
-  endif else begin
-    openw, lun, default, /get_lun
-    printf, lun, '# Default information for multifit'
-    free_lun, lun
-  endelse
-endif
-workdirectory = defaultdir
-; print, "Returning " + defaultdir
-return, defaultdir
-end
-
-pro setDefaultItem, item, value
-if (STRUPCASE(!VERSION.OS_FAMILY) eq 'UNIX') then begin
-  default = GETENV('HOME') + "/" + ".multifit"
-  if (file_test(default)) then begin
-    str = ""
-    done = 0
-    openr, lun, default, /get_lun
-    while ~ EOF(lun) do begin
-      row = ""
-      readf, lun, row
-      word = strsplit(row, COUNT=nn, /EXTRACT)
-      label = STRUPCASE(word[0])
-      CASE label OF
-        item: begin
-          str = str + item + " " + value + "|"
-          done = 1
-        end
-        else: str = str + row + "|"
-      endcase
-    endwhile
-    free_lun, lun
-    if (done eq 0) then str = str + item + " " + value + "|"
-    ; print, "Trying to write " + str
-    openw, lun, default, /get_lun
-    word = strsplit(str, "|", COUNT=nn, /EXTRACT)
-    for i=0,nn-1 do printf, lun, word[i]
-    free_lun, lun
   endif
 endif
 end
 
-pro setDefaultJCPDSdir, dir
-setDefaultItem, "JCPDS_DIRECTORY:", dir
+
+pro savedefaults
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
+common experiment, wavelength, detectordistance
+common id6, ID6_psize, ID6_center
+
+if (!D.NAME eq 'WIN') then newline = string([13B, 10B]) else newline = string(10B)
+
+str = "# Multifit default parameters\n"
+str += "WORK_DIRECTORY: " + defaultdirectory + newline
+str += "JCPDS_DIRECTORY: " + jcpdsdirectory + newline
+str += "DATA_DIRECTORY: " + datadirectory + newline
+str += "OUTPUT_DIRECTORY: " + outputdirectory + newline
+str += "ID6_DIRECTORY: " + id6directory + newline
+str += "EXTENSTION: " + extension + newline
+str += "WAVELENGTH: " + string(wavelength) + newline
+str += "DETECTORDISTANCE: " + string(detectordistance) + newline
+str += "ID6_PIXELSIZE: " + string(ID6_psize) + newline
+str += "ID6_CENTER: " + string(ID6_center) + newline
+
+if (STRUPCASE(!VERSION.OS_FAMILY) eq 'UNIX') then begin
+  default = GETENV('HOME') + "/" + ".multifit"
+  ; print, "Trying to write " + str
+  openw, lun, default, /get_lun
+  printf, lun, str
+  free_lun, lun
+endif
+
 end
 
-pro setDefaultWorkDir, dir
-setDefaultItem, "WORK_DIRECTORY:", dir
-end
 
 ; ********************************* LOAD_DEFAULTS *********************************
 
 PRO load_defaults_startup
 common fonts, titlefont, boldfont, mainfont, avFontHeight
-common files, extension, directory, outputdirectory
-common experiment, wavelength, detectordistance
-common default, defaultdir
 ; default color palette and font for plots
 OS   = strupcase(!VERSION.OS)
 OS   = strmid(OS,0,3)
@@ -115,14 +117,6 @@ loadct, 15, /SILENT
 DEVICE, SET_FONT='Helvetica Bold', /TT_FONT, SET_CHARACTER_SIZE=[8,10]
 ; default for plots
 !P.MULTI = 0
-; directories
-defaultdir = readdefault()
-directory = defaultdir
-outputdirectory = defaultdir
-; other things
-extension = '.chi'
-wavelength=0.4000
-detectordistance=200.
 ; Fonts
 if (OS ne 'WIN') then begin
   mainfont = '-*-helvetica-medium-r-*-*-12-*-*-*-*-*-*-*'
@@ -148,6 +142,8 @@ endif else begin
   avFontHeight = fix(avFontHeight/2)
 endelse
 WIDGET_CONTROL,  DEFAULT_FONT=mainfont
+; Read other things from a default file
+readdefault
 end
 
 ; ****************************************** about window **************
@@ -161,7 +157,7 @@ common fonts, titlefont, boldfont, mainfont, avFontHeight
 basedialog = WIDGET_BASE(/COLUMN, /MODAL, GROUP_LEADER=base, Title='About Multifit')
 infobase =  WIDGET_BASE(basedialog,/COLUMN)
 la = WIDGET_LABEL(infobase, VALUE='Multifit', /ALIGN_LEFT, font=titlefont)
-la = WIDGET_LABEL(infobase, VALUE='Multifit v4.4, Compiled January 30th 2014', /ALIGN_LEFT)
+la = WIDGET_LABEL(infobase, VALUE='Multifit v4.4, Revision 63, Compiled January 31h 2014', /ALIGN_LEFT)
 la = WIDGET_LABEL(infobase, VALUE='', /ALIGN_LEFT)
 la = WIDGET_LABEL(infobase, VALUE='Multifit is a software to process multiple diffraction images', /ALIGN_LEFT)
 la = WIDGET_LABEL(infobase, VALUE='Copyright S. Merkel, Universite Lille 1, France', /ALIGN_LEFT)
@@ -183,19 +179,20 @@ END
 
 ; ****************************************** SAVEPARAMS ********************************
 PRO saveparams, base, log, inputDirText, outputDirText, waveText, ipDistanceText
-common files, extension, directory, outputdirectory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
 common experiment, wavelength, detectordistance
-common workdirectory, workdirectory
 common inputfiles, inputfiles, activeset
-filename=dialog_pickfile(title='Filename', path=workdirectory, DIALOG_PARENT=base, DEFAULT_EXTENSION='.par', FILTER=['*.par'], /WRITE)
+filename=dialog_pickfile(title='Filename', path=defaultdirectory, DIALOG_PARENT=base, DEFAULT_EXTENSION='.par', FILTER=['*.par'], /WRITE)
 if (filename ne '') then begin
 	filename = addextension(filename, 'par')
 	openw, lun, filename, /get_lun
 	printf, lun, '# Parameter file for multfit'
 	printf, lun, '# Directory with chi and idl files'
-	printf, lun, 'directory|'+directory
+	printf, lun, 'directory|'+datadirectory
 	printf, lun, '# Directory with image fits'
 	printf, lun, 'outputdirectory|'+outputdirectory
+	printf, lun, '# Directory with ID6 diffraction data'
+	printf, lun, 'id6directory|'+id6directory
 	printf, lun, '# Wavelength'
 	printf, lun, 'wavelength|'+ STRING(wavelength, /PRINT)
 	printf, lun, '# Detector distance'
@@ -208,14 +205,13 @@ if (filename ne '') then begin
 	free_lun, lun
     logit, log, "Parameters save in " + filename
 	FDECOMP, filename, disk, dir, name, qual, version
-	workdirectory = disk+dir
-	setDefaultWorkDir, workdirectory
+	defaultdirectory = disk+dir
 endif
 END
 
 PRO readparams, base, log, inputDirText, outputDirText, waveText, ipDistanceText, listSets
-common workdirectory, workdirectory
-filename=dialog_pickfile(title='Filename', path=workdirectory, DIALOG_PARENT=base, DEFAULT_EXTENSION='.par', FILTER=['*.par'])
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
+filename=dialog_pickfile(title='Filename', path=defaultdirectory, DIALOG_PARENT=base, DEFAULT_EXTENSION='.par', FILTER=['*.par'])
 if (filename ne '') then begin
   ; print, "Want to open ", filename
 	openr, lun, filename, /get_lun
@@ -228,6 +224,7 @@ if (filename ne '') then begin
 			'outputdirectory': chgOutputDirBasic, log, outputDirText, words[1]
 			'wavelength': chgWavelengthBasic, log, waveText, words[1]
 			'detectordistance': chgDetectordistanceBasic, log, ipDistanceText, words[1]
+			'id6directory': id6directory=words[1]
 			'inputfiles': inpufilesFromList, log, listSets, strsplit(words[1], ';', /EXTRACT)
 			else:
 		endcase
@@ -235,36 +232,35 @@ if (filename ne '') then begin
 	close, lun
   logit, log, "Parameters read from " + filename
 	FDECOMP, filename, disk, dir, name, qual, version
-	workdirectory = disk+dir
-	setDefaultWorkDir, workdirectory
+	defaultdirectory = disk+dir
 endif
 end
 
 ; ****************************************** CHGINPUTDIR *********************************
 PRO chgInputDir, base, log, widget
-common files, extension, directory, outputdirectory
-result=dialog_pickfile(/DIRECTORY,title='Select input directory', path=directory, DIALOG_PARENT=base)
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
+result=dialog_pickfile(/DIRECTORY,title='Select input directory', path=datadirectory, DIALOG_PARENT=base)
 if (result ne '') then begin
-    directory = result
-    inputDirLabel = 'Input directory: ' + directory
-    WIDGET_CONTROL, widget, SET_VALUE=directory
+    datadirectory = result
+    inputDirLabel = 'Input directory: ' + datadirectory
+    WIDGET_CONTROL, widget, SET_VALUE=datadirectory
     logit, log, inputDirLabel
 endif
 END
 
 PRO chgInputDirBasic, log, widget, result
-common files, extension, directory, outputdirectory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
 if (result ne '') then begin
-    directory = result
-    inputDirLabel = 'Input directory: ' + directory
-    WIDGET_CONTROL, widget, SET_VALUE=directory
+    datadirectory = result
+    inputDirLabel = 'Input directory: ' + datadirectory
+    WIDGET_CONTROL, widget, SET_VALUE=datadirectory
     logit, log, inputDirLabel
 endif
 END
 
 ; ****************************************** CHGOUTPUTDIR *************************************
 PRO chgOutputDir, base, log, widget
-common files, extension, directory, outputdirectory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
 result=dialog_pickfile(/DIRECTORY,title='Select output directory', path=outputdirectory, DIALOG_PARENT=base)
 if (result ne '') then begin
     outputdirectory=result
@@ -275,7 +271,7 @@ endif
 END
 
 PRO chgOutputDirBasic, log, widget, result
-common files, extension, directory, outputdirectory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
 if (result ne '') then begin
     outputdirectory=result
     outputDirLabel = 'Output directory: ' + outputdirectory
@@ -364,7 +360,6 @@ END
 ; ****************************************** READ AND CONVERT CHI FILES **************
 
 PRO convertonechi_event, ev
-common files, extension, directory, outputdirectory
 WIDGET_CONTROL, ev.TOP, GET_UVALUE=stash
 WIDGET_CONTROL, ev.ID, GET_UVALUE=uval
 log=stash.log
@@ -401,7 +396,6 @@ endelse
 END
 
 PRO convertonechi, base, log
-common files, extension, directory, outputdirectory
 common inputinfo, string
 basedialog = WIDGET_BASE(/COLUMN, /MODAL, GROUP_LEADER=base)
 nameBase =  WIDGET_BASE(basedialog,COLUMN=2, /GRID_LAYOUT, FRAME=1)
@@ -423,7 +417,6 @@ XMANAGER, 'convertonechi', basedialog
 END
 
 PRO convertfileseries_event, ev
-common files, extension, directory, outputdirectory
 WIDGET_CONTROL, ev.TOP, GET_UVALUE=stash
 WIDGET_CONTROL, ev.ID, GET_UVALUE=uval
 log=stash.log
@@ -460,7 +453,6 @@ endelse
 END
 
 PRO convertfileseries, base, log
-common files, extension, directory, outputdirectory
 common inputinfo, string
 basedialog = WIDGET_BASE(/COLUMN, /MODAL, GROUP_LEADER=base)
 nameBase =  WIDGET_BASE(basedialog,COLUMN=2, /GRID_LAYOUT, FRAME=1)
@@ -483,7 +475,6 @@ END
 
 
 PRO convertmultiplechi_event, ev
-common files, extension, directory, outputdirectory
 WIDGET_CONTROL, ev.TOP, GET_UVALUE=stash
 WIDGET_CONTROL, ev.ID, GET_UVALUE=uval
 log=stash.log
@@ -535,7 +526,6 @@ logit, log, "Failed"
 END
 
 PRO convertmultiplechi, base, log
-common files, extension, directory, outputdirectory
 common inputinfo, string
 basedialog = WIDGET_BASE(/COLUMN, /MODAL, GROUP_LEADER=base)
 nameBase =  WIDGET_BASE(basedialog,COLUMN=2, /GRID_LAYOUT, FRAME=1)
@@ -583,12 +573,12 @@ END
 ; ****************************************** SETUP INPUT (DATA) FILES **************
 
 pro oneInputFile, widget, log
-common files, extension, directory, outputdirectory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
 common inputfiles, inputfiles, activeset
-result=dialog_pickfile(title='Select input file', path=directory, DIALOG_PARENT=base, DEFAULT_EXTENSION='.idl')
+result=dialog_pickfile(title='Select input file', path=datadirectory, DIALOG_PARENT=base, DEFAULT_EXTENSION='.idl')
 if (result ne '') then begin
 	FDECOMP, result, disk, dir, name, qual, version
-	filename = directory + name + "." + Qual
+	filename = datadirectory + name + "." + Qual
 	filenameshort = name + "." + Qual
 	if (FILE_TEST(filename)) then begin
 		inputText = strarr(1)
@@ -608,12 +598,12 @@ END
 
 pro inpufilesFromList, log, list_widget, list
 common inputfiles, inputfiles, activeset
-common files, extension, directory, outputdirectory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
 n = n_elements(list)
 inputText = strarr(n)
 for j=0,n-1 do begin
 	filenameshort = list[j]
-	filename = directory + filenameshort
+	filename = datadirectory + filenameshort
 	if (FILE_TEST(filename) ne 1) then begin
 		tmp = DIALOG_MESSAGE(filenameshort + " is not in your data directory.", /ERROR)
 		logit, log, "Failed setting input files: failed on " + filenameshort
@@ -629,7 +619,7 @@ end
 
 PRO multipleInputFiles_event, ev
 common inputfiles, inputfiles, activeset
-common files, extension, directory, outputdirectory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
 WIDGET_CONTROL, ev.TOP, GET_UVALUE=stash
 WIDGET_CONTROL, ev.ID, GET_UVALUE=uval
 log=stash.log
@@ -646,7 +636,7 @@ if (uval eq 'OK') then begin
     for j=first,last do begin
 	fileindex = intformat(j,digits);
 	filenameshort = strtrim(base) + "_" + fileindex + ".idl"
-	filename = directory + filenameshort
+	filename = datadirectory + filenameshort
 	if (FILE_TEST(filename) ne 1) then begin
 		tmp = DIALOG_MESSAGE(filenameshort + " is not in your data directory.", /ERROR)
 		logit, log, "Set multiple datasets: failed on " + filenameshort
@@ -667,7 +657,6 @@ endelse
 END
 
 PRO multipleInputFiles, base, widget, log
-common files, extension, directory, outputdirectory
 common fonts, titlefont, boldfont, mainfont, avFontHeight
 input = WIDGET_BASE(/COLUMN, Title='Set multipe input files', /MODAL, GROUP_LEADER=base)
 inputMacLa = WIDGET_LABEL(input, VALUE='Set multipe input files', /ALIGN_CENTER, font=titlefont)
@@ -693,8 +682,8 @@ END
 
 pro changeActiveSet, log, list, index
 common inputfiles, inputfiles, activeset
-common files, extension, directory, outputdirectory
-file = directory + inputfiles(index)
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
+file = datadirectory + inputfiles(index)
 res = readfile(file)
 if (res eq 1) then begin
     activeset = index
@@ -722,7 +711,7 @@ END
 
 PRO removeSlice_event, ev
 common inputfiles, inputfiles, activeset
-common files, extension, directory, outputdirectory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
 common datainfo, filenames, alphastart, alphaend, intervalle, date
 common rawdata, nalpha, ntheta, alpha, twotheta, data
 WIDGET_CONTROL, ev.TOP, GET_UVALUE=stash
@@ -736,7 +725,7 @@ if (uval eq 'OK') then begin
     max = (FLOAT(maxTheta[0]))
 	FDECOMP, file, disk, dir, name, qual, version
 	if (qual ne 'idl') then file = file + ".idl"
-	filename = directory + file
+	filename = datadirectory + file
 	if (FILE_TEST(filename) eq 1) then begin
 		tmp = DIALOG_MESSAGE("Can not overwrite " + filename, /ERROR)
 		return
@@ -759,7 +748,6 @@ END
 
 pro removeSlice, base, log
 logit, log, "Removing slice from active dataset..."
-common files, extension, directory, outputdirectory
 common fonts, titlefont, boldfont, mainfont, avFontHeight
 input = WIDGET_BASE(/COLUMN, Title='Remove Slice in Active Dataset', /MODAL, GROUP_LEADER=base)
 title = WIDGET_LABEL(input, VALUE='Remove Slice in Active Dataset', /ALIGN_CENTER, font=titlefont)
@@ -793,7 +781,7 @@ return, 1
 END
 
 pro maudExport, base, listSets, log
-common files, extension, directory, outputdirectory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
 common inputfiles, inputfiles, activeset
 if (FILE_TEST( outputdirectory, /DIRECTORY) ne 1) then begin
         tmp = DIALOG_MESSAGE("Error with directory: " + outputdirectory, /ERROR)
@@ -802,7 +790,7 @@ if (FILE_TEST( outputdirectory, /DIRECTORY) ne 1) then begin
 endif
 nfiles = N_ELEMENTS(inputfiles)
 for i=0, nfiles-1 do begin
-	file = directory + inputfiles(i)
+	file = datadirectory + inputfiles(i)
 	logit, log, "Reading: " + file
 	res = readfile(file)
 	if (res ne 1) then begin
@@ -988,7 +976,6 @@ END
 
 ; subroutine with GUI to create macro for a single image
 PRO fit2dmac_event, ev
-common files, extension, directory, outputdirectory
 WIDGET_CONTROL, ev.TOP, GET_UVALUE=stash
 WIDGET_CONTROL, ev.ID, GET_UVALUE=uval
 log=stash.log
@@ -1012,14 +999,15 @@ endif else begin
     WIDGET_CONTROL, ev.TOP, /DESTROY
 endelse
 END
+
 PRO fit2dmac, base, log
-common files, extension, directory, outputdirectory
 common fonts, titlefont, boldfont, mainfont, avFontHeight
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
 fit2d = WIDGET_BASE(/COLUMN, Title='Create macro for fit2d (single images)', /MODAL, GROUP_LEADER=base)
 fit2dMacLa = WIDGET_LABEL(fit2d, VALUE='Create macro for fit2d (single images)', /ALIGN_center, font=titlefont)
 fit2dMacDir = WIDGET_BASE(fit2d, /ROW)
 fit2dMacDirLa = WIDGET_LABEL(fit2dMacDir, VALUE='Directory for CHI files export', /ALIGN_LEFT)
-fit2dMacDirText = WIDGET_TEXT(fit2dMacDir, VALUE=directory, XSIZE=60)
+fit2dMacDirText = WIDGET_TEXT(fit2dMacDir, VALUE=datadirectory, XSIZE=60)
 fit2dMacBase = WIDGET_BASE(fit2d, /ROW)
 fit2dMacBaseLa = WIDGET_LABEL(fit2dMacBase, VALUE='Base for filenames', /ALIGN_LEFT)
 fit2dMacBaseText = WIDGET_TEXT(fit2dMacBase, VALUE='filename', XSIZE=60, /EDITABLE)
@@ -1046,8 +1034,8 @@ END
 ; subroutine with GUI to create macro for a multiple images
 
 PRO chgDiffDir, base, widget
-common files, extension, directory, outputdirectory
-result=dialog_pickfile(/DIRECTORY,title='Select input directory', path=directory, DIALOG_PARENT=base)
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
+result=dialog_pickfile(/DIRECTORY,title='Select input directory', path=defaultdirectory, DIALOG_PARENT=base)
 if (result ne '') then begin
     WIDGET_CONTROL, widget, SET_VALUE=result
 endif
@@ -1103,8 +1091,8 @@ endif
 END
 
 PRO fit2dmaclong, base, log
-common files, extension, directory, outputdirectory
 common fonts, titlefont, boldfont, mainfont, avFontHeight
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
 fit2d = WIDGET_BASE(/COLUMN, Title='Create macro for fit2d (multiple images)', /MODAL, GROUP_LEADER=base)
 fit2dMacLa = WIDGET_LABEL(fit2d, VALUE='Create macro for fit2d (multiple images)', /ALIGN_CENTER, font=titlefont)
 ; Input files: diffraction images
@@ -1133,7 +1121,7 @@ inputMar = Widget_Button(format, Value='Mar3450', UVALUE='FORMAT')
 fit2dOutput = WIDGET_BASE(fit2d, /COLUMN, FRAME=1)
 fit2dOutputDir = WIDGET_BASE(fit2dOutput, /ROW)
 fit2dOutputDirLa = WIDGET_LABEL(fit2dOutputDir, VALUE='Directory for CHI files export ', /ALIGN_LEFT)
-fit2dOutputDirText = WIDGET_TEXT(fit2dOutputDir, VALUE=directory, XSIZE=60)
+fit2dOutputDirText = WIDGET_TEXT(fit2dOutputDir, VALUE=datadirectory, XSIZE=60)
 fit2dOutputFiles = WIDGET_BASE(fit2dOutput, COLUMN=2, /GRID_LAYOUT)
 fit2dMacAzStLa = WIDGET_LABEL(fit2dOutputFiles, VALUE='First azimuth angle', /ALIGN_LEFT)
 fit2dMacAzLtLa = WIDGET_LABEL(fit2dOutputFiles, VALUE='Last azimuth angle', /ALIGN_LEFT)
@@ -1196,6 +1184,7 @@ PRO resizebase, base, stash
 END
 
 PRO exitit, widget
+    savedefaults
     WIDGET_CONTROL, widget, /DESTROY
 end
 
@@ -1246,7 +1235,7 @@ endcase
 END
 
 PRO gui
-common files, extension, directory, outputdirectory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
 common experiment, wavelength, detectordistance
 common fonts, titlefont, boldfont, mainfont, avFontHeight
 ; default values
@@ -1257,22 +1246,27 @@ base = WIDGET_BASE(Title='Multipeak superfit!',/COLUMN, MBAR=bar, /TLB_SIZE_EVEN
 file_menu = WIDGET_BUTTON(bar, VALUE='File', /MENU)
 file_bttn3 = WIDGET_BUTTON(file_menu, VALUE='Save parameters', UVALUE='SAVEPARAM')
 file_bttn4 = WIDGET_BUTTON(file_menu, VALUE='Read parameters', UVALUE='READPARAM')
+file_bttn1 = WIDGET_BUTTON(file_menu, VALUE='Single input file', UVALUE='ONEIDL', /SEPARATOR)
+file_bttn2 = WIDGET_BUTTON(file_menu, VALUE='Multiple input files', UVALUE='MULTIPLEIDL')
 file_bttn5 = WIDGET_BUTTON(file_menu, VALUE='Exit', UVALUE='EXIT', /SEPARATOR)
-; Input file menu
-input_menu = WIDGET_BUTTON(bar, VALUE='Input files', /MENU) 
-file_bttn1 = WIDGET_BUTTON(input_menu, VALUE='Single input file', UVALUE='ONEIDL')
-file_bttn2 = WIDGET_BUTTON(input_menu, VALUE='Multiple input files', UVALUE='MULTIPLEIDL')
-; Data menu
-data_menu = WIDGET_BUTTON(bar, VALUE='Data handling', /MENU) 
+; Fit2d interaction menu
+data_menu = WIDGET_BUTTON(bar, VALUE='Fit2d', /MENU) 
 fit2d_bttn1 = WIDGET_BUTTON(data_menu, VALUE='Create Fit2d macro for one file', UVALUE='FIT2DMAC')
 fit2d_bttn2 = WIDGET_BUTTON(data_menu, VALUE='Create Fit2d macro for multiple files', UVALUE='FIT2DMACLONG')
 fit2d_bttn3 = WIDGET_BUTTON(data_menu, VALUE='Convert CHI to IDL: 1 set', UVALUE='CONVERTONECHI')
 fit2d_bttn4 = WIDGET_BUTTON(data_menu, VALUE='Convert CHI to IDL: multiple sets', UVALUE='CONVERTMULTIPLECHI')
 fit2d_bttn4 = WIDGET_BUTTON(data_menu, VALUE='Convert CHI to IDL: file series', UVALUE='CONVERTFILESERIES')
-maud_bttn1 = WIDGET_BUTTON(data_menu, VALUE='Export active datasets for Maud', UVALUE='MAUDEXPORT', /SEPARATOR)
-data_bttn3 = WIDGET_BUTTON(data_menu, VALUE='Remove slice from active dataset', UVALUE='REMOVESLICE', /SEPARATOR)
+; ID 06 menu
+; id6_menu = WIDGET_BUTTON(bar, VALUE='ESRF ID06', /MENU)
+; bttn1 = WIDGET_BUTTON(id6_menu, VALUE='Calibration', UVALUE='ID6CALIB')
+; bttn2 = WIDGET_BUTTON(id6_menu, VALUE='Convertion to multifit', UVALUE='ID6CONVERT')
+; bttn3 = WIDGET_BUTTON(id6_menu, VALUE='Uncake to tiff', UVALUE='ID6UNCAKE')
+; Other menu
+dataset_menu = WIDGET_BUTTON(bar, VALUE='Current dataset', /MENU)
+maud_bttn1 = WIDGET_BUTTON(dataset_menu, VALUE='Export active datasets for Maud', UVALUE='MAUDEXPORT')
+data_bttn3 = WIDGET_BUTTON(dataset_menu, VALUE='Remove slice from active dataset', UVALUE='REMOVESLICE', /SEPARATOR)
 ; Image fit menu
-fit_menu = WIDGET_BUTTON(bar, VALUE='Image fit', /MENU) 
+fit_menu = WIDGET_BUTTON(bar, VALUE='Peak fitting', /MENU) 
 fit_bttn1 = WIDGET_BUTTON(fit_menu, VALUE='Fit active dataset (manual)', UVALUE='FITONESET')
 fit_bttn3 = WIDGET_BUTTON(fit_menu, VALUE='Create a fit model', UVALUE='MODELONEIMAGE', /SEPARATOR)
 fit_bttn5 = WIDGET_BUTTON(fit_menu, VALUE='Fit one image: automatic', UVALUE='FITONESETAUTO', /SEPARATOR)
@@ -1293,7 +1287,7 @@ defaultBase =  WIDGET_BASE(top,/COLUMN, FRAME=1, /ALIGN_CENTER)
 pathBase =  WIDGET_BASE(defaultBase,COLUMN=3)
 inputDirLa = WIDGET_LABEL(pathBase, VALUE='Directory with CHI or MULTIFIT data files: ', /ALIGN_LEFT, ysize=ysizeparams)
 outputDirLa = WIDGET_LABEL(pathBase, VALUE='Directory to save fits: ', /ALIGN_LEFT, ysize=ysizeparams)
-inputDirText = WIDGET_TEXT(pathBase, VALUE=directory, XSIZE=40, SCR_YSIZE=ysizeparams)
+inputDirText = WIDGET_TEXT(pathBase, VALUE=datadirectory, XSIZE=40, SCR_YSIZE=ysizeparams)
 outputDirText = WIDGET_TEXT(pathBase, VALUE=outputdirectory, XSIZE=40, SCR_YSIZE=ysizeparams)
 inputDirBu = WIDGET_BUTTON(pathBase, VALUE='Change', UVALUE='INPUTDIR', ysize=ysizeparams, xsize=80)
 outputDirBu = WIDGET_BUTTON(pathBase, VALUE='Change', UVALUE='OUTPUTDIR', ysize=ysizeparams, xsize=80)

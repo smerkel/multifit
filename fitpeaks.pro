@@ -454,7 +454,7 @@ end
 
 pro saveresults, include, npeaks, good, results, savehalfwidth
 common rawdata, nalpha, ntheta, alpha, twotheta, data
-common files, extension, directory, outputdirectory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
 outfile = pickfile_dir_ext(outputdirectory, 'dat', title='Save as')
 if (outfile ne '') then begin
     titre=''
