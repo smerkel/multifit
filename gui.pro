@@ -89,7 +89,7 @@ common esrfid6, ID6_psize, ID6_center, ID6_etamin, ID6_etamax, ID6_dark
 
 if (!D.NAME eq 'WIN') then newline = string([13B, 10B]) else newline = string(10B)
 
-str = "# Multifit default parameters\n"
+str = "# Multifit default parameters" + newline
 str += "WORK_DIRECTORY: " + defaultdirectory + newline
 str += "JCPDS_DIRECTORY: " + jcpdsdirectory + newline
 str += "DATA_DIRECTORY: " + datadirectory + newline
@@ -169,7 +169,7 @@ common fonts, titlefont, boldfont, mainfont, avFontHeight
 basedialog = WIDGET_BASE(/COLUMN, /MODAL, GROUP_LEADER=base, Title='About Multifit')
 infobase =  WIDGET_BASE(basedialog,/COLUMN)
 la = WIDGET_LABEL(infobase, VALUE='Multifit', /ALIGN_LEFT, font=titlefont)
-la = WIDGET_LABEL(infobase, VALUE='Multifit v4.4, Revision 68, Compiled January 31h 2014', /ALIGN_LEFT)
+la = WIDGET_LABEL(infobase, VALUE='Multifit v4.4, Revision 69, Compiled January 31h 2014', /ALIGN_LEFT)
 la = WIDGET_LABEL(infobase, VALUE='', /ALIGN_LEFT)
 la = WIDGET_LABEL(infobase, VALUE='Multifit is a software to process multiple diffraction images', /ALIGN_LEFT)
 la = WIDGET_LABEL(infobase, VALUE='Copyright S. Merkel, Universite Lille 1, France', /ALIGN_LEFT)
@@ -195,7 +195,7 @@ common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpds
 common experiment, wavelength, detectordistance, experimenttype
 common esrfid6, ID6_psize, ID6_center, ID6_etamin, ID6_etamax, ID6_dark
 common inputfiles, inputfiles, activeset
-filename=dialog_pickfile(title='Filename', path=defaultdirectory, DIALOG_PARENT=base, DEFAULT_EXTENSION='.par', FILTER=['*.par'], /WRITE)
+filename=dialog_pickfile(title='Save parameters into...', path=defaultdirectory, DIALOG_PARENT=base, DEFAULT_EXTENSION='.par', FILTER=['*.par'], /WRITE, /OVERWRITE_PROMPT)
 if (filename ne '') then begin
 	filename = addextension(filename, 'par')
 	openw, lun, filename, /get_lun
@@ -238,7 +238,7 @@ PRO readparams, base, log, listSets
 common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
 common esrfid6, ID6_psize, ID6_center, ID6_etamin, ID6_etamax, ID6_dark
 common experiment, wavelength, detectordistance, experimenttype
-filename=dialog_pickfile(title='Filename', path=defaultdirectory, DIALOG_PARENT=base, DEFAULT_EXTENSION='.par', FILTER=['*.par'])
+filename=dialog_pickfile(title='Read parameters from...', path=defaultdirectory, DIALOG_PARENT=base, FILTER=['*.par','*.*'], /must_exist)
 if (filename ne '') then begin
   ; print, "Want to open ", filename
 	openr, lun, filename, /get_lun
@@ -479,7 +479,8 @@ END
 PRO chgID6Dark, base, log, widget
   common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
   common esrfid6, ID6_psize, ID6_center, ID6_etamin, ID6_etamax, ID6_dark
-  result=dialog_pickfile(title='Select ID6 dark dataset', path=id6directory, DIALOG_PARENT=base)
+  filters = ['*.tif', '*.tiff', '*.*']
+  result=dialog_pickfile(title='Select ID6 dark dataset', path=id6directory, DIALOG_PARENT=base, filter=filters, /must_exist)
   if (result ne '') then begin
     ID6_dark = result
     message = 'New ID6 dark file: ' + ID6_dark
@@ -708,7 +709,7 @@ END
 pro oneInputFile, widget, log
 common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
 common inputfiles, inputfiles, activeset
-result=dialog_pickfile(title='Select input file', path=datadirectory, DIALOG_PARENT=base, DEFAULT_EXTENSION='.idl')
+result=dialog_pickfile(title='Input data from...', path=datadirectory, DIALOG_PARENT=base, FILTER=['*.idl','*.*'], /must_exist)
 if (result ne '') then begin
 	FDECOMP, result, disk, dir, name, qual, version
 	filename = datadirectory + name + "." + Qual
@@ -1168,7 +1169,7 @@ END
 
 PRO chgDiffDir, base, widget
 common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
-result=dialog_pickfile(/DIRECTORY,title='Select input directory', path=defaultdirectory, DIALOG_PARENT=base)
+result=dialog_pickfile(/DIRECTORY,title='Directory with diffraction data...', path=defaultdirectory, DIALOG_PARENT=base)
 if (result ne '') then begin
     WIDGET_CONTROL, widget, SET_VALUE=result
 endif
@@ -1410,6 +1411,9 @@ CASE ev.id OF
 		'CONVERTFILESERIES': convertfileseries, stash.base, stash.log
 		'FIT2DMAC': fit2dmac, stash.base, stash.log
 		'FIT2DMACLONG': fit2dmaclong, stash.base, stash.log
+		'ID6CALIB': performID6Calibration, stash.base, stash.log, stash.ipDistanceText, stash.id6CenterText
+		'ID6CONVERT': doID6SaveData, stash.base, stash.log
+		'ID6UNCAKE':doID6Uncake, stash.base, stash.log
 		'MAUDEXPORT': maudExport, stash.base, stash.listSets, stash.log
 		'LISTSETS': changeActiveSet, stash.log, stash.listSets, active[0]
 		'MAPPLOT': mapplotActiveSet, stash.base, stash.log, stash.listSets, active[0]
@@ -1459,9 +1463,9 @@ fit2d_bttn4 = WIDGET_BUTTON(data_menu, VALUE='Convert CHI to IDL: multiple sets'
 fit2d_bttn4 = WIDGET_BUTTON(data_menu, VALUE='Convert CHI to IDL: file series', UVALUE='CONVERTFILESERIES')
 ; ID 06 menu
 id6_menu = WIDGET_BUTTON(bar, VALUE='ESRF ID06', /MENU)
-bttn1 = WIDGET_BUTTON(id6_menu, VALUE='Calibration', UVALUE='ID6CALIB')
-bttn2 = WIDGET_BUTTON(id6_menu, VALUE='Convertion to multifit', UVALUE='ID6CONVERT')
-bttn3 = WIDGET_BUTTON(id6_menu, VALUE='Uncake to tiff', UVALUE='ID6UNCAKE')
+bttn1 = WIDGET_BUTTON(id6_menu, VALUE='Calibration from tif', UVALUE='ID6CALIB')
+bttn2 = WIDGET_BUTTON(id6_menu, VALUE='Convert tif to multifit', UVALUE='ID6CONVERT')
+bttn3 = WIDGET_BUTTON(id6_menu, VALUE='Uncake tif to tif', UVALUE='ID6UNCAKE')
 ; Other menu
 dataset_menu = WIDGET_BUTTON(bar, VALUE='Current dataset', /MENU)
 plotactive = WIDGET_BUTTON(dataset_menu, VALUE='Plot 2D', UVALUE='PLOTONESET')

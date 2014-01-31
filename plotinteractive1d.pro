@@ -35,7 +35,8 @@ pro plotinteractive1D_exportgif, event
   ; fix the extension
   filters = [['*.gif'], ['GIF']]
   ; pick a filename
-  filename = DIALOG_PICKFILE(dialog_parent = (*pstate).tlb, filter=filters, /write , TITLE='Save graphics as...', path=defaultdirectory, get_path = newdefaultdir);
+  filename = DIALOG_PICKFILE(dialog_parent = (*pstate).tlb , TITLE='Save graphics as...', $ 
+    path=defaultdirectory, get_path = newdefaultdir, filter=filters, default_extension='.gif', /write, /OVERWRITE_PROMPT);
   ; if OK was pressed
   if (filename ne '') then begin
     ; export the content of the active window to gif
@@ -52,7 +53,8 @@ pro plotinteractive1D_exportjpg, event
   ; fix the extension
   filters = [['*.jpg;*.jpeg'], ['JPEG']]
   ; pick a filename
-  filename = DIALOG_PICKFILE(dialog_parent = (*pstate).tlb, filter=filters, /write , TITLE='Save graphics as...', path=defaultdirectory, get_path = newdefaultdir);
+  filename = DIALOG_PICKFILE(dialog_parent = (*pstate).tlb, TITLE='Save graphics as...', path=defaultdirectory, $
+    get_path = newdefaultdir, filter=filters, default_extension='.jpg', /write, /OVERWRITE_PROMPT);
   ; if OK was pressed
   if (filename ne '') then begin
     ; export the content of the active window to jpeg
@@ -71,7 +73,8 @@ pro plotinteractive1D_exportps, event
   ; fix the extension
   filters = [['*.ps'], ['PS']]
   ; pick a filename
-  filename = DIALOG_PICKFILE(dialog_parent = (*pstate).tlb, filter=filters, /write , TITLE='Save graphics as...', path=defaultdirectory, get_path = newdefaultdir);
+  filename = DIALOG_PICKFILE(dialog_parent = (*pstate).tlb, TITLE='Save graphics as...', path=defaultdirectory, $
+    get_path = newdefaultdir, filter=filters, default_extension='.ps', /write, /OVERWRITE_PROMPT);
   ; if OK was pressed
   if (filename ne '') then begin
     ; save current devide, set the device to postscript
@@ -97,7 +100,8 @@ pro plotinteractive1D_exportchi, event
   ; fix the extension
   filters = [['*.chi'], ['CHI']]
   ; pick a filename
-  filename = DIALOG_PICKFILE(dialog_parent = (*pstate).tlb, filter=filters, /write , TITLE='Save dataset as...', path=defaultdir, get_path = newdefaultdir);
+  filename = DIALOG_PICKFILE(dialog_parent = (*pstate).tlb, filter=filters, TITLE='Save dataset as...', $
+    path=defaultdir, get_path = newdefaultdir, filter=filters, default_extension='.chi', /write, /OVERWRITE_PROMPT);
   ; if OK was pressed
   if (filename ne '') then begin
     ; export the content of the active window to chiplot
