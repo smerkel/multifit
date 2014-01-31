@@ -35,7 +35,7 @@
 ;
 pro fitautoJCPDS, oldbase, jcpds, fitselect, pressureentry, widthentry, wfactorentry
 common rawdata, nalpha, ntheta, alpha, twotheta, data
-common experiment, wavelength, detectordistance
+common experiment, wavelength, detectordistance, experimenttype
 common plotit, def, base, draw
 common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
 ; getting parameters
@@ -136,7 +136,7 @@ end
 ;
 pro testJCPDSFit, oldbase, jcpds, fitselect, pressureentry, widthentry, wfactorentry
 common rawdata, nalpha, ntheta, alpha, twotheta, data
-common experiment, wavelength, detectordistance
+common experiment, wavelength, detectordistance, experimenttype
 common plotit, def, base, draw
 ; getting parameters
 WIDGET_CONTROL, pressureentry, GET_VALUE=pressure
@@ -255,7 +255,7 @@ end
 ;
 pro plotJCPDSData, oldbase, jcpds, fitselect, pressureentry, widthentry, wfactor
 common rawdata, nalpha, ntheta, alpha, twotheta, data
-common experiment, wavelength, detectordistance
+common experiment, wavelength, detectordistance, experimenttype
 common plotit, def, base, draw
 ; getting parameters
 WIDGET_CONTROL, pressureentry, GET_VALUE=pressure

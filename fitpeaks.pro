@@ -393,7 +393,7 @@ end
 
 pro calculateTD, include, npeaks, good, position, intensity, halfwidth, results
 common rawdata, nalpha, ntheta, alpha, twotheta, data
-common experiment, wavelength, detectordistance
+common experiment, wavelength, detectordistance, experimenttype
 ttheta = fltarr(nalpha,npeaks)
 d =  fltarr(nalpha,npeaks)
 halfW = fltarr(nalpha,npeaks)
