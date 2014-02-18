@@ -1337,29 +1337,28 @@ widget_control, dropListExp, get_value=exptypes
 select = widget_info(dropListExp, /DROPLIST_SELECT)
 if (select eq 0) then experimenttype = "General" else if (select eq 1) then experimenttype = "ESRFID06"
 logit, log, "Switching experiment type to: " + exptypes[select]
-widget_control, baseoptions, /DESTROY
-baseoptions =  WIDGET_BASE(stash.defaultBase,COLUMN=2)
-label = WIDGET_LABEL(baseoptions, VALUE='Directory with CHI or MULTIFIT data files: ', /ALIGN_LEFT, ysize=ysizeparams)
-label = WIDGET_LABEL(baseoptions, VALUE='Directory to save fits: ', /ALIGN_LEFT, ysize=ysizeparams)
-label = WIDGET_LABEL(baseoptions, VALUE='Wavelength (angstroms)', /ALIGN_LEFT, ysize=ysizeparams)
-label = WIDGET_LABEL(baseoptions, VALUE='Sample-Detector distance (mm)', /ALIGN_LEFT, ysize=ysizeparams)
+newbaseoptions =  WIDGET_BASE(stash.defaultBase,COLUMN=2)
+label = WIDGET_LABEL(newbaseoptions, VALUE='Directory with CHI or MULTIFIT data files: ', /ALIGN_LEFT, ysize=ysizeparams)
+label = WIDGET_LABEL(newbaseoptions, VALUE='Directory to save fits: ', /ALIGN_LEFT, ysize=ysizeparams)
+label = WIDGET_LABEL(newbaseoptions, VALUE='Wavelength (angstroms)', /ALIGN_LEFT, ysize=ysizeparams)
+label = WIDGET_LABEL(newbaseoptions, VALUE='Sample-Detector distance (mm)', /ALIGN_LEFT, ysize=ysizeparams)
 if (experimenttype eq "ESRFID06") then begin
-  label =  WIDGET_LABEL(baseoptions, VALUE='ID6 pixel size (microns)', /ALIGN_LEFT, ysize=ysizeparams)
-  label =  WIDGET_LABEL(baseoptions, VALUE='ID6 center (pixels)', /ALIGN_LEFT, ysize=ysizeparams)
-  label =  WIDGET_LABEL(baseoptions, VALUE='ID6 eta min (degrees)', /ALIGN_LEFT, ysize=ysizeparams)
-  label =  WIDGET_LABEL(baseoptions, VALUE='ID6 eta max (degrees)', /ALIGN_LEFT, ysize=ysizeparams)
-  label =  WIDGET_LABEL(baseoptions, VALUE='ID6 dark file', /ALIGN_LEFT, ysize=ysizeparams)
+  label =  WIDGET_LABEL(newbaseoptions, VALUE='ID6 pixel size (microns)', /ALIGN_LEFT, ysize=ysizeparams)
+  label =  WIDGET_LABEL(newbaseoptions, VALUE='ID6 center (pixels)', /ALIGN_LEFT, ysize=ysizeparams)
+  label =  WIDGET_LABEL(newbaseoptions, VALUE='ID6 eta min (degrees)', /ALIGN_LEFT, ysize=ysizeparams)
+  label =  WIDGET_LABEL(newbaseoptions, VALUE='ID6 eta max (degrees)', /ALIGN_LEFT, ysize=ysizeparams)
+  label =  WIDGET_LABEL(newbaseoptions, VALUE='ID6 dark file', /ALIGN_LEFT, ysize=ysizeparams)
 endif
-inputDirText = WIDGET_BUTTON(baseoptions, /ALIGN_LEFT, VALUE=datadirectory, XSIZE=400, SCR_YSIZE=ysizeparams, UVALUE='INPUTDIR')
-outputDirText = WIDGET_BUTTON(baseoptions, /ALIGN_LEFT, VALUE=outputdirectory, XSIZE=400, SCR_YSIZE=ysizeparams, UVALUE='OUTPUTDIR')
-waveText = WIDGET_BUTTON(baseoptions, /ALIGN_LEFT, VALUE=STRTRIM(STRING(wavelength,/PRINT),2), XSIZE=80, SCR_YSIZE=ysizeparams, UVALUE='WAVE')
-ipDistanceText = WIDGET_BUTTON(baseoptions, /ALIGN_LEFT, VALUE=STRTRIM(STRING(detectordistance,/PRINT),2), XSIZE=80, SCR_YSIZE=ysizeparams, UVALUE='DETECTORDISTANCE')
+inputDirText = WIDGET_BUTTON(newbaseoptions, /ALIGN_LEFT, VALUE=datadirectory, XSIZE=400, SCR_YSIZE=ysizeparams, UVALUE='INPUTDIR')
+outputDirText = WIDGET_BUTTON(newbaseoptions, /ALIGN_LEFT, VALUE=outputdirectory, XSIZE=400, SCR_YSIZE=ysizeparams, UVALUE='OUTPUTDIR')
+waveText = WIDGET_BUTTON(newbaseoptions, /ALIGN_LEFT, VALUE=STRTRIM(STRING(wavelength,/PRINT),2), XSIZE=80, SCR_YSIZE=ysizeparams, UVALUE='WAVE')
+ipDistanceText = WIDGET_BUTTON(newbaseoptions, /ALIGN_LEFT, VALUE=STRTRIM(STRING(detectordistance,/PRINT),2), XSIZE=80, SCR_YSIZE=ysizeparams, UVALUE='DETECTORDISTANCE')
 if (experimenttype eq "ESRFID06") then begin
-  id6PixelSizeText = WIDGET_BUTTON(baseoptions, /ALIGN_LEFT, VALUE=STRTRIM(STRING(ID6_psize,/PRINT),2), XSIZE=80, SCR_YSIZE=ysizeparams, UVALUE='ID6PIXELSIZE')
-  id6CenterText = WIDGET_BUTTON(baseoptions, /ALIGN_LEFT, VALUE=STRTRIM(STRING(ID6_center,/PRINT),2), XSIZE=80, SCR_YSIZE=ysizeparams, UVALUE='ID6CENTER')
-  id6EtaMinText = WIDGET_BUTTON(baseoptions, /ALIGN_LEFT, VALUE=STRTRIM(STRING(ID6_etamin,/PRINT),2), XSIZE=80, SCR_YSIZE=ysizeparams, UVALUE='ID6ETAMIN')
-  id6EtaMaxText = WIDGET_BUTTON(baseoptions, /ALIGN_LEFT, VALUE=STRTRIM(STRING(ID6_etamax,/PRINT),2), XSIZE=80, SCR_YSIZE=ysizeparams, UVALUE='ID6ETAMAX')
-  id6DarkText = WIDGET_BUTTON(baseoptions, /ALIGN_LEFT, VALUE=ID6_dark, XSIZE=400, SCR_YSIZE=ysizeparams, UVALUE='ID6DARK')
+  id6PixelSizeText = WIDGET_BUTTON(newbaseoptions, /ALIGN_LEFT, VALUE=STRTRIM(STRING(ID6_psize,/PRINT),2), XSIZE=80, SCR_YSIZE=ysizeparams, UVALUE='ID6PIXELSIZE')
+  id6CenterText = WIDGET_BUTTON(newbaseoptions, /ALIGN_LEFT, VALUE=STRTRIM(STRING(ID6_center,/PRINT),2), XSIZE=80, SCR_YSIZE=ysizeparams, UVALUE='ID6CENTER')
+  id6EtaMinText = WIDGET_BUTTON(newbaseoptions, /ALIGN_LEFT, VALUE=STRTRIM(STRING(ID6_etamin,/PRINT),2), XSIZE=80, SCR_YSIZE=ysizeparams, UVALUE='ID6ETAMIN')
+  id6EtaMaxText = WIDGET_BUTTON(newbaseoptions, /ALIGN_LEFT, VALUE=STRTRIM(STRING(ID6_etamax,/PRINT),2), XSIZE=80, SCR_YSIZE=ysizeparams, UVALUE='ID6ETAMAX')
+  id6DarkText = WIDGET_BUTTON(newbaseoptions, /ALIGN_LEFT, VALUE=ID6_dark, XSIZE=400, SCR_YSIZE=ysizeparams, UVALUE='ID6DARK')
 endif else begin
   id6PixelSizeText = 0
   id6CenterText = 0
@@ -1367,7 +1366,8 @@ endif else begin
   id6EtaMaxText = 0
   id6DarkText = 0
 endelse
-stash.baseoptions = baseoptions
+widget_control, baseoptions, /DESTROY
+stash.baseoptions = newbaseoptions
 stash.inputDirText = inputDirText
 stash.outputDirText = outputDirText
 stash.waveText = waveText
