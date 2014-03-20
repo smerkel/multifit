@@ -143,7 +143,7 @@ if (OS ne 'WIN') then begin
 endif else begin
   titlefont = 'helvetica*bold*14'
   boldfont = 'helvetica*bold*12'
-  mainfont = 'helvetica*12'
+  mainfont = 'helvetica*14'
   ; calculating conversion between font size in and number of pixels
   ; need for some user interface stuff
   scale = !D.X_PX_CM ; how many pixels in a cm
@@ -1329,7 +1329,7 @@ common experiment, wavelength, detectordistance, experimenttype
 common esrfid6, ID6_psize, ID6_center, ID6_etamin, ID6_etamax, ID6_dark
 common fonts, titlefont, boldfont, mainfont, avFontHeight
 
-ysizeparams=fix(1.2*avFontHeight)
+ysizeparams=fix(1.6*avFontHeight)
 baseoptions = stash.baseoptions
 dropListExp = stash.dropListExp
 log = stash.log
@@ -1337,28 +1337,40 @@ widget_control, dropListExp, get_value=exptypes
 select = widget_info(dropListExp, /DROPLIST_SELECT)
 if (select eq 0) then experimenttype = "General" else if (select eq 1) then experimenttype = "ESRFID06"
 logit, log, "Switching experiment type to: " + exptypes[select]
-newbaseoptions =  WIDGET_BASE(stash.defaultBase,COLUMN=2)
-label = WIDGET_LABEL(newbaseoptions, VALUE='Directory with CHI or MULTIFIT data files: ', /ALIGN_LEFT, ysize=ysizeparams)
-label = WIDGET_LABEL(newbaseoptions, VALUE='Directory to save fits: ', /ALIGN_LEFT, ysize=ysizeparams)
-label = WIDGET_LABEL(newbaseoptions, VALUE='Wavelength (angstroms)', /ALIGN_LEFT, ysize=ysizeparams)
-label = WIDGET_LABEL(newbaseoptions, VALUE='Sample-Detector distance (mm)', /ALIGN_LEFT, ysize=ysizeparams)
+newbaseoptions =  WIDGET_BASE(stash.defaultBase,ROW=9)
+
+newbaseoptionsrow1 = WIDGET_BASE(newbaseoptions,COLUMN=2);
+newbaseoptionsrow2 = WIDGET_BASE(newbaseoptions,COLUMN=2);
+newbaseoptionsrow3 = WIDGET_BASE(newbaseoptions,COLUMN=2);
+newbaseoptionsrow4 = WIDGET_BASE(newbaseoptions,COLUMN=2);
+newbaseoptionsrow5 = WIDGET_BASE(newbaseoptions,COLUMN=2);
+newbaseoptionsrow6 = WIDGET_BASE(newbaseoptions,COLUMN=2);
+newbaseoptionsrow7 = WIDGET_BASE(newbaseoptions,COLUMN=2);
+newbaseoptionsrow8 = WIDGET_BASE(newbaseoptions,COLUMN=2);
+newbaseoptionsrow9 = WIDGET_BASE(newbaseoptions,COLUMN=2);
+
+; Note: SCR_YSIZE=ysizeparams or ysize = ysizeparams: this screws up the displays on Windows systems...
+label = WIDGET_LABEL(newbaseoptionsrow1, VALUE='Directory with CHI or MULTIFIT data files: ', /ALIGN_LEFT)
+label = WIDGET_LABEL(newbaseoptionsrow2, VALUE='Directory to save fits: ', /ALIGN_LEFT)
+label = WIDGET_LABEL(newbaseoptionsrow3, VALUE='Wavelength (angstroms)', /ALIGN_LEFT)
+label = WIDGET_LABEL(newbaseoptionsrow4, VALUE='Sample-Detector distance (mm)', /ALIGN_LEFT)
 if (experimenttype eq "ESRFID06") then begin
-  label =  WIDGET_LABEL(newbaseoptions, VALUE='ID6 pixel size (microns)', /ALIGN_LEFT, ysize=ysizeparams)
-  label =  WIDGET_LABEL(newbaseoptions, VALUE='ID6 center (pixels)', /ALIGN_LEFT, ysize=ysizeparams)
-  label =  WIDGET_LABEL(newbaseoptions, VALUE='ID6 eta min (degrees)', /ALIGN_LEFT, ysize=ysizeparams)
-  label =  WIDGET_LABEL(newbaseoptions, VALUE='ID6 eta max (degrees)', /ALIGN_LEFT, ysize=ysizeparams)
-  label =  WIDGET_LABEL(newbaseoptions, VALUE='ID6 dark file', /ALIGN_LEFT, ysize=ysizeparams)
+  label =  WIDGET_LABEL(newbaseoptionsrow5, VALUE='ID6 pixel size (microns)', /ALIGN_LEFT)
+  label =  WIDGET_LABEL(newbaseoptionsrow6, VALUE='ID6 center (pixels)', /ALIGN_LEFT)
+  label =  WIDGET_LABEL(newbaseoptionsrow7, VALUE='ID6 eta min (degrees)', /ALIGN_LEFT)
+  label =  WIDGET_LABEL(newbaseoptionsrow8, VALUE='ID6 eta max (degrees)', /ALIGN_LEFT)
+  label =  WIDGET_LABEL(newbaseoptionsrow9, VALUE='ID6 dark file', /ALIGN_LEFT)
 endif
-inputDirText = WIDGET_BUTTON(newbaseoptions, /ALIGN_LEFT, VALUE=datadirectory, XSIZE=400, SCR_YSIZE=ysizeparams, UVALUE='INPUTDIR')
-outputDirText = WIDGET_BUTTON(newbaseoptions, /ALIGN_LEFT, VALUE=outputdirectory, XSIZE=400, SCR_YSIZE=ysizeparams, UVALUE='OUTPUTDIR')
-waveText = WIDGET_BUTTON(newbaseoptions, /ALIGN_LEFT, VALUE=STRTRIM(STRING(wavelength,/PRINT),2), XSIZE=80, SCR_YSIZE=ysizeparams, UVALUE='WAVE')
-ipDistanceText = WIDGET_BUTTON(newbaseoptions, /ALIGN_LEFT, VALUE=STRTRIM(STRING(detectordistance,/PRINT),2), XSIZE=80, SCR_YSIZE=ysizeparams, UVALUE='DETECTORDISTANCE')
+inputDirText = WIDGET_BUTTON(newbaseoptionsrow1, /ALIGN_LEFT, VALUE=datadirectory, XSIZE=400,  UVALUE='INPUTDIR')
+outputDirText = WIDGET_BUTTON(newbaseoptionsrow2, /ALIGN_LEFT, VALUE=outputdirectory, XSIZE=400,  UVALUE='OUTPUTDIR')
+waveText = WIDGET_BUTTON(newbaseoptionsrow3, /ALIGN_LEFT, VALUE=STRTRIM(STRING(wavelength,/PRINT),2), XSIZE=80,  UVALUE='WAVE')
+ipDistanceText = WIDGET_BUTTON(newbaseoptionsrow4, /ALIGN_LEFT, VALUE=STRTRIM(STRING(detectordistance,/PRINT),2), XSIZE=80, UVALUE='DETECTORDISTANCE')
 if (experimenttype eq "ESRFID06") then begin
-  id6PixelSizeText = WIDGET_BUTTON(newbaseoptions, /ALIGN_LEFT, VALUE=STRTRIM(STRING(ID6_psize,/PRINT),2), XSIZE=80, SCR_YSIZE=ysizeparams, UVALUE='ID6PIXELSIZE')
-  id6CenterText = WIDGET_BUTTON(newbaseoptions, /ALIGN_LEFT, VALUE=STRTRIM(STRING(ID6_center,/PRINT),2), XSIZE=80, SCR_YSIZE=ysizeparams, UVALUE='ID6CENTER')
-  id6EtaMinText = WIDGET_BUTTON(newbaseoptions, /ALIGN_LEFT, VALUE=STRTRIM(STRING(ID6_etamin,/PRINT),2), XSIZE=80, SCR_YSIZE=ysizeparams, UVALUE='ID6ETAMIN')
-  id6EtaMaxText = WIDGET_BUTTON(newbaseoptions, /ALIGN_LEFT, VALUE=STRTRIM(STRING(ID6_etamax,/PRINT),2), XSIZE=80, SCR_YSIZE=ysizeparams, UVALUE='ID6ETAMAX')
-  id6DarkText = WIDGET_BUTTON(newbaseoptions, /ALIGN_LEFT, VALUE=ID6_dark, XSIZE=400, SCR_YSIZE=ysizeparams, UVALUE='ID6DARK')
+  id6PixelSizeText = WIDGET_BUTTON(newbaseoptionsrow5, /ALIGN_LEFT, VALUE=STRTRIM(STRING(ID6_psize,/PRINT),2), XSIZE=80,  UVALUE='ID6PIXELSIZE')
+  id6CenterText = WIDGET_BUTTON(newbaseoptionsrow6, /ALIGN_LEFT, VALUE=STRTRIM(STRING(ID6_center,/PRINT),2), XSIZE=80,  UVALUE='ID6CENTER')
+  id6EtaMinText = WIDGET_BUTTON(newbaseoptionsrow7, /ALIGN_LEFT, VALUE=STRTRIM(STRING(ID6_etamin,/PRINT),2), XSIZE=80,  UVALUE='ID6ETAMIN')
+  id6EtaMaxText = WIDGET_BUTTON(newbaseoptionsrow8, /ALIGN_LEFT, VALUE=STRTRIM(STRING(ID6_etamax,/PRINT),2), XSIZE=80,  UVALUE='ID6ETAMAX')
+  id6DarkText = WIDGET_BUTTON(newbaseoptionsrow9, /ALIGN_LEFT, VALUE=ID6_dark, XSIZE=400, SCR_YSIZE=ysizeparams, UVALUE='ID6DARK')
 endif else begin
   id6PixelSizeText = 0
   id6CenterText = 0
@@ -1489,7 +1501,7 @@ about_bttn1 = WIDGET_BUTTON(about_menu, VALUE='About Multifit', UVALUE='ABOUT')
 ; top container
 top = WIDGET_BASE(base,/ROW)
 ; display default parameters
-ysizeparams=fix(1.2*avFontHeight)
+ysizeparams=fix(1.6*avFontHeight)
 defaultBase =  WIDGET_BASE(top,/ROW, FRAME=1, /ALIGN_CENTER)
 thisbase =  WIDGET_BASE(defaultBase,/COLUMN, /ALIGN_CENTER)
 label = WIDGET_LABEL(thisbase, VALUE='Experiment type', /ALIGN_CENTER)
@@ -1497,28 +1509,38 @@ listexp = ['General', 'ESRF ID06']
 dropListExp = WIDGET_DROPLIST(thisbase, VALUE=listexp, UVALUE='CHANGEEXPTYPE')
 if (experimenttype eq "General") then select=0 else if (experimenttype eq "ESRFID06") then select=1 
 widget_control, dropListExp,  SET_DROPLIST_SELECT = select
-baseoptions =  WIDGET_BASE(defaultBase,COLUMN=2)
-label = WIDGET_LABEL(baseoptions, VALUE='Directory with CHI or MULTIFIT data files: ', /ALIGN_LEFT, ysize=ysizeparams)
-label = WIDGET_LABEL(baseoptions, VALUE='Directory to save fits: ', /ALIGN_LEFT, ysize=ysizeparams)
-label = WIDGET_LABEL(baseoptions, VALUE='Wavelength (angstroms)', /ALIGN_LEFT, ysize=ysizeparams)
-label = WIDGET_LABEL(baseoptions, VALUE='Sample-Detector distance (mm)', /ALIGN_LEFT, ysize=ysizeparams)
+baseoptions =  WIDGET_BASE(defaultBase, row=9)
+baseoptionsrow1 = WIDGET_BASE(baseoptions,COLUMN=2);
+baseoptionsrow2 = WIDGET_BASE(baseoptions,COLUMN=2);
+baseoptionsrow3 = WIDGET_BASE(baseoptions,COLUMN=2);
+baseoptionsrow4 = WIDGET_BASE(baseoptions,COLUMN=2);
+baseoptionsrow5 = WIDGET_BASE(baseoptions,COLUMN=2);
+baseoptionsrow6 = WIDGET_BASE(baseoptions,COLUMN=2);
+baseoptionsrow7 = WIDGET_BASE(baseoptions,COLUMN=2);
+baseoptionsrow8 = WIDGET_BASE(baseoptions,COLUMN=2);
+baseoptionsrow9 = WIDGET_BASE(baseoptions,COLUMN=2);
+; Note: SCR_YSIZE=ysizeparams or ysize = ysizeparams: this screws up the displays on Windows systems...
+label1 = WIDGET_LABEL(baseoptionsrow1 , VALUE='Directory with CHI or MULTIFIT data files: ', /ALIGN_LEFT)
+label2 = WIDGET_LABEL(baseoptionsrow2 , VALUE='Directory to save fits: ', /ALIGN_LEFT)
+label3 = WIDGET_LABEL(baseoptionsrow3 , VALUE='Wavelength (angstroms)', /ALIGN_LEFT)
+label4 = WIDGET_LABEL(baseoptionsrow4 , VALUE='Sample-Detector distance (mm)', /ALIGN_LEFT)
 if (experimenttype eq "ESRFID06") then begin
-  label =  WIDGET_LABEL(baseoptions, VALUE='ID6 pixel size (microns)', /ALIGN_LEFT, ysize=ysizeparams)
-  label =  WIDGET_LABEL(baseoptions, VALUE='ID6 center (pixels)', /ALIGN_LEFT, ysize=ysizeparams)
-  label =  WIDGET_LABEL(baseoptions, VALUE='ID6 eta min (degrees)', /ALIGN_LEFT, ysize=ysizeparams)
-  label =  WIDGET_LABEL(baseoptions, VALUE='ID6 eta max (degrees)', /ALIGN_LEFT, ysize=ysizeparams)
-  label =  WIDGET_LABEL(baseoptions, VALUE='ID6 dark file', /ALIGN_LEFT, ysize=ysizeparams)
+  label =  WIDGET_LABEL(baseoptionsrow5 , VALUE='ID6 pixel size (microns)', /ALIGN_LEFT)
+  label =  WIDGET_LABEL(baseoptionsrow6 , VALUE='ID6 center (pixels)', /ALIGN_LEFT)
+  label =  WIDGET_LABEL(baseoptionsrow7 , VALUE='ID6 eta min (degrees)', /ALIGN_LEFT)
+  label =  WIDGET_LABEL(baseoptionsrow8 , VALUE='ID6 eta max (degrees)', /ALIGN_LEFT)
+  label =  WIDGET_LABEL(baseoptionsrow9 , VALUE='ID6 dark file', /ALIGN_LEFT)
 endif
-inputDirText = WIDGET_BUTTON(baseoptions, /ALIGN_LEFT, VALUE=datadirectory, XSIZE=400, SCR_YSIZE=ysizeparams, UVALUE='INPUTDIR')
-outputDirText = WIDGET_BUTTON(baseoptions, /ALIGN_LEFT, VALUE=outputdirectory, XSIZE=400, SCR_YSIZE=ysizeparams, UVALUE='OUTPUTDIR')
-waveText = WIDGET_BUTTON(baseoptions, /ALIGN_LEFT, VALUE=STRTRIM(STRING(wavelength,/PRINT),2), XSIZE=80, SCR_YSIZE=ysizeparams, UVALUE='WAVE')
-ipDistanceText = WIDGET_BUTTON(baseoptions, /ALIGN_LEFT, VALUE=STRTRIM(STRING(detectordistance,/PRINT),2), XSIZE=80, SCR_YSIZE=ysizeparams, UVALUE='DETECTORDISTANCE')
+inputDirText = WIDGET_BUTTON(baseoptionsrow1, /ALIGN_LEFT, VALUE=datadirectory, XSIZE=400, UVALUE='INPUTDIR') 
+outputDirText = WIDGET_BUTTON(baseoptionsrow2, /ALIGN_LEFT, VALUE=outputdirectory, XSIZE=400,  UVALUE='OUTPUTDIR') 
+waveText = WIDGET_BUTTON(baseoptionsrow3, /ALIGN_LEFT, VALUE=STRTRIM(STRING(wavelength,/PRINT),2), XSIZE=80,  UVALUE='WAVE') 
+ipDistanceText = WIDGET_BUTTON(baseoptionsrow4, /ALIGN_LEFT, VALUE=STRTRIM(STRING(detectordistance,/PRINT),2), XSIZE=80,  UVALUE='DETECTORDISTANCE') 
 if (experimenttype eq "ESRFID06") then begin
-  id6PixelSizeText = WIDGET_BUTTON(baseoptions, /ALIGN_LEFT, VALUE=STRTRIM(STRING(ID6_psize,/PRINT),2), XSIZE=80, SCR_YSIZE=ysizeparams, UVALUE='ID6PIXELSIZE')
-  id6CenterText = WIDGET_BUTTON(baseoptions, /ALIGN_LEFT, VALUE=STRTRIM(STRING(ID6_center,/PRINT),2), XSIZE=80, SCR_YSIZE=ysizeparams, UVALUE='ID6CENTER')
-  id6EtaMinText = WIDGET_BUTTON(baseoptions, /ALIGN_LEFT, VALUE=STRTRIM(STRING(ID6_etamin,/PRINT),2), XSIZE=80, SCR_YSIZE=ysizeparams, UVALUE='ID6ETAMIN')
-  id6EtaMaxText = WIDGET_BUTTON(baseoptions, /ALIGN_LEFT, VALUE=STRTRIM(STRING(ID6_etamax,/PRINT),2), XSIZE=80, SCR_YSIZE=ysizeparams, UVALUE='ID6ETAMAX')
-  id6DarkText = WIDGET_BUTTON(baseoptions, /ALIGN_LEFT, VALUE=ID6_dark, XSIZE=400, SCR_YSIZE=ysizeparams, UVALUE='ID6DARK')
+  id6PixelSizeText = WIDGET_BUTTON(baseoptionsrow5, /ALIGN_LEFT, VALUE=STRTRIM(STRING(ID6_psize,/PRINT),2), XSIZE=80,  UVALUE='ID6PIXELSIZE')
+  id6CenterText = WIDGET_BUTTON(baseoptionsrow6, /ALIGN_LEFT, VALUE=STRTRIM(STRING(ID6_center,/PRINT),2), XSIZE=80, UVALUE='ID6CENTER')
+  id6EtaMinText = WIDGET_BUTTON(baseoptionsrow7, /ALIGN_LEFT, VALUE=STRTRIM(STRING(ID6_etamin,/PRINT),2), XSIZE=80,  UVALUE='ID6ETAMIN')
+  id6EtaMaxText = WIDGET_BUTTON(baseoptionsrow8, /ALIGN_LEFT, VALUE=STRTRIM(STRING(ID6_etamax,/PRINT),2), XSIZE=80, UVALUE='ID6ETAMAX') 
+  id6DarkText = WIDGET_BUTTON(baseoptionsrow9, /ALIGN_LEFT, VALUE=ID6_dark, XSIZE=400, UVALUE='ID6DARK') 
 endif else begin
   id6PixelSizeText = 0
   id6CenterText = 0
@@ -1535,9 +1557,11 @@ mapplot = WIDGET_BUTTON(listBase, VALUE='Mapplot', UVALUE='MAPPLOT')
 plotactive = WIDGET_BUTTON(listBase, VALUE='Plot', UVALUE='PLOTONESET')
 log = WIDGET_TEXT(bottom, XSIZE=60, YSIZE=22, /ALIGN_CENTER, /EDITABLE, /WRAP, /SCROLL)
 
-stash = {base: base, log:log, baseoptions: baseoptions, dropListExp: dropListExp, inputDirText:inputDirText, outputDirText:outputDirText, waveText:waveText, ipDistanceText: ipDistanceText, $
+stash = {base: base, log:log, baseoptions: baseoptions, $
+  dropListExp: dropListExp, inputDirText:inputDirText, outputDirText:outputDirText, waveText:waveText, ipDistanceText: ipDistanceText, $
   id6PixelSizeText: id6PixelSizeText, id6CenterText:id6CenterText, id6EtaMinText:id6EtaMinText, id6EtaMaxText:id6EtaMaxText, id6DarkText:id6DarkText, $
-  listSets: listSets, defaultBase:defaultBase, bottom:bottom, listBase:listBase, listLa:listLa, mapplot:mapplot, plotactive:plotactive}
+  listSets: listSets, defaultBase:defaultBase, bottom:bottom, listBase:listBase, listLa:listLa, mapplot:mapplot, plotactive:plotactive }
+
 WIDGET_CONTROL, base, SET_UVALUE=stash
 WIDGET_CONTROL, base, /REALIZE
 resizebase, base, stash
