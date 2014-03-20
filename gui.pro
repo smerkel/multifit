@@ -169,7 +169,7 @@ common fonts, titlefont, boldfont, mainfont, avFontHeight
 basedialog = WIDGET_BASE(/COLUMN, /MODAL, GROUP_LEADER=base, Title='About Multifit')
 infobase =  WIDGET_BASE(basedialog,/COLUMN)
 la = WIDGET_LABEL(infobase, VALUE='Multifit', /ALIGN_LEFT, font=titlefont)
-la = WIDGET_LABEL(infobase, VALUE='Multifit v5.0, Revision 75, Compiled February 19 2014', /ALIGN_LEFT)
+la = WIDGET_LABEL(infobase, VALUE='Multifit v5.0, Revision 82, Compiled March 20 2014', /ALIGN_LEFT)
 la = WIDGET_LABEL(infobase, VALUE='', /ALIGN_LEFT)
 la = WIDGET_LABEL(infobase, VALUE='Multifit is a software to process multiple diffraction images', /ALIGN_LEFT)
 la = WIDGET_LABEL(infobase, VALUE='Copyright S. Merkel, Universite Lille 1, France', /ALIGN_LEFT)
@@ -234,7 +234,7 @@ if (filename ne '') then begin
 endif
 END
 
-PRO readparams, base, log, listSets
+PRO readparams, base, log, listSets, stash
 common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
 common esrfid6, ID6_psize, ID6_center, ID6_etamin, ID6_etamax, ID6_dark
 common experiment, wavelength, detectordistance, experimenttype
@@ -257,7 +257,7 @@ if (filename ne '') then begin
 			'ID6_psize': ID6_psize = float(words[1])
 			'ID6_center': ID6_center = float(words[1])
 			'ID6_etamin': ID6_etamin = float(words[1])
-			'ID6_etamax': ID6_etamin = float(words[1])
+			'ID6_etamax': ID6_etamax = float(words[1])
 			'ID6_dark': ID6_dark = words[1]
 			else:
 		endcase
@@ -266,6 +266,7 @@ if (filename ne '') then begin
   logit, log, "Parameters read from " + filename
 	FDECOMP, filename, disk, dir, name, qual, version
 	defaultdirectory = disk+dir
+	chgExperimentType, stash
 endif
 end
 
@@ -1407,7 +1408,7 @@ CASE ev.id OF
 		'INPUTDIR': chgInputDir, stash.base, stash.log, stash.inputDirText
 		'OUTPUTDIR': chgOutputDir, stash.base, stash.log, stash.outputDirText
 		'SAVEPARAM': saveparams, stash.base, stash.log
-		'READPARAM': readparams, stash.base, stash.log, stash.listSets
+		'READPARAM': readparams, stash.base, stash.log, stash.listSets, stash
 		'REMOVESLICE': removeSlice, stash.base
 		'WAVE': chgWavelength, stash.base, stash.log, stash.waveText
 		'DETECTORDISTANCE': chgDetectorDistance, stash.base, stash.log, stash.ipDistanceText

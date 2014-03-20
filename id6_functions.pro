@@ -91,6 +91,8 @@ d = fltarr(n_elements(h))
 twotheta = fltarr(n_elements(h))
 d = a/sqrt(h*h+k*k+l*l)
 twotheta = 2.*asin(wavelength/(2.*d))
+print, d
+print, twotheta
   
 ; Loop to optimize detector distance and beam center based on calibrant peak positions
 ; We do it three times, it's plenty
@@ -103,6 +105,7 @@ for loop=0,2 do begin
     ; Look for all LaB6 peaks based on the first estimate
     for i=0,(n_elements(h)-1) do begin
       test = pixel[i]
+      
       ; test = getIndex(twotheta[i],x,n_elements(x))
       ; print, twotheta[i], test, n_elements(x)
       ;plot, rebin[test-hwidth:test+hwidth], color=0, background=255
