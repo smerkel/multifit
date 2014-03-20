@@ -1350,16 +1350,16 @@ newbaseoptionsrow8 = WIDGET_BASE(newbaseoptions,COLUMN=2);
 newbaseoptionsrow9 = WIDGET_BASE(newbaseoptions,COLUMN=2);
 
 ; Note: SCR_YSIZE=ysizeparams or ysize = ysizeparams: this screws up the displays on Windows systems...
-label = WIDGET_LABEL(newbaseoptionsrow1, VALUE='Directory with CHI or MULTIFIT data files: ', /ALIGN_LEFT)
-label = WIDGET_LABEL(newbaseoptionsrow2, VALUE='Directory to save fits: ', /ALIGN_LEFT)
-label = WIDGET_LABEL(newbaseoptionsrow3, VALUE='Wavelength (angstroms)', /ALIGN_LEFT)
-label = WIDGET_LABEL(newbaseoptionsrow4, VALUE='Sample-Detector distance (mm)', /ALIGN_LEFT)
+label = WIDGET_LABEL(newbaseoptionsrow1, VALUE='Directory with CHI or MULTIFIT data files: ', /ALIGN_LEFT, XSIZE=250)
+label = WIDGET_LABEL(newbaseoptionsrow2, VALUE='Directory to save fits: ', /ALIGN_LEFT, XSIZE=250)
+label = WIDGET_LABEL(newbaseoptionsrow3, VALUE='Wavelength (angstroms)', /ALIGN_LEFT, XSIZE=250)
+label = WIDGET_LABEL(newbaseoptionsrow4, VALUE='Sample-Detector distance (mm)', /ALIGN_LEFT, XSIZE=250)
 if (experimenttype eq "ESRFID06") then begin
-  label =  WIDGET_LABEL(newbaseoptionsrow5, VALUE='ID6 pixel size (microns)', /ALIGN_LEFT)
-  label =  WIDGET_LABEL(newbaseoptionsrow6, VALUE='ID6 center (pixels)', /ALIGN_LEFT)
-  label =  WIDGET_LABEL(newbaseoptionsrow7, VALUE='ID6 eta min (degrees)', /ALIGN_LEFT)
-  label =  WIDGET_LABEL(newbaseoptionsrow8, VALUE='ID6 eta max (degrees)', /ALIGN_LEFT)
-  label =  WIDGET_LABEL(newbaseoptionsrow9, VALUE='ID6 dark file', /ALIGN_LEFT)
+  label =  WIDGET_LABEL(newbaseoptionsrow5, VALUE='ID6 pixel size (microns)', /ALIGN_LEFT, XSIZE=250)
+  label =  WIDGET_LABEL(newbaseoptionsrow6, VALUE='ID6 center (pixels)', /ALIGN_LEFT, XSIZE=250)
+  label =  WIDGET_LABEL(newbaseoptionsrow7, VALUE='ID6 eta min (degrees)', /ALIGN_LEFT, XSIZE=250)
+  label =  WIDGET_LABEL(newbaseoptionsrow8, VALUE='ID6 eta max (degrees)', /ALIGN_LEFT, XSIZE=250)
+  label =  WIDGET_LABEL(newbaseoptionsrow9, VALUE='ID6 dark file', /ALIGN_LEFT, XSIZE=250)
 endif
 inputDirText = WIDGET_BUTTON(newbaseoptionsrow1, /ALIGN_LEFT, VALUE=datadirectory, XSIZE=400,  UVALUE='INPUTDIR')
 outputDirText = WIDGET_BUTTON(newbaseoptionsrow2, /ALIGN_LEFT, VALUE=outputdirectory, XSIZE=400,  UVALUE='OUTPUTDIR')
@@ -1520,16 +1520,16 @@ baseoptionsrow7 = WIDGET_BASE(baseoptions,COLUMN=2);
 baseoptionsrow8 = WIDGET_BASE(baseoptions,COLUMN=2);
 baseoptionsrow9 = WIDGET_BASE(baseoptions,COLUMN=2);
 ; Note: SCR_YSIZE=ysizeparams or ysize = ysizeparams: this screws up the displays on Windows systems...
-label1 = WIDGET_LABEL(baseoptionsrow1 , VALUE='Directory with CHI or MULTIFIT data files: ', /ALIGN_LEFT)
-label2 = WIDGET_LABEL(baseoptionsrow2 , VALUE='Directory to save fits: ', /ALIGN_LEFT)
-label3 = WIDGET_LABEL(baseoptionsrow3 , VALUE='Wavelength (angstroms)', /ALIGN_LEFT)
-label4 = WIDGET_LABEL(baseoptionsrow4 , VALUE='Sample-Detector distance (mm)', /ALIGN_LEFT)
+label1 = WIDGET_LABEL(baseoptionsrow1 , VALUE='Directory with CHI or MULTIFIT data files: ', /ALIGN_LEFT, XSIZE=250 )
+label2 = WIDGET_LABEL(baseoptionsrow2 , VALUE='Directory to save fits: ', /ALIGN_LEFT, XSIZE=250)
+label3 = WIDGET_LABEL(baseoptionsrow3 , VALUE='Wavelength (angstroms)', /ALIGN_LEFT, XSIZE=250 )
+label4 = WIDGET_LABEL(baseoptionsrow4 , VALUE='Sample-Detector distance (mm)', /ALIGN_LEFT, XSIZE=250 )
 if (experimenttype eq "ESRFID06") then begin
-  label =  WIDGET_LABEL(baseoptionsrow5 , VALUE='ID6 pixel size (microns)', /ALIGN_LEFT)
-  label =  WIDGET_LABEL(baseoptionsrow6 , VALUE='ID6 center (pixels)', /ALIGN_LEFT)
-  label =  WIDGET_LABEL(baseoptionsrow7 , VALUE='ID6 eta min (degrees)', /ALIGN_LEFT)
-  label =  WIDGET_LABEL(baseoptionsrow8 , VALUE='ID6 eta max (degrees)', /ALIGN_LEFT)
-  label =  WIDGET_LABEL(baseoptionsrow9 , VALUE='ID6 dark file', /ALIGN_LEFT)
+  label =  WIDGET_LABEL(baseoptionsrow5 , VALUE='ID6 pixel size (microns)', /ALIGN_LEFT, XSIZE=250 )
+  label =  WIDGET_LABEL(baseoptionsrow6 , VALUE='ID6 center (pixels)', /ALIGN_LEFT, XSIZE=250 )
+  label =  WIDGET_LABEL(baseoptionsrow7 , VALUE='ID6 eta min (degrees)', /ALIGN_LEFT, XSIZE=250 )
+  label =  WIDGET_LABEL(baseoptionsrow8 , VALUE='ID6 eta max (degrees)', /ALIGN_LEFT, XSIZE=250 )
+  label =  WIDGET_LABEL(baseoptionsrow9 , VALUE='ID6 dark file', /ALIGN_LEFT, XSIZE=250 )
 endif
 inputDirText = WIDGET_BUTTON(baseoptionsrow1, /ALIGN_LEFT, VALUE=datadirectory, XSIZE=400, UVALUE='INPUTDIR') 
 outputDirText = WIDGET_BUTTON(baseoptionsrow2, /ALIGN_LEFT, VALUE=outputdirectory, XSIZE=400,  UVALUE='OUTPUTDIR') 
