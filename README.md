@@ -10,7 +10,9 @@ and intensities, and propagate the results to other azimuth and images.
 Polydefix is for analyzes of deformation experiments. Starting from 
 output files created in Multifit or other packages, it will extract elastic 
 lattice strains, evaluate sample pressure and differential stress,
-and prepare input files for further texture analysis..
+and prepare input files for further texture analysis.
+
+Multifit/Polydefix homepage is at http://merkel.zoneo.net/Multifit-Polydefix/
 
 ## About Multifit
 
