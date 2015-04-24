@@ -1,5 +1,9 @@
 # Multifit
 
+© Sébastien Merkel, Université Lille 1, France
+Since June 2011, polydefix is open source software, licensed under the GPL Version 2. 
+Multifit/Polydefix homepage is at http://merkel.zoneo.net/Multifit-Polydefix/
+
 ## Multifit/Polydefix
 
 Multifit/Polydefix is an open-source IDL software package for an efficient 
@@ -12,7 +16,6 @@ output files created in Multifit or other packages, it will extract elastic
 lattice strains, evaluate sample pressure and differential stress,
 and prepare input files for further texture analysis.
 
-Multifit/Polydefix homepage is at http://merkel.zoneo.net/Multifit-Polydefix/
 
 ## About Multifit
 
