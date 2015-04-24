@@ -1,8 +1,8 @@
 # Multifit
 
 © Sébastien Merkel, Université Lille 1, France
-Since June 2011, polydefix is open source software, licensed under the GPL Version 2. 
-Multifit/Polydefix homepage is at http://merkel.zoneo.net/Multifit-Polydefix/
+  Since June 2011, polydefix is open source software, licensed under the GPL Version 2. 
+  Multifit/Polydefix homepage is at http://merkel.zoneo.net/Multifit-Polydefix/
 
 ## Multifit/Polydefix
 
