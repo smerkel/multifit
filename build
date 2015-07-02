@@ -64,6 +64,9 @@
 ; Resolve all routines
 RESOLVE_ALL, /CONTINUE_ON_ERROR
 
+CALDAT, SYSTIME(), month, day, year
+PRINT, SYSTIME(), format = '(C(CMOI2.2, "/", CDI2.2, "/", CYI))'
+
 ; Create the project save file
-SAVE, /ROUTINES, FILENAME='multifit.sav', /VERBOSE
+SAVE, /ROUTINES, FILENAME='multifit.sav', /VERBOSE, DESCRIPTION=SYSTIME()
 
