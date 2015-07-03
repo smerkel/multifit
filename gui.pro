@@ -158,6 +158,7 @@ WIDGET_CONTROL,  DEFAULT_FONT=mainfont
 readdefault
 end
 
+
 ; ****************************************** about window **************
 
 PRO aboutWindow_event, ev
@@ -172,7 +173,6 @@ la = WIDGET_TEXT(infobase, XSIZE=80, YSIZE=20, /ALIGN_LEFT, /EDITABLE, /WRAP)
 ccr = STRING(13B) ; Carriage Return
 clf = STRING([10B]) ; line feed
 text = "Multifit" + ccr + clf
-text += "Compiled July 3nd 2015" + ccr + clf
 text += "Homepage: http://merkel.zoneo.net/Multifit-Polydefix" + ccr + clf + ccr + clf
 text += "Multifit/Polydefix is an open-source IDL software package for an efficient processing of diffraction data obtained in deformation apparatuses at synchrotron beamlines. It is a compound of three different packages that can be run independently. Multifit is dedicated to the fitting of two-dimensional (2-D) diffraction data. It will extract d-spacings, intensities, and half-widths for peaks of a given material, for multiple azimuthal slices and over multiple diffraction images." + ccr + clf + ccr + clf
 text += "Copyright S. Merkel, N. Hilairet Universite Lille 1, France" + ccr + clf
@@ -1448,6 +1448,7 @@ CASE ev.id OF
 		'PLOTFIT': plotResultsWindow, stash.base
 		'MODELONEIMAGE': createModelWindow, stash.base
 		'ABOUT': aboutWindow, stash.base
+		'CHANGES': changesWindow, stash.base
 		'NOTAVAILABLE': tmp = DIALOG_MESSAGE("This function is not implemented yet!", /ERROR)
 		'FORBIDDEN': tmp = DIALOG_MESSAGE("You need to register", /ERROR)
 		'CHANGEEXPTYPE': chgExperimentType, stash
@@ -1506,6 +1507,7 @@ fitres_bttn3 = WIDGET_BUTTON(fit_menu, VALUE='Plot Results', UVALUE='PLOTFIT', /
 ; About menu
 about_menu = WIDGET_BUTTON(bar, VALUE='About...', /MENU, /ALIGN_RIGHT) 
 about_bttn1 = WIDGET_BUTTON(about_menu, VALUE='About Multifit', UVALUE='ABOUT')
+about_bttn1 = WIDGET_BUTTON(about_menu, VALUE='Recent changes', UVALUE='CHANGES')
 ; top container
 top = WIDGET_BASE(base,/ROW)
 ; display default parameters
