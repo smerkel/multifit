@@ -23,7 +23,8 @@
 .RESET_SESSION
 
 ; Compile project files                                                                                                                  
-.COMPILE 'plotinteractive1d.pro'                                                                                                                                          
+.COMPILE 'plotinteractive1d.pro'      
+.COMPILE 'changesWindow.pro'                                                                                                                                    
 .COMPILE 'intformat.pro'  
 .COMPILE 'getindex.pro' 
 .COMPILE 'minmaxval.pro'       
