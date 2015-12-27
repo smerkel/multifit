@@ -199,3 +199,57 @@ date = systime(0)
 return, 1
 BADINPUT: return, !ERR_STRING
 end
+
+; *******************************************************************
+;
+; subroutine READ_multichi
+;   to read the content of a serie .chi files created by fit2d multichi output
+;   for instance, file_00001.chi file_00002.chi ....
+; send the base file name, start azimuth,end azimuth, and number of slices
+;   for instance READ_multichi, 'file_', 0, 360, 72
+;
+; *******************************************************************
+
+function read_multichi, name, startAz, endAz, nAz, log
+common rawdata, nalpha, ntheta, alpha, twotheta, data
+common datainfo, filenames, alphastart, alphaend, intervalle, date
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
+ON_IOERROR, BADINPUT
+nalpha = nAz
+intervalle = 1.0*(endAz-startAz)/nAz
+alphastart = startAz + intervalle/2.
+alphaend = endAz - intervalle/2.
+fileindex = intformat(1,5);
+file = datadirectory + name + "_" + fileindex + extension
+file = STRCOMPRESS(file, /REMOVE_ALL)
+fileinfo = FILE_TEST(file)
+if (fileinfo ne 1) then begin
+    return, "File " + file + " does not exist!"
+endif
+ntheta = ndata(file)
+data = fltarr(nalpha,ntheta)
+twotheta = fltarr(ntheta)
+alpha = fltarr(nalpha)
+tmp =  readdata(file)
+data(0,*) = tmp(1,*)
+twotheta = tmp(0,*)
+alpha(0) = alphastart
+for i = 1,nAz  do begin
+    alpha(i) = alpha(i-1)+intervalle
+    ii = intformat(i+1,5);
+    file = datadirectory + name + "_" + ii + extension
+    file = STRCOMPRESS(file, /REMOVE_ALL)
+    ; logit, log, "Reading " + file
+    fileinfo = FILE_TEST(file)
+    if (fileinfo ne 1) then begin
+        return, "File " + file + " does not exist!"
+    endif
+    tmp =  readdata(file)
+    data(i,*) = tmp(1,*)
+endfor
+                                ; saving basic informations about the data
+filenames = datadirectory + name
+date = systime(0)
+return, 1
+BADINPUT: return, !ERR_STRING
+end

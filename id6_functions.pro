@@ -23,6 +23,7 @@
 ;
 ; Generate the eta scale, based on number of pixiels in image height and eta ranges
 ; image: 2D image data
+; This function is not used. We rely on fit2d
 ; 
 function ID6_make_eta_scale, image
 common esrfid6, ID6_psize, ID6_center, ID6_etamin, ID6_etamax, ID6_dark
@@ -35,6 +36,7 @@ end
 ;
 ; Generate the two theta scale, based on number of pixels in image length and calibration parameters
 ; image: 2D image data
+; This function is not used. We rely on fit2d
 ;
 function ID6_make_twotheta_scale, image
 common esrfid6, ID6_psize, ID6_center, ID6_etamin, ID6_etamax, ID6_dark
@@ -48,6 +50,7 @@ end
 ;
 ; Returns data from a tiff file, with the dark removed
 ; file: tiff file
+; This function is not used. We rely on fit2d
 ;
 function ID6_load, file
 common esrfid6, ID6_psize, ID6_center, ID6_etamin, ID6_etamax, ID6_dark
@@ -65,6 +68,7 @@ end
 ; First guess
 ;   - detector distance : 1040 mm
 ;   - center at pixel 1500
+; This function is not used. We rely on fit2d
 ;
 pro ID6_fitcalibrant, image, log
 common esrfid6, ID6_psize, ID6_center, ID6_etamin, ID6_etamax, ID6_dark
@@ -156,6 +160,7 @@ end
 ; Function to convert ID6 data into regular diffraction rings
 ; Send data and name of outputfile
 ; Will be saved in tiff
+; This function is not used. We rely on fit2d
 ;
 pro ID6_uncake, image, outputfile
 common esrfid6, ID6_psize, ID6_center, ID6_etamin, ID6_etamax, ID6_dark
@@ -192,6 +197,7 @@ endfor
 write_tiff, outputfile, newdata, /LONG
 end
 
+; This function is not used. We rely on fit2d
 function ID6_savedata, data, file
   common esrfid6, ID6_psize, ID6_center, ID6_etamin, ID6_etamax, ID6_dark
   ON_IOERROR, IOERROR
@@ -228,6 +234,7 @@ end
 ; - log: log window
 ; - ipDistanceText: field to update with detector distance
 ; - id6CenterText: field to update with beam center
+; This function is not used. We rely on fit2d
 ;
 pro performID6Calibration, base, log, ipDistanceText, id6CenterText
 common esrfid6, ID6_psize, ID6_center, ID6_etamin, ID6_etamax, ID6_dark
@@ -253,6 +260,7 @@ end
 ; Send
 ; - base: parent window
 ; - log: log window
+; This function is not used. We rely on fit2d
 ; 
 pro doID6Uncake, base, log
 common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
@@ -287,6 +295,7 @@ end
 ; Send
 ; - base: parent window
 ; - log: log window
+; This function is not used. We rely on fit2d
 ;
 pro doID6SaveData, base, log
 common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory

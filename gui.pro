@@ -501,6 +501,66 @@ END
 
 ; ****************************************** READ AND CONVERT CHI FILES **************
 
+; Convert one series of chi files created by Fit2d multi-chi output
+PRO convertonemultichi_event, ev
+WIDGET_CONTROL, ev.TOP, GET_UVALUE=stash
+WIDGET_CONTROL, ev.ID, GET_UVALUE=uval
+log=stash.log
+if (uval eq 'OK') then begin
+    WIDGET_CONTROL, stash.startiText, GET_VALUE=starti
+    WIDGET_CONTROL, stash.endiText, GET_VALUE=endi
+    WIDGET_CONTROL, stash.slicesText, GET_VALUE=slices
+    WIDGET_CONTROL, stash.nameText, GET_VALUE=basename
+    logit, log, "Read series of text files: " + basename + " with angles from " + starti + " to " + endi + " with " +  slices + " slices"
+    startiFlt = FLOAT(starti)
+    endiFlt = FLOAT(endi)
+    slicesInt = FIX(FLOAT(slices))
+    result = read_multichi(basename, startiFlt, endiFlt, slicesInt, log)
+    if (result eq 1) then begin
+        logit, log, "Read series of text files: success"
+	outputname = basename + ".idl"
+	logit, log, "Saving data in MULTIFIT format into " + outputname
+	res = savedata(outputname)
+	if (res eq 1) then begin
+		logit, log, "Save data in MULTIFIT format to " + outputname + ": success"
+		WIDGET_CONTROL, ev.TOP, /DESTROY
+	endif else begin
+	        tmp = DIALOG_MESSAGE(res, /ERROR)
+	        logit, log, "Save data in MULTIFIT format: failed"
+	endelse
+    endif else begin
+        tmp = DIALOG_MESSAGE(result, /ERROR)
+        logit, log, "Read series of text files: failed"
+    endelse
+endif else begin
+    logit, log, "Read series of text files: canceled"
+    WIDGET_CONTROL, ev.TOP, /DESTROY
+endelse
+END
+
+; Convert one series of chi files created by Fit2d multi-chi output
+PRO convertonemultichi, base, log
+common inputinfo, string
+basedialog = WIDGET_BASE(/COLUMN, /MODAL, GROUP_LEADER=base)
+nameBase =  WIDGET_BASE(basedialog,COLUMN=2, /GRID_LAYOUT, FRAME=1)
+nameLa = WIDGET_LABEL(nameBase, VALUE='Base for name of chi files', /ALIGN_LEFT)
+startiLa = WIDGET_LABEL(nameBase, VALUE='First azimuth angle', /ALIGN_LEFT)
+intervalLa = WIDGET_LABEL(nameBase, VALUE='Last azimuth angle', /ALIGN_LEFT)
+intervalLa = WIDGET_LABEL(nameBase, VALUE='Number of slices', /ALIGN_LEFT)
+nameText = WIDGET_TEXT(nameBase, XSIZE=10, /EDITABLE)
+startiText = WIDGET_TEXT(nameBase, XSIZE=5, /EDITABLE)
+endiText = WIDGET_TEXT(nameBase, XSIZE=5, /EDITABLE)
+slicesText = WIDGET_TEXT(nameBase, XSIZE=5, /EDITABLE)
+extButtons = WIDGET_BASE(basedialog,/ROW, /GRID_LAYOUT, /ALIGN_CENTER)
+ok = WIDGET_BUTTON(extButtons, VALUE='Ok', UVALUE='OK', xsize=80)
+cancel = WIDGET_BUTTON(extButtons, VALUE='Cancel', UVALUE='CANCEL', xsize=80)
+stash = {log:log, nameText:nameText, slicesText:slicesText, startiText:startiText, endiText:endiText}
+WIDGET_CONTROL, basedialog, SET_UVALUE=stash
+WIDGET_CONTROL, basedialog, /REALIZE
+XMANAGER, 'convertonemultichi', basedialog
+END
+
+
 PRO convertonechi_event, ev
 WIDGET_CONTROL, ev.TOP, GET_UVALUE=stash
 WIDGET_CONTROL, ev.ID, GET_UVALUE=uval
@@ -1330,7 +1390,10 @@ PRO exitit, widget
     WIDGET_CONTROL, widget, /DESTROY
 end
 
-
+; This function is not used
+; it was meant to be used for ESRD ID6 data but fit2d was adapted for ID6
+; no need to multiply the work
+; I also do not want to keep track of changes on id6 detectors
 pro chgExperimentType, stash
 common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
 common experiment, wavelength, detectordistance, experimenttype
@@ -1419,16 +1482,17 @@ CASE ev.id OF
 		'REMOVESLICE': removeSlice, stash.base
 		'WAVE': chgWavelength, stash.base, stash.log, stash.waveText
 		'DETECTORDISTANCE': chgDetectorDistance, stash.base, stash.log, stash.ipDistanceText
-		'ID6PIXELSIZE': chgID6PixelSize, stash.base, stash.log, stash.id6PixelSizeText
-		'ID6CENTER': chgID6Center, stash.base, stash.log, stash.id6CenterText
-		'ID6ETAMIN': chgID6EtaMin, stash.base, stash.log, stash.id6EtaMinText
-		'ID6ETAMAX': chgID6EtaMax, stash.base, stash.log, stash.id6EtaMaxText
-		'ID6DARK': chgID6Dark, stash.base, stash.log, stash.id6DarkText
+;		'ID6PIXELSIZE': chgID6PixelSize, stash.base, stash.log, stash.id6PixelSizeText
+;		'ID6CENTER': chgID6Center, stash.base, stash.log, stash.id6CenterText
+;		'ID6ETAMIN': chgID6EtaMin, stash.base, stash.log, stash.id6EtaMinText
+;		'ID6ETAMAX': chgID6EtaMax, stash.base, stash.log, stash.id6EtaMaxText
+;		'ID6DARK': chgID6Dark, stash.base, stash.log, stash.id6DarkText
 		'ONEIDL': oneInputFile, stash.listSets, stash.log
 		'MULTIPLEIDL': multipleInputFiles, stash.base, stash.listSets, stash.log
 		'CONVERTONECHI': convertonechi, stash.base, stash.log
 		'CONVERTMULTIPLECHI': convertmultiplechi, stash.base, stash.log
 		'CONVERTFILESERIES': convertfileseries, stash.base, stash.log
+		'CONVERTONEIMAGEMULTICHI': convertonemultichi, stash.base, stash.log
 		'FIT2DMAC': fit2dmac, stash.base, stash.log
 		'FIT2DMACLONG': fit2dmaclong, stash.base, stash.log
 		'ID6CALIB': performID6Calibration, stash.base, stash.log, stash.ipDistanceText, stash.id6CenterText
@@ -1451,7 +1515,7 @@ CASE ev.id OF
 		'CHANGES': changesWindow, stash.base
 		'NOTAVAILABLE': tmp = DIALOG_MESSAGE("This function is not implemented yet!", /ERROR)
 		'FORBIDDEN': tmp = DIALOG_MESSAGE("You need to register", /ERROR)
-		'CHANGEEXPTYPE': chgExperimentType, stash
+;		'CHANGEEXPTYPE': chgExperimentType, stash
 		'EXIT': exitit, ev.top
 		else:
 		ENDCASE
@@ -1462,7 +1526,7 @@ END
 PRO gui
 common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
 common experiment, wavelength, detectordistance, experimenttype
-common esrfid6, ID6_psize, ID6_center, ID6_etamin, ID6_etamax, ID6_dark
+; common esrfid6, ID6_psize, ID6_center, ID6_etamin, ID6_etamax, ID6_dark
 common fonts, titlefont, boldfont, mainfont, avFontHeight
 ; default values
 load_defaults_startup
@@ -1477,16 +1541,18 @@ file_bttn2 = WIDGET_BUTTON(file_menu, VALUE='Multiple input files', UVALUE='MULT
 file_bttn5 = WIDGET_BUTTON(file_menu, VALUE='Exit', UVALUE='EXIT', /SEPARATOR)
 ; Fit2d interaction menu
 data_menu = WIDGET_BUTTON(bar, VALUE='Fit2d', /MENU) 
-fit2d_bttn1 = WIDGET_BUTTON(data_menu, VALUE='Create Fit2d macro for one file', UVALUE='FIT2DMAC')
-fit2d_bttn2 = WIDGET_BUTTON(data_menu, VALUE='Create Fit2d macro for multiple files', UVALUE='FIT2DMACLONG')
-fit2d_bttn3 = WIDGET_BUTTON(data_menu, VALUE='Convert CHI to IDL: 1 set', UVALUE='CONVERTONECHI')
-fit2d_bttn4 = WIDGET_BUTTON(data_menu, VALUE='Convert CHI to IDL: multiple sets', UVALUE='CONVERTMULTIPLECHI')
-fit2d_bttn4 = WIDGET_BUTTON(data_menu, VALUE='Convert CHI to IDL: file series', UVALUE='CONVERTFILESERIES')
-; ID 06 menu
-id6_menu = WIDGET_BUTTON(bar, VALUE='ESRF ID06', /MENU)
-bttn1 = WIDGET_BUTTON(id6_menu, VALUE='Calibration from tif', UVALUE='ID6CALIB')
-bttn2 = WIDGET_BUTTON(id6_menu, VALUE='Convert tif to multifit', UVALUE='ID6CONVERT')
-bttn3 = WIDGET_BUTTON(id6_menu, VALUE='Uncake tif to tif', UVALUE='ID6UNCAKE')
+fit2d_bttn1 = WIDGET_BUTTON(data_menu, VALUE='Create Multifit Fit2d macro for one file', UVALUE='FIT2DMAC')
+fit2d_bttn2 = WIDGET_BUTTON(data_menu, VALUE='Create Multifit Fit2d macro for multiple files', UVALUE='FIT2DMACLONG')
+fit2d_bttn3 = WIDGET_BUTTON(data_menu, VALUE='Convert CHI created by Multifit macro to IDL: 1 set', UVALUE='CONVERTONECHI')
+fit2d_bttn4 = WIDGET_BUTTON(data_menu, VALUE='Convert CHI created by Multifit macro to IDL: multiple sets', UVALUE='CONVERTMULTIPLECHI')
+fit2d_bttn4 = WIDGET_BUTTON(data_menu, VALUE='Convert CHI created by Multifit macro to IDL: file series', UVALUE='CONVERTFILESERIES')
+fit2d_bttn5 = WIDGET_BUTTON(data_menu, VALUE='Convert CHI from Multi-CHI: one image', UVALUE='CONVERTONEIMAGEMULTICHI', /SEPARATOR)
+fit2d_bttn6 = WIDGET_BUTTON(data_menu, VALUE='Convert CHI from Multi-CHI: file series', UVALUE='CONVERTFILESERIESMULTICHI')
+; ID 06 menu, removed. We rely on fit2d
+; id6_menu = WIDGET_BUTTON(bar, VALUE='ESRF ID06', /MENU)
+; bttn1 = WIDGET_BUTTON(id6_menu, VALUE='Calibration from tif', UVALUE='ID6CALIB')
+; bttn2 = WIDGET_BUTTON(id6_menu, VALUE='Convert tif to multifit', UVALUE='ID6CONVERT')
+; bttn3 = WIDGET_BUTTON(id6_menu, VALUE='Uncake tif to tif', UVALUE='ID6UNCAKE')
 ; Other menu
 dataset_menu = WIDGET_BUTTON(bar, VALUE='Current dataset', /MENU)
 plotactive = WIDGET_BUTTON(dataset_menu, VALUE='Plot 2D', UVALUE='PLOTONESET')
@@ -1514,11 +1580,11 @@ top = WIDGET_BASE(base,/ROW)
 ysizeparams=fix(1.6*avFontHeight)
 defaultBase =  WIDGET_BASE(top,/ROW, FRAME=1, /ALIGN_CENTER)
 thisbase =  WIDGET_BASE(defaultBase,/COLUMN, /ALIGN_CENTER)
-label = WIDGET_LABEL(thisbase, VALUE='Experiment type', /ALIGN_CENTER)
-listexp = ['General', 'ESRF ID06']
-dropListExp = WIDGET_DROPLIST(thisbase, VALUE=listexp, UVALUE='CHANGEEXPTYPE')
-if (experimenttype eq "General") then select=0 else if (experimenttype eq "ESRFID06") then select=1 
-widget_control, dropListExp,  SET_DROPLIST_SELECT = select
+; label = WIDGET_LABEL(thisbase, VALUE='Experiment type', /ALIGN_CENTER)
+; listexp = ['General', 'ESRF ID06']
+; dropListExp = WIDGET_DROPLIST(thisbase, VALUE=listexp, UVALUE='CHANGEEXPTYPE')
+; if (experimenttype eq "General") then select=0 else if (experimenttype eq "ESRFID06") then select=1 
+; widget_control, dropListExp,  SET_DROPLIST_SELECT = select
 baseoptions =  WIDGET_BASE(defaultBase, row=9)
 baseoptionsrow1 = WIDGET_BASE(baseoptions,COLUMN=2);
 baseoptionsrow2 = WIDGET_BASE(baseoptions,COLUMN=2);
@@ -1534,30 +1600,30 @@ label1 = WIDGET_LABEL(baseoptionsrow1 , VALUE='Directory with CHI or MULTIFIT da
 label2 = WIDGET_LABEL(baseoptionsrow2 , VALUE='Directory to save fits: ', /ALIGN_LEFT, XSIZE=250)
 label3 = WIDGET_LABEL(baseoptionsrow3 , VALUE='Wavelength (angstroms)', /ALIGN_LEFT, XSIZE=250 )
 label4 = WIDGET_LABEL(baseoptionsrow4 , VALUE='Sample-Detector distance (mm)', /ALIGN_LEFT, XSIZE=250 )
-if (experimenttype eq "ESRFID06") then begin
-  label =  WIDGET_LABEL(baseoptionsrow5 , VALUE='ID6 pixel size (microns)', /ALIGN_LEFT, XSIZE=250 )
-  label =  WIDGET_LABEL(baseoptionsrow6 , VALUE='ID6 center (pixels)', /ALIGN_LEFT, XSIZE=250 )
-  label =  WIDGET_LABEL(baseoptionsrow7 , VALUE='ID6 eta min (degrees)', /ALIGN_LEFT, XSIZE=250 )
-  label =  WIDGET_LABEL(baseoptionsrow8 , VALUE='ID6 eta max (degrees)', /ALIGN_LEFT, XSIZE=250 )
-  label =  WIDGET_LABEL(baseoptionsrow9 , VALUE='ID6 dark file', /ALIGN_LEFT, XSIZE=250 )
-endif
+; if (experimenttype eq "ESRFID06") then begin
+;  label =  WIDGET_LABEL(baseoptionsrow5 , VALUE='ID6 pixel size (microns)', /ALIGN_LEFT, XSIZE=250 )
+;  label =  WIDGET_LABEL(baseoptionsrow6 , VALUE='ID6 center (pixels)', /ALIGN_LEFT, XSIZE=250 )
+;  label =  WIDGET_LABEL(baseoptionsrow7 , VALUE='ID6 eta min (degrees)', /ALIGN_LEFT, XSIZE=250 )
+;  label =  WIDGET_LABEL(baseoptionsrow8 , VALUE='ID6 eta max (degrees)', /ALIGN_LEFT, XSIZE=250 )
+;  label =  WIDGET_LABEL(baseoptionsrow9 , VALUE='ID6 dark file', /ALIGN_LEFT, XSIZE=250 )
+;endif
 inputDirText = WIDGET_BUTTON(baseoptionsrow1, /ALIGN_LEFT, VALUE=datadirectory, XSIZE=400, UVALUE='INPUTDIR') 
 outputDirText = WIDGET_BUTTON(baseoptionsrow2, /ALIGN_LEFT, VALUE=outputdirectory, XSIZE=400,  UVALUE='OUTPUTDIR') 
 waveText = WIDGET_BUTTON(baseoptionsrow3, /ALIGN_LEFT, VALUE=STRTRIM(STRING(wavelength,/PRINT),2), XSIZE=80,  UVALUE='WAVE') 
 ipDistanceText = WIDGET_BUTTON(baseoptionsrow4, /ALIGN_LEFT, VALUE=STRTRIM(STRING(detectordistance,/PRINT),2), XSIZE=80,  UVALUE='DETECTORDISTANCE') 
-if (experimenttype eq "ESRFID06") then begin
-  id6PixelSizeText = WIDGET_BUTTON(baseoptionsrow5, /ALIGN_LEFT, VALUE=STRTRIM(STRING(ID6_psize,/PRINT),2), XSIZE=80,  UVALUE='ID6PIXELSIZE')
-  id6CenterText = WIDGET_BUTTON(baseoptionsrow6, /ALIGN_LEFT, VALUE=STRTRIM(STRING(ID6_center,/PRINT),2), XSIZE=80, UVALUE='ID6CENTER')
-  id6EtaMinText = WIDGET_BUTTON(baseoptionsrow7, /ALIGN_LEFT, VALUE=STRTRIM(STRING(ID6_etamin,/PRINT),2), XSIZE=80,  UVALUE='ID6ETAMIN')
-  id6EtaMaxText = WIDGET_BUTTON(baseoptionsrow8, /ALIGN_LEFT, VALUE=STRTRIM(STRING(ID6_etamax,/PRINT),2), XSIZE=80, UVALUE='ID6ETAMAX') 
-  id6DarkText = WIDGET_BUTTON(baseoptionsrow9, /ALIGN_LEFT, VALUE=ID6_dark, XSIZE=400, UVALUE='ID6DARK') 
-endif else begin
-  id6PixelSizeText = 0
-  id6CenterText = 0 
-  id6EtaMinText = 0
-  id6EtaMaxText = 0 
-  id6DarkText = 0
-endelse
+; if (experimenttype eq "ESRFID06") then begin
+;  id6PixelSizeText = WIDGET_BUTTON(baseoptionsrow5, /ALIGN_LEFT, VALUE=STRTRIM(STRING(ID6_psize,/PRINT),2), XSIZE=80,  UVALUE='ID6PIXELSIZE')
+;  id6CenterText = WIDGET_BUTTON(baseoptionsrow6, /ALIGN_LEFT, VALUE=STRTRIM(STRING(ID6_center,/PRINT),2), XSIZE=80, UVALUE='ID6CENTER')
+;  id6EtaMinText = WIDGET_BUTTON(baseoptionsrow7, /ALIGN_LEFT, VALUE=STRTRIM(STRING(ID6_etamin,/PRINT),2), XSIZE=80,  UVALUE='ID6ETAMIN')
+;  id6EtaMaxText = WIDGET_BUTTON(baseoptionsrow8, /ALIGN_LEFT, VALUE=STRTRIM(STRING(ID6_etamax,/PRINT),2), XSIZE=80, UVALUE='ID6ETAMAX') 
+;  id6DarkText = WIDGET_BUTTON(baseoptionsrow9, /ALIGN_LEFT, VALUE=ID6_dark, XSIZE=400, UVALUE='ID6DARK') 
+; endif else begin
+;  id6PixelSizeText = 0
+;  id6CenterText = 0 
+;  id6EtaMinText = 0
+;  id6EtaMaxText = 0 
+;  id6DarkText = 0
+; endelse
 ; List datasets and logwindow
 bottom =  WIDGET_BASE(base,/ROW)
 listBase =  WIDGET_BASE(bottom,/COLUMN, FRAME=1)
@@ -1567,9 +1633,13 @@ mapplot = WIDGET_BUTTON(listBase, VALUE='Mapplot', UVALUE='MAPPLOT')
 plotactive = WIDGET_BUTTON(listBase, VALUE='Plot', UVALUE='PLOTONESET')
 log = WIDGET_TEXT(bottom, XSIZE=60, YSIZE=22, /ALIGN_CENTER, /EDITABLE, /WRAP, /SCROLL)
 
+; stash = {base: base, log:log, baseoptions: baseoptions, $
+;  dropListExp: dropListExp, inputDirText:inputDirText, outputDirText:outputDirText, waveText:waveText, ipDistanceText: ipDistanceText, $
+;  id6PixelSizeText: id6PixelSizeText, id6CenterText:id6CenterText, id6EtaMinText:id6EtaMinText, id6EtaMaxText:id6EtaMaxText, id6DarkText:id6DarkText, $
+;  listSets: listSets, defaultBase:defaultBase, bottom:bottom, listBase:listBase, listLa:listLa, mapplot:mapplot, plotactive:plotactive }
+
 stash = {base: base, log:log, baseoptions: baseoptions, $
-  dropListExp: dropListExp, inputDirText:inputDirText, outputDirText:outputDirText, waveText:waveText, ipDistanceText: ipDistanceText, $
-  id6PixelSizeText: id6PixelSizeText, id6CenterText:id6CenterText, id6EtaMinText:id6EtaMinText, id6EtaMaxText:id6EtaMaxText, id6DarkText:id6DarkText, $
+  inputDirText:inputDirText, outputDirText:outputDirText, waveText:waveText, ipDistanceText: ipDistanceText, $
   listSets: listSets, defaultBase:defaultBase, bottom:bottom, listBase:listBase, listLa:listLa, mapplot:mapplot, plotactive:plotactive }
 
 WIDGET_CONTROL, base, SET_UVALUE=stash
