@@ -30,13 +30,29 @@ PRO plotit, stash
 		tmp = DIALOG_MESSAGE('Select at least one spectrum!', /ERROR)
 		return
 	endif
-	;stash = {base:base, listID: listID, stretchBut:stretchBut, stretchVa:stretchVa, $
-	 ; legendeBut:legendeBut, stackBut:stackBut}
+	
+	; Set up CATCH error handler for conversion issues
+	Catch, theError
+	IF theError NE 0 THEN BEGIN
+	  Catch, /Cancel
+	  bad_io:
+	    tmp = DIALOG_MESSAGE('Some numbers are not correct in your settings', /ERROR)
+	    return
+	ENDIF
+	; Set up file I/O error handling.
+	ON_IOError, bad_io
+	
 	separate_Y = WIDGET_INFO(stash.stretchBut, /BUTTON_SET)
-	WIDGET_CONTROL, stash.stretchVa, GET_VALUE=separation
+	WIDGET_CONTROL, stash.stretchVa, GET_VALUE=sep
+	separation = float(sep[0])
 	addlegend = WIDGET_INFO(stash.legendeBut, /BUTTON_SET)
 	stack = WIDGET_INFO(stash.stackBut, /BUTTON_SET)
 	base = stash.base
+	rangeSet = WIDGET_INFO(stash.thetaBut, /BUTTON_SET)
+	WIDGET_CONTROL, stash.thetaMinVa, GET_VALUE=sep
+	tthetamin = float(sep[0])
+	WIDGET_CONTROL, stash.thetaMaxVa, GET_VALUE=sep
+	tthetamax = float(sep[0])
 	
 	if (stack eq 1) then nplots = 1 else nplots=n_elements(toplot)
 	xdata = twotheta
@@ -46,9 +62,9 @@ PRO plotit, stash
 	if (stack eq 0) then begin
 	 offset = 0.
    for i=0,nplots-1 do begin
-    if ((i gt 0) and (separate_Y eq 1)) then offset = offset + 1.0*float(separation[0])
-      ydata[i,*] = data[toplot[i],*] + offset
-      leg[i] = alpha[toplot[i]]
+    if ((i gt 0) and (separate_Y eq 1)) then offset = offset + 1.0*separation
+    ydata[i,*] = data[toplot[i],*] + offset
+    leg[i] = alpha[toplot[i]]
    endfor
   endif else begin
    ydata[0,*] = data[toplot[0],*]
@@ -93,19 +109,19 @@ PRO plotWindow, parent
 	top = WIDGET_BASE(base,/ROW)
 	; display default parameters
 	dataBase =  WIDGET_BASE(top,/COLUMN, FRAME=1)
-	alphaminLabel = 'Delta min: ' + STRTRIM(STRING(alphastart,/PRINT),1)
+	alphaminLabel = 'Min azimuth: ' + STRTRIM(STRING(alphastart,/PRINT),1)
 	alphaminLa = WIDGET_LABEL(dataBase, VALUE=alphaminLabel, /ALIGN_LEFT)
-	alphamaxLabel = 'Delta max: ' + STRTRIM(STRING(alphaend,/PRINT),1)
+	alphamaxLabel = 'Max azimuth: ' + STRTRIM(STRING(alphaend,/PRINT),1)
 	alphamaxLa = WIDGET_LABEL(dataBase, VALUE=alphamaxLabel, /ALIGN_LEFT)
 	intervalLabel = 'Interval: ' + STRTRIM(STRING(intervalle,/PRINT),1)
 	intervalLa = WIDGET_LABEL(dataBase, VALUE=intervalLabel, /ALIGN_LEFT)
 	
-	; list of delta values
+	; list of azimuth values
 	listBase =  WIDGET_BASE(top,/COLUMN, FRAME=1)
 	alphaText = strarr(nalpha)
 	alphaU = intarr(nalpha)
 	for i=0, nalpha[0]-1 do begin
-		alphaText(i) = 'delta = ' + STRTRIM(STRING(alpha(i),/PRINT))
+		alphaText(i) = 'Az = ' + STRTRIM(STRING(alpha(i),/PRINT))
 		alphaU(i) = i
 	endfor
 	listID = Widget_List(listBase, VALUE=alphaText, UVALUE='LISTDELTA', YSIZE=20, /MULTIPLE)
@@ -117,7 +133,7 @@ PRO plotWindow, parent
 	stretchCh = Widget_Base(stretchBase, /NonExclusive)
 	stretchBut = Widget_Button(stretchCh, Value='Y-Separation', UVALUE='DUMMY')
 	Widget_Control, stretchBut, Set_Button=0
-	stretchVa = WIDGET_TEXT(stretchBase, VALUE='100',/ALIGN_LEFT, XSIZE=10)
+	stretchVa = WIDGET_TEXT(stretchBase, VALUE='100',/ALIGN_LEFT, XSIZE=10, /EDITABLE)
 	; legende
 	legendeBase = WIDGET_BASE(optBase,/ROW)
 	legendeCh = Widget_Base(legendeBase, /NonExclusive)
@@ -129,20 +145,22 @@ PRO plotWindow, parent
 	stackBut = Widget_Button(stackCh, Value='Stack datasets', UVALUE='DUMMY')
 	Widget_Control, stackBut, Set_Button=0
 	; range in 2theta
-	; thetaBase = WIDGET_BASE(optBase,/ROW)
-	; tlb = Widget_Base(thetaBase, /NonExclusive)
-	; thetaBut = Widget_Button(tlb, Value='2theta range', UVALUE='THETA')
-	; Widget_Control, thetaBut, Set_Button=0
-	; thetaMinVa = WIDGET_TEXT(thetaBase, VALUE='0',/ALIGN_LEFT, XSIZE=10)
-	; thetarangeLa = WIDGET_LABEL(thetaBase, VALUE='to', /ALIGN_LEFT)
-	; thetaMaxVa = WIDGET_TEXT(thetaBase, VALUE='20',/ALIGN_LEFT, XSIZE=10)
+	mintt = strtrim(string(min(twotheta)),2)
+	maxtt = strtrim(string(max(twotheta)),2)
+	thetaBase = WIDGET_BASE(optBase,/ROW)
+	tlb = Widget_Base(thetaBase, /NonExclusive)
+	thetaBut = Widget_Button(tlb, Value='2theta range', UVALUE='THETA')
+	Widget_Control, thetaBut, Set_Button=0
+	thetaMinVa = WIDGET_TEXT(thetaBase, VALUE=mintt,/ALIGN_LEFT, XSIZE=10, /EDITABLE)
+	thetarangeLa = WIDGET_LABEL(thetaBase, VALUE='to', /ALIGN_LEFT)
+	thetaMaxVa = WIDGET_TEXT(thetaBase, VALUE=maxtt,/ALIGN_LEFT, XSIZE=10, /EDITABLE)
 	; ACTION BUTTONS
 	butBase = WIDGET_BASE(base,/ROW, /ALIGN_CENTER)
 	plotBut = WIDGET_BUTTON(butBase, VALUE='Plot', UVALUE='PLOT')
 	closeBut = WIDGET_BUTTON(butBase, VALUE='Close', UVALUE='EXIT')
 	; Create an anonymous structure to hold widget IDs
 	stash = {base:base, listID: listID, stretchBut:stretchBut, stretchVa:stretchVa, $
-			legendeBut:legendeBut, stackBut:stackBut} 
+			legendeBut:legendeBut, stackBut:stackBut, thetaBut:thetaBut, thetaMinVa:thetaMinVa, thetaMaxVa:thetaMaxVa} 
 	WIDGET_CONTROL, base, SET_UVALUE=stash
 	WIDGET_CONTROL, base, /REALIZE
 	XMANAGER, 'plotWindow', base
