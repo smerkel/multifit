@@ -539,6 +539,7 @@ endif else begin
 endelse
 END
 
+
 ; Convert one series of chi files created by Fit2d multi-chi output
 PRO convertonemultichi, base, log
 common inputinfo, string
@@ -560,6 +561,83 @@ WIDGET_CONTROL, basedialog, SET_UVALUE=stash
 WIDGET_CONTROL, basedialog, /REALIZE
 XMANAGER, 'convertonemultichi', basedialog
 END
+
+
+; Convert series of chi files created by Fit2d multi-chi output for a whole load of images
+PRO converfileseriesmultichi_event, ev
+WIDGET_CONTROL, ev.TOP, GET_UVALUE=stash
+WIDGET_CONTROL, ev.ID, GET_UVALUE=uval
+log=stash.log
+if (uval eq 'OK') then begin
+    WIDGET_CONTROL, stash.startiText, GET_VALUE=starti
+    WIDGET_CONTROL, stash.endiText, GET_VALUE=endi
+    WIDGET_CONTROL, stash.fimageText, GET_VALUE=firstimage
+    WIDGET_CONTROL, stash.limageText, GET_VALUE=lastimage
+    WIDGET_CONTROL, stash.slicesText, GET_VALUE=slices
+    WIDGET_CONTROL, stash.nameText, GET_VALUE=basename
+    logit, log, "Read series of images created with multi-chi ouput: " + basename + ", image " + firstimage + " to " + lastimage + " with angles from " + starti + " to " + endi + " with " +  slices + " slices"
+    startiFlt = FLOAT(starti)
+    endiFlt = FLOAT(endi)
+    slicesInt = FIX(FLOAT(slices))
+    fimage = FIX(FLOAT(firstimage[0]))
+    limage = FIX(FLOAT(lastimage[0]))
+    ; print, slicesInt, typename(slicesInt), n_elements(slicesInt)
+    noclose = 0
+    for  i = fimage,limage do begin
+		file = basename + "_" + intformat(i,3)
+		result = read_multichi(file, startiFlt, endiFlt, slicesInt[0], log)
+		if (result eq 1) then begin
+			logit, log, "Read chi files data for " + file
+			outputname = file + ".idl"
+			logit, log, "Saving data in MULTIFIT format into " + outputname
+			res = savedata(outputname)
+			if (res eq 1) then begin
+				logit, log, "Save data in MULTIFIT format to " + outputname + ": success"
+			endif else begin
+				tmp = DIALOG_MESSAGE(res, /ERROR)
+				logit, log, "Save data in MULTIFIT format: failed"
+				noclose = 1
+			endelse
+		endif else begin
+			tmp = DIALOG_MESSAGE(result, /ERROR)
+			logit, log, "Failed reading chi files for " + file
+			noclose = 1
+		endelse
+	endfor
+	if (noclose eq 0) then WIDGET_CONTROL, ev.TOP, /DESTROY
+endif else begin
+    logit, log, "Read series of text files: canceled"
+    WIDGET_CONTROL, ev.TOP, /DESTROY
+endelse
+END
+
+
+; Convert series of chi files created by Fit2d multi-chi output for a whole load of images
+PRO convertfileseriesmultichi, base, log
+common inputinfo, string
+basedialog = WIDGET_BASE(/COLUMN, /MODAL, GROUP_LEADER=base)
+nameBase =  WIDGET_BASE(basedialog,COLUMN=2, /GRID_LAYOUT, FRAME=1)
+nameLa = WIDGET_LABEL(nameBase, VALUE='Base for name of file name', /ALIGN_LEFT)
+nameLa = WIDGET_LABEL(nameBase, VALUE='First image number', /ALIGN_LEFT)
+nameLa = WIDGET_LABEL(nameBase, VALUE='Last image number', /ALIGN_LEFT)
+startiLa = WIDGET_LABEL(nameBase, VALUE='First azimuth angle', /ALIGN_LEFT)
+intervalLa = WIDGET_LABEL(nameBase, VALUE='Last azimuth angle', /ALIGN_LEFT)
+intervalLa = WIDGET_LABEL(nameBase, VALUE='Number of slices', /ALIGN_LEFT)
+nameText = WIDGET_TEXT(nameBase, XSIZE=10, /EDITABLE)
+fimageText = WIDGET_TEXT(nameBase, XSIZE=10, /EDITABLE)
+limageText = WIDGET_TEXT(nameBase, XSIZE=10, /EDITABLE)
+startiText = WIDGET_TEXT(nameBase, XSIZE=5, /EDITABLE)
+endiText = WIDGET_TEXT(nameBase, XSIZE=5, /EDITABLE)
+slicesText = WIDGET_TEXT(nameBase, XSIZE=5, /EDITABLE)
+extButtons = WIDGET_BASE(basedialog,/ROW, /GRID_LAYOUT, /ALIGN_CENTER)
+ok = WIDGET_BUTTON(extButtons, VALUE='Ok', UVALUE='OK', xsize=80)
+cancel = WIDGET_BUTTON(extButtons, VALUE='Cancel', UVALUE='CANCEL', xsize=80)
+stash = {log:log, nameText:nameText, slicesText:slicesText, startiText:startiText, endiText:endiText, fimageText: fimageText, limageText:limageText}
+WIDGET_CONTROL, basedialog, SET_UVALUE=stash
+WIDGET_CONTROL, basedialog, /REALIZE
+XMANAGER, 'converfileseriesmultichi', basedialog
+END
+
 
 
 PRO convertonechi_event, ev
@@ -1490,6 +1568,7 @@ CASE ev.id OF
 		'CONVERTMULTIPLECHI': convertmultiplechi, stash.base, stash.log
 		'CONVERTFILESERIES': convertfileseries, stash.base, stash.log
 		'CONVERTONEIMAGEMULTICHI': convertonemultichi, stash.base, stash.log
+		'CONVERTFILESERIESMULTICHI': convertfileseriesmultichi, stash.base, stash.log
 		'FIT2DMAC': fit2dmac, stash.base, stash.log
 		'FIT2DMACLONG': fit2dmaclong, stash.base, stash.log
 		'ID6CALIB': performID6Calibration, stash.base, stash.log, stash.ipDistanceText, stash.id6CenterText
