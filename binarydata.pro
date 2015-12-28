@@ -55,8 +55,8 @@ ON_IOERROR, BADINPUT
 openr, /XDR, 1, file
                                 ; basic info
 length = fix(0)
-alphastart = float(0)
-alphaend = float(0)
+alphastart = fix(0)
+alphaend = fix(0)
 intervalle = float(0)
 readu, 1, length
 filenames = STRING(REPLICATE(32B,length))
@@ -79,6 +79,12 @@ readu, 1, alpha
 readu, 1, twotheta
 readu, 1, data
 close, 1
+                               ; fix things
+; in the old days, azimuth (called alpha here) were integers. The file format was not change the lines below fixes
+;  things up
+alphastart = min(alpha)
+alphaend = max(alpha)
+if (n_elements(alpha) gt 1) then intervalle = alpha[1]-alpha[0] else intervalle = 0.0
 return, 1
 BADINPUT: close, 1
 return, !ERR_STRING
