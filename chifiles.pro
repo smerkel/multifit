@@ -234,8 +234,7 @@ twotheta = fltarr(ntheta)
 tmp =  readdata(file)
 data[0,*] = tmp[1,*]
 twotheta = tmp[0,*]
-for i = 1,nAz  do begin
-    print, "trying to assign ", i, " with ", alpha[i-1]+intervalle
+for i = 1,nAz-1  do begin
     alpha[i] = alpha[i-1]+intervalle
     ii = intformat(i+1,5);
     file = datadirectory + name + "_" + ii + extension
