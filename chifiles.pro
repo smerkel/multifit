@@ -234,6 +234,7 @@ twotheta = fltarr(ntheta)
 tmp =  readdata(file)
 data[0,*] = tmp[1,*]
 twotheta = tmp[0,*]
+print, typename(nAz)
 for i = 1,nAz  do begin
     alpha[i] = alpha[i-1]+intervalle
     ii = intformat(i+1,5);
