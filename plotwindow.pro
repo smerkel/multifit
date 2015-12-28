@@ -49,10 +49,15 @@ PRO plotit, stash
 	stack = WIDGET_INFO(stash.stackBut, /BUTTON_SET)
 	base = stash.base
 	rangeSet = WIDGET_INFO(stash.thetaBut, /BUTTON_SET)
-	WIDGET_CONTROL, stash.thetaMinVa, GET_VALUE=sep
-	tthetamin = float(sep[0])
-	WIDGET_CONTROL, stash.thetaMaxVa, GET_VALUE=sep
-	tthetamax = float(sep[0])
+	if (rangeSet eq 1) then begin
+		WIDGET_CONTROL, stash.thetaMinVa, GET_VALUE=sep
+		tthetamin = float(sep[0])
+		WIDGET_CONTROL, stash.thetaMaxVa, GET_VALUE=sep
+		tthetamax = float(sep[0])
+	endif else begin
+		tthetamin = min(twotheta)
+		tthetamax = max(twotheta)
+	endelse
 	
 	if (stack eq 1) then nplots = 1 else nplots=n_elements(toplot)
 	xdata = twotheta
@@ -60,25 +65,22 @@ PRO plotit, stash
 	leg = strarr(nplots)
 	
 	if (stack eq 0) then begin
-	 offset = 0.
-   for i=0,nplots-1 do begin
-    if ((i gt 0) and (separate_Y eq 1)) then offset = offset + 1.0*separation
-    ydata[i,*] = data[toplot[i],*] + offset
-    leg[i] = alpha[toplot[i]]
-   endfor
-  endif else begin
-   ydata[0,*] = data[toplot[0],*]
-   for i=1,n_elements(toplot)-1 do ydata[0,*] += data[toplot[i],*]
-   addlegend = 0
-  endelse
+		offset = 0.
+		for i=0,nplots-1 do begin
+			if ((i gt 0) and (separate_Y eq 1)) then offset = offset + 1.0*separation
+			ydata[i,*] = data[toplot[i],*] + offset
+			leg[i] = alpha[toplot[i]]
+		endfor
+	endif else begin
+		ydata[0,*] = data[toplot[0],*]
+		for i=1,n_elements(toplot)-1 do ydata[0,*] += data[toplot[i],*]
+		addlegend = 0
+	endelse
 	if (addlegend eq 1) then begin
-    plotinteractive1D, base, xdata, ydata, xlabel='2 theta', ylabel='Intensity', legend = leg
-  endif else begin
-    plotinteractive1D, base, xdata, ydata, xlabel='2 theta', ylabel='Intensity'
-  endelse
-    
-  
-	
+		plotinteractive1D, base, xdata, ydata, xlabel='2 theta', ylabel='Intensity', legend = leg, range=[tthetamin, tthetamax]
+	endif else begin
+		plotinteractive1D, base, xdata, ydata, xlabel='2 theta', ylabel='Intensity', range=[tthetamin, tthetamax]
+	endelse
 	; plotdata, toplot, stretchit, float(stretch), thetait, thetaMin, thetaMax, legendeskipit, legendeskip
 END
 
