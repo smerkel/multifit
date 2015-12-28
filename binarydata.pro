@@ -55,9 +55,9 @@ ON_IOERROR, BADINPUT
 openr, /XDR, 1, file
                                 ; basic info
 length = fix(0)
-alphastart = fix(0)
-alphaend = fix(0)
-intervalle = fix(0)
+alphastart = float(0)
+alphaend = float(0)
+intervalle = float(0)
 readu, 1, length
 filenames = STRING(REPLICATE(32B,length))
 readu, 1, filenames
