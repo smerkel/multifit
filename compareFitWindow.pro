@@ -47,7 +47,7 @@ for i=0,nlabels-1 do begin
 	ticklabels[i] = strtrim(string(contours[j], /print, FORMAT='(F10.0)'),2)
 endfor
 ticksinterval = ndata/(nlabels-1)
-contour, data, /NOERASE ,/FILL, levels = contours, ystyle=1, xstyle=1, background=255, color = 0, charsize = 1.5, xticks=0.0, xtickinterval=100, xtickname=['',''], ytickinterval=ticksinterval, ytickname=ticklabels
+contour, data, /NOERASE ,/FILL, levels = contours, ystyle=1, xstyle=1, background=255, color = 0, charsize = 1.1, xticks=0.0, xtickinterval=100, xtickname=['',''], ytickinterval=ticksinterval, ytickname=ticklabels
 end
 
 pro changeFitFile, fitFileEntry
