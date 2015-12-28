@@ -105,7 +105,7 @@ if (count eq 0) then indexL = 0 else indexL = tmp[0]
 tmp = WHERE(twotheta  LT thetamax[0], count)
 if (count eq 0) then indexR = N_ELEMENTS(twotheta)-1 else indexR=tmp[count-1]
 datatmp = data(*,indexL:indexR)
-sqrtdata = ROTATE(datatmp,3)
+plotdata = ROTATE(datatmp,1) ; 12/2015, changed from 3 to 1, azimuth were in the wrong order
 contours = contourlevel(plotmin, plotmax)
 rangetheta = max(alpha)-min(alpha)
 if (rangetheta le 30) then begin
@@ -116,7 +116,7 @@ endif else if (rangetheta le 360) then begin
 	ticksep = 45
 endif else ticksep = 90
 !P.REGION = [0., 0., 0.8, 1.]
-contour, sqrtdata, twotheta(indexL:indexR), alpha, /FILL, levels = contours, ystyle=1, xstyle=1, background=255, color = 0, charsize = 1.5, xtitle='two theta', ytitle='azimuth', ytickinterval=ticksep
+contour, plotdata, twotheta(indexL:indexR), alpha, /FILL, levels = contours, ystyle=1, xstyle=1, background=255, color = 0, charsize = 1.5, xtitle='two theta', ytitle='azimuth', ytickinterval=ticksep
 !P.REGION = [0.75, 0.5, 1., 1.]
 plotlegend, contours
 !P.REGION = [0., 0., 1., 1.]
