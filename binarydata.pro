@@ -80,8 +80,8 @@ readu, 1, twotheta
 readu, 1, data
 close, 1
                                ; fix things
-; in the old days, azimuth (called alpha here) were integers. The file format was not change the lines below fixes
-;  things up
+; in the old days, azimuth (called alpha here) were integers. The file format was not changed. 
+; The lines below fixes things up
 alphastart = min(alpha)
 alphaend = max(alpha)
 if (n_elements(alpha) gt 1) then intervalle = alpha[1]-alpha[0] else intervalle = 0.0
