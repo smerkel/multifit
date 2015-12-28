@@ -219,6 +219,8 @@ nalpha = nAz
 intervalle = 1.0*(endAz-startAz)/nAz
 alphastart = startAz + intervalle/2.
 alphaend = endAz - intervalle/2.
+alpha = fltarr(nalpha)
+alpha[0] = alphastart
 fileindex = intformat(1,5);
 file = datadirectory + name + "_" + fileindex + extension
 file = STRCOMPRESS(file, /REMOVE_ALL)
@@ -229,13 +231,11 @@ endif
 ntheta = ndata(file)
 data = fltarr(nalpha,ntheta)
 twotheta = fltarr(ntheta)
-alpha = fltarr(nalpha)
 tmp =  readdata(file)
-data(0,*) = tmp(1,*)
-twotheta = tmp(0,*)
-alpha(0) = alphastart
+data[0,*] = tmp[1,*]
+twotheta = tmp[0,*]
 for i = 1,nAz  do begin
-    alpha(i) = alpha(i-1)+intervalle
+    alpha[i] = alpha[i-1]+intervalle
     ii = intformat(i+1,5);
     file = datadirectory + name + "_" + ii + extension
     file = STRCOMPRESS(file, /REMOVE_ALL)
@@ -245,7 +245,7 @@ for i = 1,nAz  do begin
         return, "File " + file + " does not exist!"
     endif
     tmp =  readdata(file)
-    data(i,*) = tmp(1,*)
+    data[i,*] = tmp[1,*]
 endfor
                                 ; saving basic informations about the data
 filenames = datadirectory + name

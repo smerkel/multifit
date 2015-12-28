@@ -515,7 +515,8 @@ if (uval eq 'OK') then begin
     startiFlt = FLOAT(starti)
     endiFlt = FLOAT(endi)
     slicesInt = FIX(FLOAT(slices))
-    result = read_multichi(basename, startiFlt, endiFlt, slicesInt, log)
+    ; print, slicesInt, typename(slicesInt), n_elements(slicesInt)
+    result = read_multichi(basename, startiFlt, endiFlt, slicesInt[0], log)
     if (result eq 1) then begin
         logit, log, "Read series of text files: success"
 	outputname = basename + ".idl"
