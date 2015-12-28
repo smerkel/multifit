@@ -234,8 +234,8 @@ twotheta = fltarr(ntheta)
 tmp =  readdata(file)
 data[0,*] = tmp[1,*]
 twotheta = tmp[0,*]
-print, "you are a motherfucker", typename(nAz)
 for i = 1,nAz  do begin
+    print, "trying to assign ", i, " with ", alpha[i-1]+intervalle
     alpha[i] = alpha[i-1]+intervalle
     ii = intformat(i+1,5);
     file = datadirectory + name + "_" + ii + extension
