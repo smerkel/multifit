@@ -267,7 +267,7 @@ end
 ; setting up
 ; ***************************************************************************
 
-pro plotinteractive1D, base, xdata, sendydata, title = title, xlabel = xlabel, ylabel = ylabel, legend = legend
+pro plotinteractive1D, base, xdata, sendydata, title = title, xlabel = xlabel, ylabel = ylabel, legend = legend, range = range
   IF N_Elements(title) EQ 0 THEN title = "Plot"
   IF N_Elements(xlabel) EQ 0 THEN xlabel = ""
   IF N_Elements(ylabel) EQ 0 THEN ylabel = ""
@@ -275,6 +275,13 @@ pro plotinteractive1D, base, xdata, sendydata, title = title, xlabel = xlabel, y
     plotlegend = 0
     legend = ''
   endif else plotlegend = 1
+  IF N_Elements(range) EQ 0 THEN begin
+     xmin = min(xdata)
+     xmax = max(xdata)
+  endif else begin
+     xmin = range[0]
+     xmax = range[1]
+  endelse
   ; converting ydata to 2D array if it is not already
   if (N_ELEMENTS(SIZE(sendydata, /DIMENSION)) eq 1) then begin
     ydata = fltarr(1,N_ELEMENTS(sendydata))
@@ -300,8 +307,6 @@ pro plotinteractive1D, base, xdata, sendydata, title = title, xlabel = xlabel, y
   Widget_Control, tlb, /Realize
   ; get important information to communicate in the application
   Widget_Control, draw, get_value=w_id
-  xmin = min(xdata)
-  xmax = max(xdata)
   ymin = min(ydata,/NAN)
   ymax = max(ydata,/NAN)
   state = {xdata: xdata, ydata:ydata, ncolumns: ncolumns, tlb: tlb, w_id:w_id, draw:draw, status:status, xlabel:xlabel, ylabel:ylabel, title: title, xmin:xmin, xmax:xmax, ymin:ymin, ymax:ymax, sc_xmin:0.0, sc_xmax:0.0, sc_ymin:0.0, sc_ymax:0.0, scaling:0, plotlegend: plotlegend, legend: legend}
