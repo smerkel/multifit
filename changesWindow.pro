@@ -18,8 +18,10 @@ la = WIDGET_TEXT(infobase, XSIZE=80, YSIZE=30, /ALIGN_LEFT, /EDITABLE, /WRAP)
 ccr = STRING(13B) ; Carriage Return
 clf = STRING([10B]) ; line feed
 text = "Multifit" + clf
-text += "Compiled July 3nd 2015" + clf + clf
+text += "Compiled Dec 28 2015" + clf + clf
 text += "Recent changes" + clf
+text += "- Dec 2015: improvements to the mapplot interface" + clf
+text += "- Dec 2015: new functions to import data created by fit2d multi-chi export functions" + clf
 text += "- July 2, 2015: added reference to multifit publication in the about window" + clf
 text += "- July 2, 2015: open the about window at startup" + clf
 text += "- July 2, 2015: started to record changes in this interface" + clf
