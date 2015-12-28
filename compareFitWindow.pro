@@ -130,7 +130,7 @@ if (count eq 0) then indexL = 0 else indexL = tmp[0]
 tmp = WHERE(twotheta  LT thetamax[0], count)
 if (count eq 0) then indexR = N_ELEMENTS(twotheta)-1 else indexR=tmp[count-1]
 fitarray = fitdata->buildSynthethicData(alpha,twotheta(indexL:indexR), nalpha, indexR-indexL+1)
-fit = ROTATE(fitarray,3)
+fit = ROTATE(fitarray,1)
 contours = contourlevel(plotmin, plotmax)
 rangetheta = max(alpha)-min(alpha)
 if (rangetheta le 30) then begin
@@ -155,9 +155,9 @@ if (count eq 0) then indexL = 0 else indexL = tmp[0]
 tmp = WHERE(twotheta  LT thetamax[0], count)
 if (count eq 0) then indexR = N_ELEMENTS(twotheta)-1 else indexR=tmp[count-1]
 fitarray = fitdata->buildSynthethicData(alpha,twotheta(indexL:indexR), nalpha, indexR-indexL+1)
-fit = ROTATE(fitarray,3)
+fit = ROTATE(fitarray,1)
 datatmp = data(*,indexL:indexR)
-thedata = ROTATE(datatmp,3)
+thedata = ROTATE(datatmp,1)
 both = fltarr(indexR-indexL+1,2*nalpha)
 both(*,0:(nalpha-1)) = thedata(*,*)
 both(*,nalpha:(2*nalpha-1)) = fit(*,*)
@@ -194,7 +194,7 @@ datatmp = data(*,indexL:indexR)
 dude = datatmp-fitarray;
 zeros = WHERE(fitarray EQ 0.0)
 dude[zeros] = 0.0  
-dudeplot = ROTATE(dude,3)
+dudeplot = ROTATE(dude,1)
 contours = contourlevel(plotmin, plotmax)
 rangetheta = max(alpha)-min(alpha)
 if (rangetheta le 30) then begin
@@ -226,8 +226,8 @@ datatmp = data(*,indexL:indexR)
 dude = datatmp-fitarray;
 zeros = WHERE(fitarray EQ 0.0)
 dude[zeros] = 0.0  
-dude = ROTATE(dude,3)
-datatmp = ROTATE(datatmp,3)
+dude = ROTATE(dude,1)
+datatmp = ROTATE(datatmp,1)
 both = fltarr(indexR-indexL+1,2*nalpha)
 both(*,0:(nalpha-1)) = datatmp(*,*)
 both(*,nalpha:(2*nalpha-1)) = dude(*,*)
