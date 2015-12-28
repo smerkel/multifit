@@ -901,12 +901,8 @@ END
 pro mapplotActiveSet, base, log, list, index
 common rawdata, nalpha, ntheta, alpha, twotheta, data
 logit, log, "Mapplot of active dataset "
-mindata = min(data)
-maxdata = max(data)
-mintheta = min(twotheta)
-maxtheta = max(twotheta)
 ; uses a function from compareFitWindow!!
-plotDataContour, base, mindata, maxdata, mintheta, maxtheta
+compareFitWindow, base, /nofit
 END
 
 ; ****************************************** REMOVE SLICE **************

@@ -275,10 +275,13 @@ CASE uval OF
 ENDCASE
 END
 
-PRO compareFitWindow, parent 
+; if /nofit is set, we do not show options regarding the fit, plot data only
+PRO compareFitWindow, parent, nofit = nofit
 ; force creation of a new plot window
 common rawdata, nalpha, ntheta, alpha, twotheta, data
 common fonts, titlefont, boldfont, mainfont, avFontHeight
+
+if (KEYWORD_SET(nofit)) then showfit = 0 else showfit = 1
 ; Load better color scale
 loadct, 5
 ; 
@@ -288,8 +291,7 @@ mintheta = min(twotheta)
 maxtheta = max(twotheta)
 def = 0
 ; base GUI
-base = WIDGET_BASE(Title='Multipeak comparison window',/COLUMN, GROUP_LEADER=parent)
-titleLa = WIDGET_LABEL(base, VALUE='Multipeak comparison functions', /ALIGN_CENTER, font=titlefont)
+base = WIDGET_BASE(Title='Mapplot options',/COLUMN, GROUP_LEADER=parent)
 ; Z Range
 dataRange = WIDGET_BASE(base,COLUMN=4, FRAME=1, /ALIGN_CENTER, /GRID_LAYOUT)
 dataLa1 = WIDGET_LABEL(dataRange, VALUE='Min. Z Data')
@@ -311,24 +313,37 @@ thetaMin = WIDGET_TEXT(thetaRange, VALUE=strtrim(string(mintheta,/print),2), /ED
 dataLa6 = WIDGET_LABEL(thetaRange, VALUE='Max. max Plot')
 thetaMax = WIDGET_TEXT(thetaRange, VALUE=strtrim(string(maxtheta,/print),2), /EDITABLE ,/ALIGN_LEFT, XSIZE=10)
 ; Fit
-fit = WIDGET_BASE(base, /COL, FRAME=1, /ALIGN_CENTER, /GRID_LAYOUT)
-fitLa = WIDGET_LABEL(fit, VALUE='Fit data')
-fitEn = WIDGET_BASE(fit, /ROW, FRAME=1, /ALIGN_CENTER)
-fitFile = WIDGET_TEXT(fitEn, VALUE='' ,/ALIGN_LEFT, XSIZE=30)
-fitBu = WIDGET_BUTTON(fitEn, VALUE='Change', UVALUE='FITFILE')
+if (showfit eq 1) then begin
+	fit = WIDGET_BASE(base, /COL, FRAME=1, /ALIGN_CENTER, /GRID_LAYOUT)
+	fitLa = WIDGET_LABEL(fit, VALUE='Fit data')
+	fitEn = WIDGET_BASE(fit, /ROW, FRAME=1, /ALIGN_CENTER)
+	fitFile = WIDGET_TEXT(fitEn, VALUE='' ,/ALIGN_LEFT, XSIZE=30)
+	fitBu = WIDGET_BUTTON(fitEn, VALUE='Change', UVALUE='FITFILE')
+endif
 ; ACTION BUTTONS
-buttons = WIDGET_BASE(base,ROW=3, /ALIGN_CENTER, /GRID_LAYOUT)
-plotDataBut = WIDGET_BUTTON(buttons, VALUE='Plot Data', UVALUE='PLOTDATA')
-plotFitBut = WIDGET_BUTTON(buttons, VALUE='Plot Fit', UVALUE='PLOTFIT')
-plotBothBut = WIDGET_BUTTON(buttons, VALUE='Plot Both', UVALUE='PLOTBOTH')
-plotSubstractBut = WIDGET_BUTTON(buttons, VALUE='Substract', UVALUE='SUBSTRACT')
-plotSubstractBut = WIDGET_BUTTON(buttons, VALUE='Sub. and Data', UVALUE='SUBSTRACTDATA')
-emLa = WIDGET_LABEL(buttons, VALUE=' ')
-colorBut = WIDGET_BUTTON(buttons, VALUE='Color scale', UVALUE='CSCALE')
-emLa = WIDGET_LABEL(buttons, VALUE=' ')
-closeBut = WIDGET_BUTTON(buttons, VALUE='Close', UVALUE='EXIT')
+if (showfit eq 1) then begin
+	buttons = WIDGET_BASE(base,ROW=3, /ALIGN_CENTER, /GRID_LAYOUT)
+	plotDataBut = WIDGET_BUTTON(buttons, VALUE='Plot Data', UVALUE='PLOTDATA')
+	plotFitBut = WIDGET_BUTTON(buttons, VALUE='Plot Fit', UVALUE='PLOTFIT')
+	plotBothBut = WIDGET_BUTTON(buttons, VALUE='Plot Both', UVALUE='PLOTBOTH')
+	plotSubstractBut = WIDGET_BUTTON(buttons, VALUE='Substract', UVALUE='SUBSTRACT')
+	plotSubstractBut = WIDGET_BUTTON(buttons, VALUE='Sub. and Data', UVALUE='SUBSTRACTDATA')
+	emLa = WIDGET_LABEL(buttons, VALUE=' ')
+	colorBut = WIDGET_BUTTON(buttons, VALUE='Color scale', UVALUE='CSCALE')
+	emLa = WIDGET_LABEL(buttons, VALUE=' ')
+	closeBut = WIDGET_BUTTON(buttons, VALUE='Close', UVALUE='EXIT')
+endif else begin
+	buttons = WIDGET_BASE(base,/ALIGN_CENTER, /ROW)
+	plotDataBut = WIDGET_BUTTON(buttons, VALUE='Plot Data', UVALUE='PLOTDATA')
+	colorBut = WIDGET_BUTTON(buttons, VALUE='Color scale', UVALUE='CSCALE')
+	closeBut = WIDGET_BUTTON(buttons, VALUE='Close', UVALUE='EXIT')
+endelse
 ; Create an anonymous structure to hold widget IDs
-stash = {base:base, plotMin: plotMin, plotMax: plotMax, thetaMin: thetaMin, thetaMax: thetaMax, fitFile: fitFile} 
+if (showfit eq 1) then begin
+	stash = {base:base, plotMin: plotMin, plotMax: plotMax, thetaMin: thetaMin, thetaMax: thetaMax, fitFile: fitFile}
+endif else begin
+	stash = {base:base, plotMin: plotMin, plotMax: plotMax, thetaMin: thetaMin, thetaMax: thetaMax}
+endelse
 WIDGET_CONTROL, base, SET_UVALUE=stash
 WIDGET_CONTROL, base, /REALIZE
 XMANAGER, 'compareFitWindow', base
