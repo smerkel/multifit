@@ -374,9 +374,9 @@ endif else begin
 endelse
 ; Create an anonymous structure to hold widget IDs
 if (showfit eq 1) then begin
-	stash = {base:base, log:log, plotMin: ploin, plotMax: plotMax, thetaMin: thetaMin, thetaMax: thetaMax, azMin: azMin, azMax: azMax, fitFile: fitFile}
+	stash = {base:base, log:log, listsets:listsets,  plotMin: ploin, plotMax: plotMax, thetaMin: thetaMin, thetaMax: thetaMax, azMin: azMin, azMax: azMax, fitFile: fitFile}
 endif else begin
-	stash = {base:base, listsets:listsets, plotMin: plotMin, plotMax: plotMax, thetaMin: thetaMin, thetaMax: thetaMax, azMin: azMin, azMax: azMax}
+	stash = {base:base, log:log, listsets:listsets, plotMin: plotMin, plotMax: plotMax, thetaMin: thetaMin, thetaMax: thetaMax, azMin: azMin, azMax: azMax}
 endelse
 WIDGET_CONTROL, base, SET_UVALUE=stash
 WIDGET_CONTROL, base, /REALIZE
