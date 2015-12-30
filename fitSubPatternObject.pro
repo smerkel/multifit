@@ -33,10 +33,11 @@ function FitSubPatternObject::fromModel, model, peakprofile
 self.npeaks = model->nPeaks()
 self.peakprofile = peakprofile
 self.ndelta = model->nDelta()
-self.deltarange=PTR_NEW(intarr(self.ndelta))
+self.deltarange=PTR_NEW(fltarr(self.ndelta))
 for i=0,self.ndelta-1 do begin
 	(*(self.deltarange))(i) = model->delta(i)
 endfor
+; print, (*(self.deltarange))
 self.twotheta=PTR_NEW(fltarr(self.npeaks,self.ndelta))
 self.intensity=PTR_NEW(fltarr(self.npeaks,self.ndelta))
 self.hwidth=PTR_NEW(fltarr(self.npeaks,self.ndelta))
@@ -65,7 +66,7 @@ function FitSubPatternObject::fromJCPDS, startZ, endZ, peaksZ, npeaksZ, width, p
 self.npeaks = npeaksZ
 self.peakprofile = peakprofile
 self.ndelta = N_ELEMENTS(delta)
-self.deltarange=PTR_NEW(intarr(self.ndelta))
+self.deltarange=PTR_NEW(fltarr(self.ndelta))
 for i=0,self.ndelta-1 do begin
 	(*(self.deltarange))(i) = delta[i]
 endfor
@@ -138,8 +139,9 @@ endif
 ; Let's make sure we do have data for more than a few orientations...
 if (count lt 5) then return, "You do not have enough data in there! I found" + STRING(count,/print) + " datapoints. You need at least 5."
 ; Azimuth angles are converted to INTEGERS! This is critical for comparisons later.
-self.deltarange=PTR_NEW(intarr(count))
-*(self.deltarange)=fix(azimuth(0:count-1))
+; 12/2015, removing this requirement on integers. We will deal with the consequences.
+self.deltarange=PTR_NEW(fltarr(count))
+*(self.deltarange)=(azimuth(0:count-1))
 ; end of copy from subpatternmodel.pro
 
 self.ndelta = count     
@@ -195,7 +197,8 @@ function FitSubPatternObject::optimizeOneDeltaWithCurrentDataset, loop, i, plotl
 ; This is the raw data
 common rawdata, nalpha, ntheta, alpha, twotheta, data
 ; finding index in the dataset
-indexdelta = WHERE(alpha  EQ (*self.deltarange)(i))
+indexdelta = (WHERE(alpha  gt (*self.deltarange)[i]-0.01))[0]
+; print, "Working with azimuth", (*self.deltarange)[i], " should be at ", indexdelta
 ; starting values
 fit = fltarr(self.npeaks, 4)
 ; print, "Starting value"
@@ -304,7 +307,7 @@ function FitSubPatternObject::optimizeJCPDSOneDeltaWithCurrentDataset, i, plotle
 common rawdata, nalpha, ntheta, alpha, twotheta, data
 if (keyword_set(labels)) then addlabel = 1 else addlabel = 0
 ; finding index in the dataset
-indexdelta = WHERE(alpha  EQ (*self.deltarange)(i))
+indexdelta = (WHERE(alpha  gt (*self.deltarange)[i]-0.01))[0]
 ; starting values
 fit = fltarr(self.npeaks, 4)
 ; print, "Starting value"
@@ -477,6 +480,8 @@ end
  
 ; Saves fit to Ascii for later processing
 function FitSubPatternObject::saveToAscii, lun
+	; print, "Saving model"
+	; print, "Aziuth", deltarange
 	printf, lun, '# Number of peaks'
 	printf, lun, STRING(self.nPeaks, /PRINT)
 	printf, lun, '# Peak profile'
@@ -522,7 +527,7 @@ function FitSubPatternObject::readFromascii, lun
 	;print, 'Npeaks = ' + STRING(self.nPeaks, /PRINT)
 	;print, 'Ndelta = ' + STRING(self.ndelta, /PRINT)
 	self.deltarange=PTR_NEW(intarr(self.ndelta))
-	for i=0, self.ndelta-1 do (*self.deltarange)(i) = fix(readascii(lun, com='#'))
+	for i=0, self.ndelta-1 do (*self.deltarange)(i) = float(readascii(lun, com='#'))
 	; Setting up arrays
 	self.twotheta=PTR_NEW(fltarr(self.npeaks,self.ndelta))
 	self.intensity=PTR_NEW(fltarr(self.npeaks,self.ndelta))
