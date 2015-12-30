@@ -273,6 +273,14 @@ WIDGET_CONTROL, stash.thetaMax, GET_VALUE=thetamax
 WIDGET_CONTROL, stash.azMin, GET_VALUE=azmin
 WIDGET_CONTROL, stash.azMax, GET_VALUE=azmax
 CASE uval OF
+    'PREVIOUSDATASET': BEGIN
+		advanceActiveSet, stash.log, stash.listsets
+		plotDataContour, ev.TOP, plotmin, plotmax, thetamin, thetamax, azmin, azmax
+		END
+    'NEXTDATASET': BEGIN
+		movebackActiveSet, stash.log, stash.listsets
+		plotDataContour, ev.TOP, plotmin, plotmax, thetamin, thetamax, azmin, azmax
+		END
     'PLOTDATA': plotDataContour, ev.TOP, plotmin, plotmax, thetamin, thetamax, azmin, azmax
     'PLOTFIT': plotFitContour, plotmin, plotmax, thetamin, thetamax, azmin, azmax
     'PLOTBOTH': plotBothContour, plotmin, plotmax, thetamin, thetamax, azmin, azmax
@@ -286,7 +294,8 @@ ENDCASE
 END
 
 ; if /nofit is set, we do not show options regarding the fit, plot data only
-PRO compareFitWindow, parent, nofit = nofit
+; send parent, log, and dataset list widget IDs
+PRO compareFitWindow, parent, log, listsets, nofit = nofit
 ; force creation of a new plot window
 common rawdata, nalpha, ntheta, alpha, twotheta, data
 common fonts, titlefont, boldfont, mainfont, avFontHeight
@@ -355,6 +364,9 @@ if (showfit eq 1) then begin
 	emLa = WIDGET_LABEL(buttons, VALUE=' ')
 	closeBut = WIDGET_BUTTON(buttons, VALUE='Close', UVALUE='EXIT')
 endif else begin
+	buttons2 = WIDGET_BASE(base,/ALIGN_CENTER, /ROW)
+	next = WIDGET_BUTTON(buttons2, VALUE='Next dataset', UVALUE='NEXTDATASET')
+	previous = WIDGET_BUTTON(buttons2, VALUE='Previous dataset', UVALUE='PREVIOUSDATASET')
 	buttons = WIDGET_BASE(base,/ALIGN_CENTER, /ROW)
 	plotDataBut = WIDGET_BUTTON(buttons, VALUE='Plot Data', UVALUE='PLOTDATA')
 	colorBut = WIDGET_BUTTON(buttons, VALUE='Color scale', UVALUE='CSCALE')
@@ -362,9 +374,9 @@ endif else begin
 endelse
 ; Create an anonymous structure to hold widget IDs
 if (showfit eq 1) then begin
-	stash = {base:base, plotMin: ploin, plotMax: plotMax, thetaMin: thetaMin, thetaMax: thetaMax, azMin: azMin, azMax: azMax, fitFile: fitFile}
+	stash = {base:base, log:log, plotMin: ploin, plotMax: plotMax, thetaMin: thetaMin, thetaMax: thetaMax, azMin: azMin, azMax: azMax, fitFile: fitFile}
 endif else begin
-	stash = {base:base, plotMin: plotMin, plotMax: plotMax, thetaMin: thetaMin, thetaMax: thetaMax, azMin: azMin, azMax: azMax}
+	stash = {base:base, listsets:listsets, plotMin: plotMin, plotMax: plotMax, thetaMin: thetaMin, thetaMax: thetaMax, azMin: azMin, azMax: azMax}
 endelse
 WIDGET_CONTROL, base, SET_UVALUE=stash
 WIDGET_CONTROL, base, /REALIZE

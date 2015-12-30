@@ -961,6 +961,30 @@ WIDGET_CONTROL, input, /REALIZE
 XMANAGER, 'multipleInputFiles', input
 END
 
+; Move to next set in list in gui and load the corresponding data
+; send log and list widget ids
+; created 12/2015
+pro advanceActiveSet, log, list
+active = (WIDGET_INFO(list, /LIST_SELECT))[0]
+num = WIDGET_INFO(list, /LIST_NUMBER)
+if (active lt (num-1)) then begin
+	active = active + 1
+	changeActiveSet, log, list, active
+endif
+end
+
+; Move to previous set in in list in gui and load the corresponding data
+; send log and list widget ids
+; created 12/2015
+pro movebackActiveSet, log, list
+active = (WIDGET_INFO(list, /LIST_SELECT))[0]
+if (active gt 0) then begin
+	active = active - 1
+	changeActiveSet, log, list, active
+endif
+end
+
+; change active dataset (load the data and update list in main gui)
 pro changeActiveSet, log, list, index
 common inputfiles, inputfiles, activeset
 common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
@@ -980,7 +1004,7 @@ pro mapplotActiveSet, base, log, list, index
 common rawdata, nalpha, ntheta, alpha, twotheta, data
 logit, log, "Mapplot of active dataset "
 ; uses a function from compareFitWindow!!
-compareFitWindow, base, /nofit
+compareFitWindow, base, log, list, /nofit
 END
 
 ; ****************************************** REMOVE SLICE **************
@@ -1583,7 +1607,7 @@ CASE ev.id OF
 		'FITMULTIPLESETAUTO': fitAutoWindow, stash.base, 2
 		'FITONESETJCPDS': fitJCPDSWindow, stash.base
 		'DATFILESTOFITFILE': createFitfromdatWindow, stash.base
-		'COMPAREFIT': compareFitWindow, stash.base
+		'COMPAREFIT': compareFitWindow, stash.base, stash.log, stash.listSets
 		'COMPAREFIT1D': compareFit1DWindow, stash.base
 		'PLOTFIT': plotResultsWindow, stash.base
 		'MODELONEIMAGE': createModelWindow, stash.base
