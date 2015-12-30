@@ -194,9 +194,9 @@ for peak = 0, npeaks-1 do begin
 		tmpy(indexthetaL(j):indexthetaR(j)) = tmpy(indexthetaL(j):indexthetaR(j)) - (*yfit(j))(0:indexthetaR(j)-indexthetaL(j))
 	endfor
 	; we limit the zone where the peak resides
-	tmp = WHERE(x  LT (fit(peak,0)-baseScaling*fit(peak,2)), count)
+	tmp = WHERE(x  LT (fit(peak,0)-2*baseScaling*fit(peak,2)), count)
 	if (count eq 0) then indexthetaL(peak) = 0 else indexthetaL(peak) = tmp[count-1]
-	tmp = WHERE(x  GT (fit(peak,0)+baseScaling*fit(peak,2)), count)
+	tmp = WHERE(x  GT (fit(peak,0)+2*baseScaling*fit(peak,2)), count)
 	if (count eq 0) then indexthetaR(peak) = N_ELEMENTS(x)-1 else indexthetaR(peak) = tmp[0]
 	;print, "x[0] is " + STRING(x[0],/PRINT) + ", xmax is " + STRING(x[N_ELEMENTS(x)-1],/PRINT) + " with " + STRING(N_ELEMENTS(x),/PRINT) + " elements"
 	;print, "We want " + STRING((fit(peak,0)-baseScaling*fit(peak,2)),/PRINT) + " to " + STRING((fit(peak,0)+baseScaling*fit(peak,2)),/PRINT)
