@@ -110,8 +110,9 @@ FUNCTION SubPatternModel::fromFile, log, filename, peakprofile
 	if (count lt 5) then return, "You do not have enough data in there! I found" + STRING(count,/print) + " datapoints. You need at least 5."
 	; Azimuth angles are converted to INTEGERS! This is critical for comparisons
 	; later.
-	self.deltarange=PTR_NEW(intarr(count))
-	*(self.deltarange)=fix(azimuth(0:count-1))
+	; 12/2015 Removing this requirement. We will deal with the consequences
+	self.deltarange=PTR_NEW(fltarr(count))
+	*(self.deltarange)=azimuth(0:count-1)
 	self.peakinfo = PTR_NEW(OBJARR(self.npeaks))
 	for i=0,self.npeaks-1 do begin
 		logit, log, 'Creating model for peak ' + string(i,/print)
@@ -127,8 +128,8 @@ FUNCTION SubPatternModel::readFromAscii, lun
 	row = readascii(lun,com='#')
 	self.nPeaks = fix(row)
 	ndelta = fix(readascii(lun, com='#'))
-	self.deltarange=PTR_NEW(intarr(ndelta[0]))
-	for i=0, ndelta[0]-1 do (*self.deltarange)(i) = fix(readascii(lun, com='#'))
+	self.deltarange=PTR_NEW(fltarr(ndelta[0]))
+	for i=0, ndelta[0]-1 do (*self.deltarange)(i) = float(readascii(lun, com='#'))
 	self.peakinfo = PTR_NEW(OBJARR(self.npeaks))
 	for i=0, self.nPeaks-1 do begin
 		(*(self.peakinfo))(i) = OBJ_NEW('PeakModel')
