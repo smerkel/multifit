@@ -76,6 +76,7 @@ end
 ;
 PRO plotDataContour, oldbase, plotmin, plotmax, thetamin, thetamax, azmin, azmax
 common rawdata, nalpha, ntheta, alpha, twotheta, data
+common inputfiles, inputfiles, activeset
 common plotit, def, base, draw
 ; preparing plot window
 if (exist(def) eq 0) then def=0
@@ -100,6 +101,7 @@ endif
 WIDGET_CONTROL, draw, GET_VALUE = index 
 WSET, index
 ; prepare the plot
+file = inputfiles(activeset)
 tmp = WHERE(twotheta  GT thetamin[0], count)
 if (count eq 0) then indexL = 0 else indexL = tmp[0]
 tmp = WHERE(twotheta  LT thetamax[0], count)
@@ -120,7 +122,7 @@ endif else if (rangetheta le 360) then begin
 	ticksep = 45
 endif else ticksep = 90
 !P.REGION = [0., 0., 0.8, 1.]
-contour, plotdata, twotheta(indexL:indexR), alpha(indexB:indexT), /FILL, levels = contours, ystyle=1, xstyle=1, background=255, color = 0, charsize = 1.5, xtitle='two theta', ytitle='azimuth', ytickinterval=ticksep
+contour, plotdata, twotheta(indexL:indexR), alpha(indexB:indexT), /FILL, levels = contours, ystyle=1, xstyle=1, background=255, color = 0, charsize = 1.1, xtitle='2 theta', ytitle='Azimuth', title=file, ytickinterval=ticksep
 !P.REGION = [0.75, 0.5, 1., 1.]
 plotlegend, contours
 !P.REGION = [0., 0., 1., 1.]
@@ -263,6 +265,22 @@ loadct, 15
 WIDGET_CONTROL, base, /DESTROY
 end
 
+PRO updateRangeLabels, stash
+common rawdata, nalpha, ntheta, alpha, twotheta, data
+mindata = min(data)
+maxdata = max(data)
+mintheta = min(twotheta)
+maxtheta = max(twotheta)
+minAz = min(alpha)
+maxAz = max(alpha)
+widget_control, stash.zLa1, SET_VALUE=strtrim(string(mindata,/print),2)
+widget_control, stash.zLa2, SET_VALUE=strtrim(string(maxdata,/print),2)
+widget_control, stash.thetaLa1, SET_VALUE=strtrim(string(mintheta,/print),2)
+widget_control, stash.thetaLa2, SET_VALUE=strtrim(string(maxtheta,/print),2)
+widget_control, stash.azLa1, SET_VALUE=strtrim(string(minAz,/print),2)
+widget_control, stash.azLa2, SET_VALUE=strtrim(string(maxAz,/print),2)
+end
+
 PRO compareFitWindow_event, ev
 WIDGET_CONTROL, ev.TOP, GET_UVALUE=stash
 WIDGET_CONTROL, ev.ID, GET_UVALUE=uval
@@ -274,11 +292,13 @@ WIDGET_CONTROL, stash.azMin, GET_VALUE=azmin
 WIDGET_CONTROL, stash.azMax, GET_VALUE=azmax
 CASE uval OF
     'PREVIOUSDATASET': BEGIN
-		advanceActiveSet, stash.log, stash.listsets
+		movebackActiveSet, stash.log, stash.listsets
+		updateRangeLabels, stash
 		plotDataContour, ev.TOP, plotmin, plotmax, thetamin, thetamax, azmin, azmax
 		END
     'NEXTDATASET': BEGIN
-		movebackActiveSet, stash.log, stash.listsets
+		advanceActiveSet, stash.log, stash.listsets
+		updateRangeLabels, stash
 		plotDataContour, ev.TOP, plotmin, plotmax, thetamin, thetamax, azmin, azmax
 		END
     'PLOTDATA': plotDataContour, ev.TOP, plotmin, plotmax, thetamin, thetamax, azmin, azmax
@@ -313,36 +333,30 @@ maxAz = max(alpha)
 def = 0
 ; base GUI
 base = WIDGET_BASE(Title='Mapplot options',/COLUMN, GROUP_LEADER=parent)
+options = WIDGET_BASE(base,FRAME=1, ROW=4, /ALIGN_CENTER, /GRID_LAYOUT)
+la1 = WIDGET_LABEL(options, VALUE='')
+la1 = WIDGET_LABEL(options, VALUE='Min data')
+la1 = WIDGET_LABEL(options, VALUE='Max data')
+la1 = WIDGET_LABEL(options, VALUE='Min plot')
+la1 = WIDGET_LABEL(options, VALUE='Max data')
 ; Z Range
-dataRange = WIDGET_BASE(base,COLUMN=4, FRAME=1, /ALIGN_CENTER, /GRID_LAYOUT)
-dataLa1 = WIDGET_LABEL(dataRange, VALUE='Min. Z Data')
-dataLa2 = WIDGET_LABEL(dataRange, VALUE=strtrim(string(mindata,/print),2))
-dataLa3 = WIDGET_LABEL(dataRange, VALUE='Max. Z Data')
-dataLa4 = WIDGET_LABEL(dataRange, VALUE=strtrim(string(maxdata,/print),2))
-dataLa5 = WIDGET_LABEL(dataRange, VALUE='Min. in Plot')
-plotMin = WIDGET_TEXT(dataRange, VALUE=strtrim(string(mindata,/print),2), /EDITABLE ,/ALIGN_LEFT, XSIZE=10)
-dataLa6 = WIDGET_LABEL(dataRange, VALUE='Max. in Plot')
-plotMax = WIDGET_TEXT(dataRange, VALUE=strtrim(string(maxdata,/print),2), /EDITABLE ,/ALIGN_LEFT, XSIZE=10)
+la1 = WIDGET_LABEL(options, VALUE='Intensity')
+zLa1 = WIDGET_LABEL(options, VALUE=strtrim(string(mindata,/print),2))
+zLa2 = WIDGET_LABEL(options, VALUE=strtrim(string(maxdata,/print),2))
+plotMin = WIDGET_TEXT(options, VALUE=strtrim(string(mindata,/print),2), /EDITABLE ,/ALIGN_LEFT, XSIZE=10)
+plotMax = WIDGET_TEXT(options, VALUE=strtrim(string(maxdata,/print),2), /EDITABLE ,/ALIGN_LEFT, XSIZE=10)
 ; 2 theta Range
-thetaRange = WIDGET_BASE(base,COLUMN=4, FRAME=1, /ALIGN_CENTER, /GRID_LAYOUT)
-thetaLa1 = WIDGET_LABEL(thetaRange, VALUE='Min. 2theta')
-thetaLa2 = WIDGET_LABEL(thetaRange, VALUE=strtrim(string(mintheta,/print),2))
-thetaLa3 = WIDGET_LABEL(thetaRange, VALUE='Max. 2theta')
-thetaLa4 = WIDGET_LABEL(thetaRange, VALUE=strtrim(string(maxtheta,/print),2))
-thetaLa5 = WIDGET_LABEL(thetaRange, VALUE='Min. in Plot')
-thetaMin = WIDGET_TEXT(thetaRange, VALUE=strtrim(string(mintheta,/print),2), /EDITABLE ,/ALIGN_LEFT, XSIZE=10)
-dataLa6 = WIDGET_LABEL(thetaRange, VALUE='Max. max Plot')
-thetaMax = WIDGET_TEXT(thetaRange, VALUE=strtrim(string(maxtheta,/print),2), /EDITABLE ,/ALIGN_LEFT, XSIZE=10)
+la1 = WIDGET_LABEL(options, VALUE='2 theta')
+thetaLa1 = WIDGET_LABEL(options, VALUE=strtrim(string(mintheta,/print),2))
+thetaLa2 = WIDGET_LABEL(options, VALUE=strtrim(string(maxtheta,/print),2))
+thetaMin = WIDGET_TEXT(options, VALUE=strtrim(string(mintheta,/print),2), /EDITABLE ,/ALIGN_LEFT, XSIZE=10)
+thetaMax = WIDGET_TEXT(options, VALUE=strtrim(string(maxtheta,/print),2), /EDITABLE ,/ALIGN_LEFT, XSIZE=10)
 ; azimuth Range
-azRange = WIDGET_BASE(base,COLUMN=4, FRAME=1, /ALIGN_CENTER, /GRID_LAYOUT)
-azLa1 = WIDGET_LABEL(azRange, VALUE='Min. azimuth')
-azLa2 = WIDGET_LABEL(azRange, VALUE=strtrim(string(minAz,/print),2))
-azLa3 = WIDGET_LABEL(azRange, VALUE='Max. azimuth')
-azLa4 = WIDGET_LABEL(azRange, VALUE=strtrim(string(maxAz,/print),2))
-azLa5 = WIDGET_LABEL(azRange, VALUE='Min. in Plot')
-azMin = WIDGET_TEXT(azRange, VALUE=strtrim(string(minAz,/print),2), /EDITABLE ,/ALIGN_LEFT, XSIZE=10)
-azLa6 = WIDGET_LABEL(azRange, VALUE='Max. max Plot')
-azMax = WIDGET_TEXT(azRange, VALUE=strtrim(string(maxAz,/print),2), /EDITABLE ,/ALIGN_LEFT, XSIZE=10)
+la1 = WIDGET_LABEL(options, VALUE='Azimuth')
+azLa1 = WIDGET_LABEL(options, VALUE=strtrim(string(minAz,/print),2))
+azLa2 = WIDGET_LABEL(options, VALUE=strtrim(string(maxAz,/print),2))
+azMin = WIDGET_TEXT(options, VALUE=strtrim(string(minAz,/print),2), /EDITABLE ,/ALIGN_LEFT, XSIZE=10)
+azMax = WIDGET_TEXT(options, VALUE=strtrim(string(maxAz,/print),2), /EDITABLE ,/ALIGN_LEFT, XSIZE=10)
 ; Fit
 if (showfit eq 1) then begin
 	fit = WIDGET_BASE(base, /COL, FRAME=1, /ALIGN_CENTER, /GRID_LAYOUT)
@@ -364,9 +378,9 @@ if (showfit eq 1) then begin
 	emLa = WIDGET_LABEL(buttons, VALUE=' ')
 	closeBut = WIDGET_BUTTON(buttons, VALUE='Close', UVALUE='EXIT')
 endif else begin
-	buttons2 = WIDGET_BASE(base,/ALIGN_CENTER, /ROW)
-	next = WIDGET_BUTTON(buttons2, VALUE='Next dataset', UVALUE='NEXTDATASET')
+	buttons2 = WIDGET_BASE(base,/ALIGN_CENTER, /ROW, /GRID_LAYOUT)
 	previous = WIDGET_BUTTON(buttons2, VALUE='Previous dataset', UVALUE='PREVIOUSDATASET')
+	next = WIDGET_BUTTON(buttons2, VALUE='Next dataset', UVALUE='NEXTDATASET')
 	buttons = WIDGET_BASE(base,/ALIGN_CENTER, /ROW)
 	plotDataBut = WIDGET_BUTTON(buttons, VALUE='Plot Data', UVALUE='PLOTDATA')
 	colorBut = WIDGET_BUTTON(buttons, VALUE='Color scale', UVALUE='CSCALE')
@@ -374,9 +388,9 @@ endif else begin
 endelse
 ; Create an anonymous structure to hold widget IDs
 if (showfit eq 1) then begin
-	stash = {base:base, log:log, listsets:listsets,  plotMin: ploin, plotMax: plotMax, thetaMin: thetaMin, thetaMax: thetaMax, azMin: azMin, azMax: azMax, fitFile: fitFile}
+	stash = {base:base, log:log, listsets:listsets,  zLa1:zLa1, zLa2:zLa2, thetaLa1:thetaLa1, thetaLa2: thetaLa2, azLa1:azLa1, azLa2:azLa2, plotMin: ploMin, plotMax: plotMax, thetaMin: thetaMin, thetaMax: thetaMax, azMin: azMin, azMax: azMax, fitFile: fitFile}
 endif else begin
-	stash = {base:base, log:log, listsets:listsets, plotMin: plotMin, plotMax: plotMax, thetaMin: thetaMin, thetaMax: thetaMax, azMin: azMin, azMax: azMax}
+	stash = {base:base, log:log, listsets:listsets,  zLa1:zLa1, zLa2:zLa2, thetaLa1:thetaLa1, thetaLa2: thetaLa2, azLa1:azLa1, azLa2:azLa2, plotMin: plotMin, plotMax: plotMax, thetaMin: thetaMin, thetaMax: thetaMax, azMin: azMin, azMax: azMax}
 endelse
 WIDGET_CONTROL, base, SET_UVALUE=stash
 WIDGET_CONTROL, base, /REALIZE
