@@ -388,7 +388,7 @@ endif else begin
 endelse
 ; Create an anonymous structure to hold widget IDs
 if (showfit eq 1) then begin
-	stash = {base:base, log:log, listsets:listsets,  zLa1:zLa1, zLa2:zLa2, thetaLa1:thetaLa1, thetaLa2: thetaLa2, azLa1:azLa1, azLa2:azLa2, plotMin: ploMin, plotMax: plotMax, thetaMin: thetaMin, thetaMax: thetaMax, azMin: azMin, azMax: azMax, fitFile: fitFile}
+	stash = {base:base, log:log, listsets:listsets,  zLa1:zLa1, zLa2:zLa2, thetaLa1:thetaLa1, thetaLa2: thetaLa2, azLa1:azLa1, azLa2:azLa2, plotMin: plotMin, plotMax: plotMax, thetaMin: thetaMin, thetaMax: thetaMax, azMin: azMin, azMax: azMax, fitFile: fitFile}
 endif else begin
 	stash = {base:base, log:log, listsets:listsets,  zLa1:zLa1, zLa2:zLa2, thetaLa1:thetaLa1, thetaLa2: thetaLa2, azLa1:azLa1, azLa2:azLa2, plotMin: plotMin, plotMax: plotMax, thetaMin: thetaMin, thetaMax: thetaMax, azMin: azMin, azMax: azMax}
 endelse
