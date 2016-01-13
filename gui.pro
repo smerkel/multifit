@@ -1582,13 +1582,18 @@ file_bttn2 = WIDGET_BUTTON(file_menu, VALUE='Multiple input files', UVALUE='MULT
 file_bttn5 = WIDGET_BUTTON(file_menu, VALUE='Exit', UVALUE='EXIT', /SEPARATOR)
 ; Fit2d interaction menu
 data_menu = WIDGET_BUTTON(bar, VALUE='Fit2d', /MENU) 
-fit2d_bttn1 = WIDGET_BUTTON(data_menu, VALUE='Create Multifit Fit2d macro for one file', UVALUE='FIT2DMAC')
-fit2d_bttn2 = WIDGET_BUTTON(data_menu, VALUE='Create Multifit Fit2d macro for multiple files', UVALUE='FIT2DMACLONG')
-fit2d_bttn3 = WIDGET_BUTTON(data_menu, VALUE='Convert CHI created by Multifit macro to IDL: 1 set', UVALUE='CONVERTONECHI')
-fit2d_bttn4 = WIDGET_BUTTON(data_menu, VALUE='Convert CHI created by Multifit macro to IDL: multiple sets', UVALUE='CONVERTMULTIPLECHI')
-fit2d_bttn4 = WIDGET_BUTTON(data_menu, VALUE='Convert CHI created by Multifit macro to IDL: file series', UVALUE='CONVERTFILESERIES')
-fit2d_bttn5 = WIDGET_BUTTON(data_menu, VALUE='Convert CHI from Multi-CHI: one image', UVALUE='CONVERTONEIMAGEMULTICHI', /SEPARATOR)
+fit2d_bttn5 = WIDGET_BUTTON(data_menu, VALUE='Create Fit2d macro: ESRF ID06', UVALUE='FIT2DMACID06')
+fit2d_bttn5 = WIDGET_BUTTON(data_menu, VALUE='Create Fit2d macro: regular 2D data', UVALUE='FIT2DMAC2DDATA')
+fit2d_bttn5 = WIDGET_BUTTON(data_menu, VALUE='Convert CHI from Multi-CHI: one image', UVALUE='CONVERTONEIMAGEMULTICHI')
 fit2d_bttn6 = WIDGET_BUTTON(data_menu, VALUE='Convert CHI from Multi-CHI: file series', UVALUE='CONVERTFILESERIESMULTICHI')
+fit2d_old = WIDGET_BUTTON(data_menu, VALUE='Old Fit2d Macros', /MENU, /SEPARATOR) 
+fit2d_bttn1 = WIDGET_BUTTON(fit2d_old, VALUE='Create Multifit Fit2d macro for one file', UVALUE='FIT2DMAC')
+fit2d_bttn2 = WIDGET_BUTTON(fit2d_old, VALUE='Create Multifit Fit2d macro for multiple files', UVALUE='FIT2DMACLONG')
+fit2d_bttn3 = WIDGET_BUTTON(fit2d_old, VALUE='Convert CHI created by Multifit macro to IDL: 1 set', UVALUE='CONVERTONECHI')
+fit2d_bttn4 = WIDGET_BUTTON(fit2d_old, VALUE='Convert CHI created by Multifit macro to IDL: multiple sets', UVALUE='CONVERTMULTIPLECHI')
+fit2d_bttn4 = WIDGET_BUTTON(fit2d_old, VALUE='Convert CHI created by Multifit macro to IDL: file series', UVALUE='CONVERTFILESERIES')
+
+
 ; ID 06 menu, removed. We rely on fit2d
 ; id6_menu = WIDGET_BUTTON(bar, VALUE='ESRF ID06', /MENU)
 ; bttn1 = WIDGET_BUTTON(id6_menu, VALUE='Calibration from tif', UVALUE='ID6CALIB')
