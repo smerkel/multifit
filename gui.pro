@@ -219,16 +219,16 @@ if (filename ne '') then begin
 	printf, lun, 'detectordistance|' + STRING(detectordistance, /PRINT)
 	printf, lun, '# Experiment type ("General" or "ESRFID06")'
 	printf, lun, 'experimenttype|' + experimenttype
-	printf, lun, '# ID6 beam center (pixels)'
-	printf, lun, 'ID6_center|' + STRING(ID6_center, /PRINT)
-	printf, lun, '# ID6 Pixel size (microns)'
-	printf, lun, 'ID6_psize|' + STRING(ID6_psize, /PRINT)
-	printf, lun, '# ID6 eta min (degrees)'
-	printf, lun, 'ID6_etamin|' + STRING(ID6_etamin, /PRINT)
-	printf, lun, '# ID6 eta max (degrees)'
-	printf, lun, 'ID6_etamax|' + STRING(ID6_etamax, /PRINT)
-	printf, lun, '# ID6 dark file'
-	printf, lun, 'ID6_dark|' + ID6_dark
+;	printf, lun, '# ID6 beam center (pixels)'
+;	printf, lun, 'ID6_center|' + STRING(ID6_center, /PRINT)
+;	printf, lun, '# ID6 Pixel size (microns)'
+;	printf, lun, 'ID6_psize|' + STRING(ID6_psize, /PRINT)
+;	printf, lun, '# ID6 eta min (degrees)'
+;	printf, lun, 'ID6_etamin|' + STRING(ID6_etamin, /PRINT)
+;	printf, lun, '# ID6 eta max (degrees)'
+;	printf, lun, 'ID6_etamax|' + STRING(ID6_etamax, /PRINT)
+;	printf, lun, '# ID6 dark file'
+;	printf, lun, 'ID6_dark|' + ID6_dark
 	if (size(inputfiles, /TYPE) ne 0) then begin
 		input = STRJOIN( inputfiles, ';' )
 		printf, lun, '# Input files'
@@ -261,11 +261,11 @@ if (filename ne '') then begin
 			'id6directory': id6directory = words[1]
 			'inputfiles': inpufilesFromList, log, listSets, strsplit(words[1], ';', /EXTRACT)
 			'experimenttype': experimenttype = words[1]
-			'ID6_psize': ID6_psize = float(words[1])
-			'ID6_center': ID6_center = float(words[1])
-			'ID6_etamin': ID6_etamin = float(words[1])
-			'ID6_etamax': ID6_etamax = float(words[1])
-			'ID6_dark': ID6_dark = words[1]
+;			'ID6_psize': ID6_psize = float(words[1])
+;			'ID6_center': ID6_center = float(words[1])
+;			'ID6_etamin': ID6_etamin = float(words[1])
+;			'ID6_etamax': ID6_etamax = float(words[1])
+;			'ID6_dark': ID6_dark = words[1]
 			else:
 		endcase
 	endwhile 
@@ -273,7 +273,6 @@ if (filename ne '') then begin
   logit, log, "Parameters read from " + filename
 	FDECOMP, filename, disk, dir, name, qual, version
 	defaultdirectory = disk+dir
-	chgExperimentType, stash
 endif
 end
 
@@ -1489,81 +1488,6 @@ PRO exitit, widget
     WIDGET_CONTROL, widget, /DESTROY
 end
 
-; This function is not used
-; it was meant to be used for ESRD ID6 data but fit2d was adapted for ID6
-; no need to multiply the work
-; I also do not want to keep track of changes on id6 detectors
-pro chgExperimentType, stash
-common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
-common experiment, wavelength, detectordistance, experimenttype
-common esrfid6, ID6_psize, ID6_center, ID6_etamin, ID6_etamax, ID6_dark
-common fonts, titlefont, boldfont, mainfont, avFontHeight
-
-ysizeparams=fix(1.6*avFontHeight)
-baseoptions = stash.baseoptions
-dropListExp = stash.dropListExp
-log = stash.log
-widget_control, dropListExp, get_value=exptypes
-select = widget_info(dropListExp, /DROPLIST_SELECT)
-if (select eq 0) then experimenttype = "General" else if (select eq 1) then experimenttype = "ESRFID06"
-logit, log, "Switching experiment type to: " + exptypes[select]
-newbaseoptions =  WIDGET_BASE(stash.defaultBase,ROW=9)
-
-newbaseoptionsrow1 = WIDGET_BASE(newbaseoptions,COLUMN=2);
-newbaseoptionsrow2 = WIDGET_BASE(newbaseoptions,COLUMN=2);
-newbaseoptionsrow3 = WIDGET_BASE(newbaseoptions,COLUMN=2);
-newbaseoptionsrow4 = WIDGET_BASE(newbaseoptions,COLUMN=2);
-newbaseoptionsrow5 = WIDGET_BASE(newbaseoptions,COLUMN=2);
-newbaseoptionsrow6 = WIDGET_BASE(newbaseoptions,COLUMN=2);
-newbaseoptionsrow7 = WIDGET_BASE(newbaseoptions,COLUMN=2);
-newbaseoptionsrow8 = WIDGET_BASE(newbaseoptions,COLUMN=2);
-newbaseoptionsrow9 = WIDGET_BASE(newbaseoptions,COLUMN=2);
-
-; Note: SCR_YSIZE=ysizeparams or ysize = ysizeparams: this screws up the displays on Windows systems...
-label = WIDGET_LABEL(newbaseoptionsrow1, VALUE='Directory with CHI or MULTIFIT data files: ', /ALIGN_LEFT, XSIZE=250)
-label = WIDGET_LABEL(newbaseoptionsrow2, VALUE='Directory to save fits: ', /ALIGN_LEFT, XSIZE=250)
-label = WIDGET_LABEL(newbaseoptionsrow3, VALUE='Wavelength (angstroms)', /ALIGN_LEFT, XSIZE=250)
-label = WIDGET_LABEL(newbaseoptionsrow4, VALUE='Sample-Detector distance (mm)', /ALIGN_LEFT, XSIZE=250)
-if (experimenttype eq "ESRFID06") then begin
-  label =  WIDGET_LABEL(newbaseoptionsrow5, VALUE='ID6 pixel size (microns)', /ALIGN_LEFT, XSIZE=250)
-  label =  WIDGET_LABEL(newbaseoptionsrow6, VALUE='ID6 center (pixels)', /ALIGN_LEFT, XSIZE=250)
-  label =  WIDGET_LABEL(newbaseoptionsrow7, VALUE='ID6 eta min (degrees)', /ALIGN_LEFT, XSIZE=250)
-  label =  WIDGET_LABEL(newbaseoptionsrow8, VALUE='ID6 eta max (degrees)', /ALIGN_LEFT, XSIZE=250)
-  label =  WIDGET_LABEL(newbaseoptionsrow9, VALUE='ID6 dark file', /ALIGN_LEFT, XSIZE=250)
-endif
-inputDirText = WIDGET_BUTTON(newbaseoptionsrow1, /ALIGN_LEFT, VALUE=datadirectory, XSIZE=400,  UVALUE='INPUTDIR')
-outputDirText = WIDGET_BUTTON(newbaseoptionsrow2, /ALIGN_LEFT, VALUE=outputdirectory, XSIZE=400,  UVALUE='OUTPUTDIR')
-waveText = WIDGET_BUTTON(newbaseoptionsrow3, /ALIGN_LEFT, VALUE=STRTRIM(STRING(wavelength,/PRINT),2), XSIZE=80,  UVALUE='WAVE')
-ipDistanceText = WIDGET_BUTTON(newbaseoptionsrow4, /ALIGN_LEFT, VALUE=STRTRIM(STRING(detectordistance,/PRINT),2), XSIZE=80, UVALUE='DETECTORDISTANCE')
-if (experimenttype eq "ESRFID06") then begin
-  id6PixelSizeText = WIDGET_BUTTON(newbaseoptionsrow5, /ALIGN_LEFT, VALUE=STRTRIM(STRING(ID6_psize,/PRINT),2), XSIZE=80,  UVALUE='ID6PIXELSIZE')
-  id6CenterText = WIDGET_BUTTON(newbaseoptionsrow6, /ALIGN_LEFT, VALUE=STRTRIM(STRING(ID6_center,/PRINT),2), XSIZE=80,  UVALUE='ID6CENTER')
-  id6EtaMinText = WIDGET_BUTTON(newbaseoptionsrow7, /ALIGN_LEFT, VALUE=STRTRIM(STRING(ID6_etamin,/PRINT),2), XSIZE=80,  UVALUE='ID6ETAMIN')
-  id6EtaMaxText = WIDGET_BUTTON(newbaseoptionsrow8, /ALIGN_LEFT, VALUE=STRTRIM(STRING(ID6_etamax,/PRINT),2), XSIZE=80,  UVALUE='ID6ETAMAX')
-  id6DarkText = WIDGET_BUTTON(newbaseoptionsrow9, /ALIGN_LEFT, VALUE=ID6_dark, XSIZE=400, SCR_YSIZE=ysizeparams, UVALUE='ID6DARK')
-endif else begin
-  id6PixelSizeText = 0
-  id6CenterText = 0
-  id6EtaMinText = 0
-  id6EtaMaxText = 0
-  id6DarkText = 0
-endelse
-widget_control, baseoptions, /DESTROY
-stash.baseoptions = newbaseoptions
-stash.inputDirText = inputDirText
-stash.outputDirText = outputDirText
-stash.waveText = waveText
-stash.ipDistanceText = ipDistanceText
-stash.id6PixelSizeText = id6PixelSizeText
-stash.id6CenterText = id6CenterText
-stash.id6EtaMinText = id6EtaMinText
-stash.id6EtaMaxText = id6EtaMaxText
-stash.id6DarkText = id6DarkText
-WIDGET_CONTROL, stash.base, SET_UVALUE=stash
-WIDGET_CONTROL, stash.base, /REALIZE
-resizebase, stash.base, stash
-end
-
 
 PRO gui_event, ev
                                 ; Get the 'stash' structure.
@@ -1615,7 +1539,6 @@ CASE ev.id OF
 		'CHANGES': changesWindow, stash.base
 		'NOTAVAILABLE': tmp = DIALOG_MESSAGE("This function is not implemented yet!", /ERROR)
 		'FORBIDDEN': tmp = DIALOG_MESSAGE("You need to register", /ERROR)
-;		'CHANGEEXPTYPE': chgExperimentType, stash
 		'EXIT': exitit, ev.top
 		else:
 		ENDCASE
