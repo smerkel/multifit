@@ -983,6 +983,7 @@ if (active gt 0) then begin
 endif
 end
 
+
 ; change active dataset (load the data and update list in main gui)
 pro changeActiveSet, log, list, index
 common inputfiles, inputfiles, activeset
@@ -1080,7 +1081,30 @@ free_lun, lun
 return, 1
 END
 
+
+; Export current dataset into ESG file
 pro maudExport, base, listSets, log
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
+common inputfiles, inputfiles, activeset
+if (FILE_TEST( outputdirectory, /DIRECTORY) ne 1) then begin
+        tmp = DIALOG_MESSAGE("Error with directory: " + outputdirectory, /ERROR)
+	logit, log, "Saving data in MAUD format in: " + outputdirectory + " not a valid directory"
+	return
+endif
+changeActiveSet, log, listSets, activeset
+file = datadirectory + inputfiles(activeset)
+FDECOMP, file, disk, dir, name, qual, version
+file = outputdirectory + name + ".esg"
+logit, log, "Saving data in MAUD format in " + file
+if (saveesg(file) ne 1) then begin
+	tmp = DIALOG_MESSAGE("Saving to "+file+" failed", /ERROR)
+	logit, log, "Failed"
+	return
+endif
+end
+
+; Export all IDL files into ESG file
+pro maudExportAllFiles, base, listSets, log
 common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
 common inputfiles, inputfiles, activeset
 if (FILE_TEST( outputdirectory, /DIRECTORY) ne 1) then begin
@@ -1090,14 +1114,8 @@ if (FILE_TEST( outputdirectory, /DIRECTORY) ne 1) then begin
 endif
 nfiles = N_ELEMENTS(inputfiles)
 for i=0, nfiles-1 do begin
+	changeActiveSet, log, listSets, i
 	file = datadirectory + inputfiles(i)
-	logit, log, "Reading: " + file
-	res = readfile(file)
-	if (res ne 1) then begin
-        	tmp = DIALOG_MESSAGE(res, /ERROR)
-		logit, log, "Failed"
-		return
-	endif
 	FDECOMP, file, disk, dir, name, qual, version
 	file = outputdirectory + name + ".esg"
 	logit, log, "Saving data in MAUD format in " + file
