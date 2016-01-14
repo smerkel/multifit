@@ -26,24 +26,17 @@
 ;
 
 pro readdefault
-common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory
 common experiment, wavelength, detectordistance, experimenttype
-common esrfid6, ID6_psize, ID6_center, ID6_etamin, ID6_etamax, ID6_dark
 defaultdir = GETENV('HOME')
 ; set default values
 datadirectory = defaultdir
 outputdirectory = defaultdir
 defaultdirectory = defaultdir
 jcpdsdirectory = defaultdir
-id6directory = defaultdir
 extension = '.chi'
 wavelength=0.4000
 detectordistance=200.
-ID6_psize = 200.
-ID6_center = 1500.
-ID6_etamin = 0.
-ID6_etamax = 180.
-ID6_dark = ""
 experimenttype = "General" 
 
 ; If we are using UNIX, try to see if we saved a default file
@@ -62,15 +55,9 @@ if (STRUPCASE(!VERSION.OS_FAMILY) eq 'UNIX') then begin
           "JCPDS_DIRECTORY:": jcpdsdirectory = word[1]
           "DATA_DIRECTORY:": datadirectory = word[1]
           "OUTPUT_DIRECTORY:": outputdirectory = word[1]
-          "ID6_DIRECTORY:": id6directory = word[1]
           "EXTENSTION:": extension = word[1]
           "WAVELENGTH:": wavelength = float(word[1])
           "DETECTORDISTANCE:": detectordistance = float(word[1])
-          "ID6_PIXELSIZE:": ID6_psize = float(word[1])
-          "ID6_CENTER:": ID6_center = float(word[1])
-          "ID6_ETAMIN:": ID6_etamin = float(word[1])
-          "ID6_ETAMAX:": ID6_etamax = float(word[1])
-          "ID6_DARK:": ID6_dark = word[1]
           "EXPERIMENTTYPE:": experimenttype = word[1]
           else:
         endcase
@@ -83,9 +70,8 @@ end
 
 
 pro savedefaults
-common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory
 common experiment, wavelength, detectordistance, experimenttype
-common esrfid6, ID6_psize, ID6_center, ID6_etamin, ID6_etamax, ID6_dark
 
 if (!D.NAME eq 'WIN') then newline = string([13B, 10B]) else newline = string(10B)
 
@@ -94,15 +80,9 @@ str += "WORK_DIRECTORY: " + defaultdirectory + newline
 str += "JCPDS_DIRECTORY: " + jcpdsdirectory + newline
 str += "DATA_DIRECTORY: " + datadirectory + newline
 str += "OUTPUT_DIRECTORY: " + outputdirectory + newline
-str += "ID6_DIRECTORY: " + id6directory + newline
 str += "EXTENSTION: " + extension + newline
 str += "WAVELENGTH: " + string(wavelength) + newline
 str += "DETECTORDISTANCE: " + string(detectordistance) + newline
-str += "ID6_PIXELSIZE: " + string(ID6_psize) + newline
-str += "ID6_CENTER: " + string(ID6_center) + newline
-str += "ID6_ETAMIN: " + string(ID6_etamin) + newline
-str += "ID6_ETAMAX: " + string(ID6_etamax) + newline
-str += "ID6_DARK: " + ID6_dark + newline
 str += "EXPERIMENTTYPE: " +  experimenttype + newline
 
 if (STRUPCASE(!VERSION.OS_FAMILY) eq 'UNIX') then begin
@@ -198,9 +178,8 @@ END
 
 ; ****************************************** SAVEPARAMS ********************************
 PRO saveparams, base, log
-common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory
 common experiment, wavelength, detectordistance, experimenttype
-common esrfid6, ID6_psize, ID6_center, ID6_etamin, ID6_etamax, ID6_dark
 common inputfiles, inputfiles, activeset
 filename=dialog_pickfile(title='Save parameters into...', path=defaultdirectory, DIALOG_PARENT=base, DEFAULT_EXTENSION='.par', FILTER=['*.par'], /WRITE, /OVERWRITE_PROMPT)
 if (filename ne '') then begin
@@ -211,24 +190,12 @@ if (filename ne '') then begin
 	printf, lun, 'directory|'+datadirectory
 	printf, lun, '# Directory with image fits'
 	printf, lun, 'outputdirectory|'+outputdirectory
-	printf, lun, '# Directory with ID6 diffraction data'
-	printf, lun, 'id6directory|'+id6directory
 	printf, lun, '# Wavelength (Angstroms)'
 	printf, lun, 'wavelength|'+ STRING(wavelength, /PRINT)
 	printf, lun, '# Detector distance (mm)'
 	printf, lun, 'detectordistance|' + STRING(detectordistance, /PRINT)
-	printf, lun, '# Experiment type ("General" or "ESRFID06")'
+	printf, lun, '# Experiment type ("General")'
 	printf, lun, 'experimenttype|' + experimenttype
-;	printf, lun, '# ID6 beam center (pixels)'
-;	printf, lun, 'ID6_center|' + STRING(ID6_center, /PRINT)
-;	printf, lun, '# ID6 Pixel size (microns)'
-;	printf, lun, 'ID6_psize|' + STRING(ID6_psize, /PRINT)
-;	printf, lun, '# ID6 eta min (degrees)'
-;	printf, lun, 'ID6_etamin|' + STRING(ID6_etamin, /PRINT)
-;	printf, lun, '# ID6 eta max (degrees)'
-;	printf, lun, 'ID6_etamax|' + STRING(ID6_etamax, /PRINT)
-;	printf, lun, '# ID6 dark file'
-;	printf, lun, 'ID6_dark|' + ID6_dark
 	if (size(inputfiles, /TYPE) ne 0) then begin
 		input = STRJOIN( inputfiles, ';' )
 		printf, lun, '# Input files'
@@ -242,8 +209,7 @@ endif
 END
 
 PRO readparams, base, log, listSets, stash
-common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
-common esrfid6, ID6_psize, ID6_center, ID6_etamin, ID6_etamax, ID6_dark
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory
 common experiment, wavelength, detectordistance, experimenttype
 filename=dialog_pickfile(title='Read parameters from...', path=defaultdirectory, DIALOG_PARENT=base, FILTER=['*.par','*.*'], /must_exist)
 if (filename ne '') then begin
@@ -258,14 +224,8 @@ if (filename ne '') then begin
 			'outputdirectory': outputdirectory = words[1]
 			'wavelength': wavelength = float(words[1])
 			'detectordistance': detectordistance = float(words[1])
-			'id6directory': id6directory = words[1]
 			'inputfiles': inpufilesFromList, log, listSets, strsplit(words[1], ';', /EXTRACT)
 			'experimenttype': experimenttype = words[1]
-;			'ID6_psize': ID6_psize = float(words[1])
-;			'ID6_center': ID6_center = float(words[1])
-;			'ID6_etamin': ID6_etamin = float(words[1])
-;			'ID6_etamax': ID6_etamax = float(words[1])
-;			'ID6_dark': ID6_dark = words[1]
 			else:
 		endcase
 	endwhile 
@@ -278,7 +238,7 @@ end
 
 ; ****************************************** CHGINPUTDIR *********************************
 PRO chgInputDir, base, log, widget
-common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory
 result=dialog_pickfile(/DIRECTORY,title='Select input directory', path=datadirectory, DIALOG_PARENT=base)
 if (result ne '') then begin
     datadirectory = result
@@ -291,7 +251,7 @@ END
 
 ; ****************************************** CHGOUTPUTDIR *************************************
 PRO chgOutputDir, base, log, widget
-common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory
 result=dialog_pickfile(/DIRECTORY,title='Select output directory', path=outputdirectory, DIALOG_PARENT=base)
 if (result ne '') then begin
     outputdirectory=result
@@ -363,140 +323,6 @@ WIDGET_CONTROL, basedialog, /REALIZE
 XMANAGER, 'chgDetectorDistance', basedialog
 END
 
-; ****************************************** ID6 Parameter changes *************************************
-
-PRO chgID6PixelSize_event, ev
-common esrfid6, ID6_psize, ID6_center, ID6_etamin, ID6_etamax, ID6_dark
-  WIDGET_CONTROL, ev.TOP, GET_UVALUE=stash
-  WIDGET_CONTROL, ev.ID, GET_UVALUE=uval
-  if (uval eq 'OK') then begin
-    WIDGET_CONTROL, stash.text, GET_VALUE=tt
-    ID6_psize = float(tt)
-    label = 'ID6 pixel size: ' + STRING(ID6_psize, /PRINT) + ' microns'
-    WIDGET_CONTROL, stash.widget, SET_VALUE=STRTRIM(STRING(ID6_psize, /PRINT),2)
-    logit, stash.log, label
-  endif
-  WIDGET_CONTROL, ev.TOP, /DESTROY
-END
-
-PRO chgID6PixelSize, base, log, widget
-common esrfid6, ID6_psize, ID6_center, ID6_etamin, ID6_etamax, ID6_dark
-  basedialog = WIDGET_BASE(/COLUMN, /MODAL, GROUP_LEADER=base)
-  base =  WIDGET_BASE(basedialog,/ROW)
-  label = WIDGET_LABEL(base, VALUE='ID6 Pixel Size (in microns)', /ALIGN_LEFT)
-  text = WIDGET_TEXT(base, XSIZE=10, VALUE=STRING(ID6_psize,/PRINT), /EDITABLE)
-  buttons = WIDGET_BASE(basedialog,/ROW, /GRID_LAYOUT, /ALIGN_CENTER)
-  ok = WIDGET_BUTTON(buttons, VALUE='Ok', UVALUE='OK')
-  cancel = WIDGET_BUTTON(buttons, VALUE='Cancel', UVALUE='CANCEL')
-  stash = {widget:widget, text:text, log:log}
-  WIDGET_CONTROL, basedialog, SET_UVALUE=stash
-  WIDGET_CONTROL, basedialog, /REALIZE
-  XMANAGER, 'chgID6PixelSize', basedialog
-END
-
-PRO chgID6Center_event, ev
-  common esrfid6, ID6_psize, ID6_center, ID6_etamin, ID6_etamax, ID6_dark
-  WIDGET_CONTROL, ev.TOP, GET_UVALUE=stash
-  WIDGET_CONTROL, ev.ID, GET_UVALUE=uval
-  if (uval eq 'OK') then begin
-    WIDGET_CONTROL, stash.text, GET_VALUE=tt
-    ID6_center = float(tt)
-    label = 'ID6 beam center: ' + STRING(ID6_center, /PRINT) + ' pixels'
-    WIDGET_CONTROL, stash.widget, SET_VALUE=STRTRIM(STRING(ID6_center, /PRINT),2)
-    logit, stash.log, label
-  endif
-  WIDGET_CONTROL, ev.TOP, /DESTROY
-END
-
-PRO chgID6Center, base, log, widget
-  common esrfid6, ID6_psize, ID6_center, ID6_etamin, ID6_etamax, ID6_dark
-  basedialog = WIDGET_BASE(/COLUMN, /MODAL, GROUP_LEADER=base)
-  base =  WIDGET_BASE(basedialog,/ROW)
-  label = WIDGET_LABEL(base, VALUE='ID6 beam center (in pixels)', /ALIGN_LEFT)
-  text = WIDGET_TEXT(base, XSIZE=10, VALUE=STRING(ID6_center,/PRINT), /EDITABLE)
-  buttons = WIDGET_BASE(basedialog,/ROW, /GRID_LAYOUT, /ALIGN_CENTER)
-  ok = WIDGET_BUTTON(buttons, VALUE='Ok', UVALUE='OK')
-  cancel = WIDGET_BUTTON(buttons, VALUE='Cancel', UVALUE='CANCEL')
-  stash = {widget:widget, text:text, log:log}
-  WIDGET_CONTROL, basedialog, SET_UVALUE=stash
-  WIDGET_CONTROL, basedialog, /REALIZE
-  XMANAGER, 'chgID6Center', basedialog
-END
-
-
-PRO chgID6EtaMin_event, ev
-  common esrfid6, ID6_psize, ID6_center, ID6_etamin, ID6_etamax, ID6_dark
-  WIDGET_CONTROL, ev.TOP, GET_UVALUE=stash
-  WIDGET_CONTROL, ev.ID, GET_UVALUE=uval
-  if (uval eq 'OK') then begin
-    WIDGET_CONTROL, stash.text, GET_VALUE=tt
-    ID6_etamin = float(tt)
-    label = 'ID6 minimum eta: ' + STRING(ID6_etamin, /PRINT) + ' degrees'
-    WIDGET_CONTROL, stash.widget, SET_VALUE=STRTRIM(STRING(ID6_etamin, /PRINT),2)
-    logit, stash.log, label
-  endif
-  WIDGET_CONTROL, ev.TOP, /DESTROY
-END
-
-PRO chgID6EtaMin, base, log, widget
-  common esrfid6, ID6_psize, ID6_center, ID6_etamin, ID6_etamax, ID6_dark
-  basedialog = WIDGET_BASE(/COLUMN, /MODAL, GROUP_LEADER=base)
-  base =  WIDGET_BASE(basedialog,/ROW)
-  label = WIDGET_LABEL(base, VALUE='ID6 minimum eta (in degrees)', /ALIGN_LEFT)
-  text = WIDGET_TEXT(base, XSIZE=10, VALUE=STRING(ID6_etamin,/PRINT), /EDITABLE)
-  buttons = WIDGET_BASE(basedialog,/ROW, /GRID_LAYOUT, /ALIGN_CENTER)
-  ok = WIDGET_BUTTON(buttons, VALUE='Ok', UVALUE='OK')
-  cancel = WIDGET_BUTTON(buttons, VALUE='Cancel', UVALUE='CANCEL')
-  stash = {widget:widget, text:text, log:log}
-  WIDGET_CONTROL, basedialog, SET_UVALUE=stash
-  WIDGET_CONTROL, basedialog, /REALIZE
-  XMANAGER, 'chgID6EtaMin', basedialog
-END
-
-
-PRO chgID6EtaMax_event, ev
-  common esrfid6, ID6_psize, ID6_center, ID6_etamin, ID6_etamax, ID6_dark
-  WIDGET_CONTROL, ev.TOP, GET_UVALUE=stash
-  WIDGET_CONTROL, ev.ID, GET_UVALUE=uval
-  if (uval eq 'OK') then begin
-    WIDGET_CONTROL, stash.text, GET_VALUE=tt
-    ID6_etamax = float(tt)
-    label = 'ID6 maximum eta: ' + STRING(ID6_etamax, /PRINT) + ' degrees'
-    WIDGET_CONTROL, stash.widget, SET_VALUE=STRTRIM(STRING(ID6_etamax, /PRINT),2)
-    logit, stash.log, label
-  endif
-  WIDGET_CONTROL, ev.TOP, /DESTROY
-END
-
-PRO chgID6EtaMax, base, log, widget
-  common esrfid6, ID6_psize, ID6_center, ID6_etamin, ID6_etamax, ID6_dark
-  basedialog = WIDGET_BASE(/COLUMN, /MODAL, GROUP_LEADER=base)
-  base =  WIDGET_BASE(basedialog,/ROW)
-  label = WIDGET_LABEL(base, VALUE='ID6 maximum eta (in degrees)', /ALIGN_LEFT)
-  text = WIDGET_TEXT(base, XSIZE=10, VALUE=STRING(ID6_etamax,/PRINT), /EDITABLE)
-  buttons = WIDGET_BASE(basedialog,/ROW, /GRID_LAYOUT, /ALIGN_CENTER)
-  ok = WIDGET_BUTTON(buttons, VALUE='Ok', UVALUE='OK')
-  cancel = WIDGET_BUTTON(buttons, VALUE='Cancel', UVALUE='CANCEL')
-  stash = {widget:widget, text:text, log:log}
-  WIDGET_CONTROL, basedialog, SET_UVALUE=stash
-  WIDGET_CONTROL, basedialog, /REALIZE
-  XMANAGER, 'chgID6EtaMax', basedialog
-END
-
-PRO chgID6Dark, base, log, widget
-  common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
-  common esrfid6, ID6_psize, ID6_center, ID6_etamin, ID6_etamax, ID6_dark
-  filters = ['*.tif', '*.tiff', '*.*']
-  result=dialog_pickfile(title='Select ID6 dark dataset', path=id6directory, DIALOG_PARENT=base, filter=filters, /must_exist)
-  if (result ne '') then begin
-    ID6_dark = result
-    message = 'New ID6 dark file: ' + ID6_dark
-    WIDGET_CONTROL, widget, SET_VALUE=ID6_dark
-    logit, log, message
-    FDECOMP, result, disk, dir, name, qual, version
-    id6directory = disk+dir
-  endif
-END
 
 ; ****************************************** READ AND CONVERT CHI FILES **************
 
@@ -853,7 +679,7 @@ END
 ; ****************************************** SETUP INPUT (DATA) FILES **************
 
 pro oneInputFile, widget, log
-common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory
 common inputfiles, inputfiles, activeset
 result=dialog_pickfile(title='Input data from...', path=datadirectory, DIALOG_PARENT=base, FILTER=['*.idl','*.*'], /must_exist)
 if (result ne '') then begin
@@ -878,7 +704,7 @@ END
 
 pro inpufilesFromList, log, list_widget, list
 common inputfiles, inputfiles, activeset
-common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory
 n = n_elements(list)
 inputText = strarr(n)
 for j=0,n-1 do begin
@@ -899,7 +725,7 @@ end
 
 PRO multipleInputFiles_event, ev
 common inputfiles, inputfiles, activeset
-common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory
 WIDGET_CONTROL, ev.TOP, GET_UVALUE=stash
 WIDGET_CONTROL, ev.ID, GET_UVALUE=uval
 log=stash.log
@@ -987,7 +813,7 @@ end
 ; change active dataset (load the data and update list in main gui)
 pro changeActiveSet, log, list, index
 common inputfiles, inputfiles, activeset
-common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory
 file = datadirectory + inputfiles(index)
 res = readfile(file)
 if (res eq 1) then begin
@@ -1012,7 +838,7 @@ END
 
 PRO removeSlice_event, ev
 common inputfiles, inputfiles, activeset
-common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory
 common datainfo, filenames, alphastart, alphaend, intervalle, date
 common rawdata, nalpha, ntheta, alpha, twotheta, data
 WIDGET_CONTROL, ev.TOP, GET_UVALUE=stash
@@ -1084,7 +910,7 @@ END
 
 ; Export current dataset into ESG file
 pro maudExport, base, listSets, log
-common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory
 common inputfiles, inputfiles, activeset
 if (FILE_TEST( outputdirectory, /DIRECTORY) ne 1) then begin
         tmp = DIALOG_MESSAGE("Error with directory: " + outputdirectory, /ERROR)
@@ -1105,7 +931,7 @@ end
 
 ; Export all IDL files into ESG file
 pro maudExportAllFiles, base, listSets, log
-common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory
 common inputfiles, inputfiles, activeset
 if (FILE_TEST( outputdirectory, /DIRECTORY) ne 1) then begin
         tmp = DIALOG_MESSAGE("Error with directory: " + outputdirectory, /ERROR)
@@ -1320,7 +1146,7 @@ END
 
 PRO fit2dmac, base, log
 common fonts, titlefont, boldfont, mainfont, avFontHeight
-common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory
 fit2d = WIDGET_BASE(/COLUMN, Title='Create macro for fit2d (single images)', /MODAL, GROUP_LEADER=base)
 fit2dMacLa = WIDGET_LABEL(fit2d, VALUE='Create macro for fit2d (single images)', /ALIGN_center, font=titlefont)
 fit2dMacDir = WIDGET_BASE(fit2d, /ROW)
@@ -1352,7 +1178,7 @@ END
 ; subroutine with GUI to create macro for a multiple images
 
 PRO chgDiffDir, base, widget
-common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory
 result=dialog_pickfile(/DIRECTORY,title='Directory with diffraction data...', path=defaultdirectory, DIALOG_PARENT=base)
 if (result ne '') then begin
     WIDGET_CONTROL, widget, SET_VALUE=result
@@ -1410,7 +1236,7 @@ END
 
 PRO fit2dmaclong, base, log
 common fonts, titlefont, boldfont, mainfont, avFontHeight
-common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory
 fit2d = WIDGET_BASE(/COLUMN, Title='Create macro for fit2d (multiple images)', /MODAL, GROUP_LEADER=base)
 fit2dMacLa = WIDGET_LABEL(fit2d, VALUE='Create macro for fit2d (multiple images)', /ALIGN_CENTER, font=titlefont)
 ; Input files: diffraction images
@@ -1569,7 +1395,7 @@ END
 
 
 PRO fit2dmacid06_event, ev
-common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory
 WIDGET_CONTROL, ev.TOP, GET_UVALUE=stash
 WIDGET_CONTROL, ev.ID, GET_UVALUE=uval
 log=stash.log
@@ -1601,7 +1427,7 @@ END
 
 PRO fit2dmacID06, base, log
 common fonts, titlefont, boldfont, mainfont, avFontHeight
-common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory
 common experiment, wavelength, detectordistance, experimenttype
 fit2d = WIDGET_BASE(/COLUMN, Title='Create macro for fit2d (ID06 data, multipe images)', /MODAL, GROUP_LEADER=base, TAB_MODE=1)
 ; Options
@@ -1751,11 +1577,6 @@ CASE ev.id OF
 		'REMOVESLICE': removeSlice, stash.base
 		'WAVE': chgWavelength, stash.base, stash.log, stash.waveText
 		'DETECTORDISTANCE': chgDetectorDistance, stash.base, stash.log, stash.ipDistanceText
-;		'ID6PIXELSIZE': chgID6PixelSize, stash.base, stash.log, stash.id6PixelSizeText
-;		'ID6CENTER': chgID6Center, stash.base, stash.log, stash.id6CenterText
-;		'ID6ETAMIN': chgID6EtaMin, stash.base, stash.log, stash.id6EtaMinText
-;		'ID6ETAMAX': chgID6EtaMax, stash.base, stash.log, stash.id6EtaMaxText
-;		'ID6DARK': chgID6Dark, stash.base, stash.log, stash.id6DarkText
 		'ONEIDL': oneInputFile, stash.listSets, stash.log
 		'MULTIPLEIDL': multipleInputFiles, stash.base, stash.listSets, stash.log
 		'CONVERTONECHI': convertonechi, stash.base, stash.log
@@ -1766,9 +1587,6 @@ CASE ev.id OF
 		'FIT2DMACID06': fit2dmacID06, stash.base, stash.log
 		'FIT2DMAC': fit2dmac, stash.base, stash.log
 		'FIT2DMACLONG': fit2dmaclong, stash.base, stash.log
-		'ID6CALIB': performID6Calibration, stash.base, stash.log, stash.ipDistanceText, stash.id6CenterText
-		'ID6CONVERT': doID6SaveData, stash.base, stash.log
-		'ID6UNCAKE':doID6Uncake, stash.base, stash.log
 		'MAUDEXPORT': maudExport, stash.base, stash.listSets, stash.log
 		'LISTSETS': changeActiveSet, stash.log, stash.listSets, active[0]
 		'MAPPLOT': mapplotActiveSet, stash.base, stash.log, stash.listSets, active[0]
@@ -1794,9 +1612,8 @@ endcase
 END
 
 PRO gui
-common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory
 common experiment, wavelength, detectordistance, experimenttype
-; common esrfid6, ID6_psize, ID6_center, ID6_etamin, ID6_etamax, ID6_dark
 common fonts, titlefont, boldfont, mainfont, avFontHeight
 ; default values
 load_defaults_startup
@@ -1822,13 +1639,7 @@ fit2d_bttn3 = WIDGET_BUTTON(fit2d_old, VALUE='Convert CHI created by Multifit ma
 fit2d_bttn4 = WIDGET_BUTTON(fit2d_old, VALUE='Convert CHI created by Multifit macro to IDL: multiple sets', UVALUE='CONVERTMULTIPLECHI')
 fit2d_bttn4 = WIDGET_BUTTON(fit2d_old, VALUE='Convert CHI created by Multifit macro to IDL: file series', UVALUE='CONVERTFILESERIES')
 
-
-; ID 06 menu, removed. We rely on fit2d
-; id6_menu = WIDGET_BUTTON(bar, VALUE='ESRF ID06', /MENU)
-; bttn1 = WIDGET_BUTTON(id6_menu, VALUE='Calibration from tif', UVALUE='ID6CALIB')
-; bttn2 = WIDGET_BUTTON(id6_menu, VALUE='Convert tif to multifit', UVALUE='ID6CONVERT')
-; bttn3 = WIDGET_BUTTON(id6_menu, VALUE='Uncake tif to tif', UVALUE='ID6UNCAKE')
-; Other menu
+; Data set menu
 dataset_menu = WIDGET_BUTTON(bar, VALUE='Current dataset', /MENU)
 plotactive = WIDGET_BUTTON(dataset_menu, VALUE='Plot 2D', UVALUE='PLOTONESET')
 mapplot = WIDGET_BUTTON(dataset_menu, VALUE='Mapplot', UVALUE='MAPPLOT')
@@ -1875,30 +1686,10 @@ label1 = WIDGET_LABEL(baseoptionsrow1 , VALUE='Directory with CHI or MULTIFIT da
 label2 = WIDGET_LABEL(baseoptionsrow2 , VALUE='Directory to save fits: ', /ALIGN_LEFT, XSIZE=250)
 label3 = WIDGET_LABEL(baseoptionsrow3 , VALUE='Wavelength (angstroms)', /ALIGN_LEFT, XSIZE=250 )
 label4 = WIDGET_LABEL(baseoptionsrow4 , VALUE='Sample-Detector distance (mm)', /ALIGN_LEFT, XSIZE=250 )
-; if (experimenttype eq "ESRFID06") then begin
-;  label =  WIDGET_LABEL(baseoptionsrow5 , VALUE='ID6 pixel size (microns)', /ALIGN_LEFT, XSIZE=250 )
-;  label =  WIDGET_LABEL(baseoptionsrow6 , VALUE='ID6 center (pixels)', /ALIGN_LEFT, XSIZE=250 )
-;  label =  WIDGET_LABEL(baseoptionsrow7 , VALUE='ID6 eta min (degrees)', /ALIGN_LEFT, XSIZE=250 )
-;  label =  WIDGET_LABEL(baseoptionsrow8 , VALUE='ID6 eta max (degrees)', /ALIGN_LEFT, XSIZE=250 )
-;  label =  WIDGET_LABEL(baseoptionsrow9 , VALUE='ID6 dark file', /ALIGN_LEFT, XSIZE=250 )
-;endif
 inputDirText = WIDGET_BUTTON(baseoptionsrow1, /ALIGN_LEFT, VALUE=datadirectory, XSIZE=400, UVALUE='INPUTDIR') 
 outputDirText = WIDGET_BUTTON(baseoptionsrow2, /ALIGN_LEFT, VALUE=outputdirectory, XSIZE=400,  UVALUE='OUTPUTDIR') 
 waveText = WIDGET_BUTTON(baseoptionsrow3, /ALIGN_LEFT, VALUE=STRTRIM(STRING(wavelength,/PRINT),2), XSIZE=80,  UVALUE='WAVE') 
 ipDistanceText = WIDGET_BUTTON(baseoptionsrow4, /ALIGN_LEFT, VALUE=STRTRIM(STRING(detectordistance,/PRINT),2), XSIZE=80,  UVALUE='DETECTORDISTANCE') 
-; if (experimenttype eq "ESRFID06") then begin
-;  id6PixelSizeText = WIDGET_BUTTON(baseoptionsrow5, /ALIGN_LEFT, VALUE=STRTRIM(STRING(ID6_psize,/PRINT),2), XSIZE=80,  UVALUE='ID6PIXELSIZE')
-;  id6CenterText = WIDGET_BUTTON(baseoptionsrow6, /ALIGN_LEFT, VALUE=STRTRIM(STRING(ID6_center,/PRINT),2), XSIZE=80, UVALUE='ID6CENTER')
-;  id6EtaMinText = WIDGET_BUTTON(baseoptionsrow7, /ALIGN_LEFT, VALUE=STRTRIM(STRING(ID6_etamin,/PRINT),2), XSIZE=80,  UVALUE='ID6ETAMIN')
-;  id6EtaMaxText = WIDGET_BUTTON(baseoptionsrow8, /ALIGN_LEFT, VALUE=STRTRIM(STRING(ID6_etamax,/PRINT),2), XSIZE=80, UVALUE='ID6ETAMAX') 
-;  id6DarkText = WIDGET_BUTTON(baseoptionsrow9, /ALIGN_LEFT, VALUE=ID6_dark, XSIZE=400, UVALUE='ID6DARK') 
-; endif else begin
-;  id6PixelSizeText = 0
-;  id6CenterText = 0 
-;  id6EtaMinText = 0
-;  id6EtaMaxText = 0 
-;  id6DarkText = 0
-; endelse
 ; List datasets and logwindow
 bottom =  WIDGET_BASE(base,/ROW)
 listBase =  WIDGET_BASE(bottom,/COLUMN, FRAME=1)
@@ -1907,11 +1698,6 @@ listSets = Widget_List(listBase, VALUE='', UVALUE='LISTSETS',YSIZE=15, XSIZE=15)
 mapplot = WIDGET_BUTTON(listBase, VALUE='Mapplot', UVALUE='MAPPLOT')
 plotactive = WIDGET_BUTTON(listBase, VALUE='Plot', UVALUE='PLOTONESET')
 log = WIDGET_TEXT(bottom, XSIZE=60, YSIZE=22, /ALIGN_CENTER, /EDITABLE, /WRAP, /SCROLL)
-
-; stash = {base: base, log:log, baseoptions: baseoptions, $
-;  dropListExp: dropListExp, inputDirText:inputDirText, outputDirText:outputDirText, waveText:waveText, ipDistanceText: ipDistanceText, $
-;  id6PixelSizeText: id6PixelSizeText, id6CenterText:id6CenterText, id6EtaMinText:id6EtaMinText, id6EtaMaxText:id6EtaMaxText, id6DarkText:id6DarkText, $
-;  listSets: listSets, defaultBase:defaultBase, bottom:bottom, listBase:listBase, listLa:listLa, mapplot:mapplot, plotactive:plotactive }
 
 stash = {base: base, log:log, baseoptions: baseoptions, $
   inputDirText:inputDirText, outputDirText:outputDirText, waveText:waveText, ipDistanceText: ipDistanceText, $

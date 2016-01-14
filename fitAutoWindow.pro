@@ -29,7 +29,7 @@
 ;
 
 PRO loadfitmodel, base, widget
-common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory
 	result=dialog_pickfile(title='Select input file', path=outputdirectory, DIALOG_PARENT=base, FILTER=['*.mdl','*.fit','*.*'], /must_exist)
 	if (result ne '') then begin
 		FDECOMP, result, disk, dir, name, qual, version
@@ -61,7 +61,7 @@ common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpds
 END
 
 PRO fitauto,  fitwindow, base, listSets, fitmodel, plot0, plot1, plot2, mapplot, noplot, wVa, autosaveY, autosaveN, stoponerrorY, stoponerrorN
-  common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
+  common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory
 	common inputfiles, inputfiles, activeset
 	common fitresults, fitdata
 	common rawdata, nalpha, ntheta, alpha, twotheta, data

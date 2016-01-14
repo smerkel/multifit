@@ -29,7 +29,7 @@
 .COMPILE 'getindex.pro' 
 .COMPILE 'minmaxval.pro'       
 .COMPILE 'utils.pro'
-.COMPILE 'id6_functions.pro'
+; .COMPILE 'id6_functions.pro'
 .COMPILE 'mpfitfun.pro'
 .COMPILE 'mpfitpeak.pro'
 .COMPILE 'mpfit.pro'

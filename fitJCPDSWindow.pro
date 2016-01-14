@@ -37,7 +37,7 @@ pro fitautoJCPDS, oldbase, jcpds, fitselect, pressureentry, widthentry, wfactore
 common rawdata, nalpha, ntheta, alpha, twotheta, data
 common experiment, wavelength, detectordistance, experimenttype
 common plotit, def, base, draw
-common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory
 ; getting parameters
 WIDGET_CONTROL, pressureentry, GET_VALUE=pressure
 WIDGET_CONTROL, widthentry, GET_VALUE=width
@@ -396,7 +396,7 @@ END
 ; build the interface afterwards
 ;
 PRO fitJCPDSWindow, parent
-common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory
 test = 0
 while (test eq 0) do begin
 	result=dialog_pickfile(title='Enter JCPDS card', path=jcpdsdirectory, DIALOG_PARENT=parent, filter=['*.jcpds', '*.*'], /must_exist)

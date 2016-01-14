@@ -30,7 +30,7 @@
 
 ; export to GIF function
 pro plotinteractive1D_exportgif, event
-  common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
+  common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory
   widget_control, event.top, get_uvalue=pstate
   ; fix the extension
   filters = [['*.gif'], ['GIF']]
@@ -48,7 +48,7 @@ end
 
 ; export to JPEG unction
 pro plotinteractive1D_exportjpg, event
-  common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
+  common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory
   widget_control, event.top, get_uvalue=pstate
   ; fix the extension
   filters = [['*.jpg;*.jpeg'], ['JPEG']]
@@ -66,7 +66,7 @@ end
 
 ; export to postscript
 pro plotinteractive1D_exportps, event
-  common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
+  common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory
   widget_control, event.top, get_uvalue=pstate
   ; get the data in the window
   widget_control, event.top, get_uvalue=pstate
@@ -93,7 +93,7 @@ end
 
 ; export to in chiplot unction
 pro plotinteractive1D_exportchi, event
-  common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
+  common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory
   widget_control, event.top, get_uvalue=pstate
   ; state = {xdata: xdata, ydata:ydata, ncolumns: ncolumns, tlb: tlb, w_id:w_id, draw:draw, status:status, xlabel:xlabel, ylabel:ylabel, title: title, xmin:xmin, xmax:xmax, ymin:ymin, ymax:ymax, sc_xmin:0.0, sc_xmax:0.0, sc_ymin:0.0, sc_ymax:0.0, scaling:0, plotlegend: plotlegend, legend: legend}
   if ((*pstate).ncolumns gt 1) then Result = DIALOG_MESSAGE( "You have several datasets. Only the first will be saved.", DIALOG_PARENT=(*pstate).tlb, /INFORMATION, TITLE="Multifit warning")

@@ -63,7 +63,7 @@ end
 pro read_one, name
 common rawdata, nalpha, ntheta, alpha, twotheta, data
 common datainfo, filenames, alphastart, alphaend, intervalle, date
-common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory
 inputname = name
 nalpha = 1
 file = datadirectory + name  + extension
@@ -98,7 +98,7 @@ end
 function read_all, name, izero, iend, istep, log
 common rawdata, nalpha, ntheta, alpha, twotheta, data
 common datainfo, filenames, alphastart, alphaend, intervalle, date
-common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory
 ON_IOERROR, BADINPUT
 nalphatmp = fix((iend-izero)/istep+1)
 nalpha = nalphatmp[0]
@@ -155,7 +155,7 @@ end
 function read_all_fixed_digits, name, izero, iend, idigits, log
 common rawdata, nalpha, ntheta, alpha, twotheta, data
 common datainfo, filenames, alphastart, alphaend, intervalle, date
-common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory
 ON_IOERROR, BADINPUT
 istep = 1
 nalphatmp = fix((iend-izero)/istep+1)
@@ -213,7 +213,7 @@ end
 function read_multichi, name, startAz, endAz, nAz, log
 common rawdata, nalpha, ntheta, alpha, twotheta, data
 common datainfo, filenames, alphastart, alphaend, intervalle, date
-common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory
 ON_IOERROR, BADINPUT
 nalpha = nAz
 intervalle = 1.0*(endAz-startAz)/nAz

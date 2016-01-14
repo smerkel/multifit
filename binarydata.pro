@@ -20,7 +20,7 @@
 ; *******************************************************************
 
 function savedata, file
-common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory
 common datainfo, filenames, alphastart, alphaend, intervalle, date
 common rawdata, nalpha, ntheta, alpha, twotheta, data
 ON_IOERROR, IOERROR

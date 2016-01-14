@@ -51,7 +51,7 @@ contour, data, /NOERASE ,/FILL, levels = contours, ystyle=1, xstyle=1, backgroun
 end
 
 pro changeFitFile, fitFileEntry
-common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory
 common fitresults, fitdata
 result=dialog_pickfile(title='Select fit results', path=outputdirectory, DIALOG_PARENT=base, FILTER=['*.fit','*.*'], /must_exist)
 if (result ne '') then begin

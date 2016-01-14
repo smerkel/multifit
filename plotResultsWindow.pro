@@ -132,7 +132,7 @@ END
 
 PRO plotResultsWindow, parent 
 common plotresults, def, base, draw, fitdata
-common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory
 common fonts, titlefont, boldfont, mainfont, avFontHeight
 ; Load fit data
 result=dialog_pickfile(title='Select fit results', path=outputdirectory, DIALOG_PARENT=parent, FILTER=['*.fit'], /must_exist)

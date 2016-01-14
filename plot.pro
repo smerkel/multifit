@@ -28,7 +28,7 @@
 
 
 pro startPS, outputfile
-common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory, id6directory
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory
 common devices, mydevice
 mydevice = !D.NAME
 set_plot, 'PS'
