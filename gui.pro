@@ -407,26 +407,24 @@ if (uval eq 'OK') then begin
     fimage = FIX(FLOAT(firstimage[0]))
     limage = FIX(FLOAT(lastimage[0]))
     ; print, slicesInt, typename(slicesInt), n_elements(slicesInt)
-    noclose = 0
+    noclose = 1
     for  i = fimage,limage do begin
 		file = basename + "_" + intformat(i,3)
 		result = read_multichi(file, startiFlt, endiFlt, slicesInt[0], log)
 		if (result eq 1) then begin
 			logit, log, "Read chi files data for " + file
 			outputname = file + ".idl"
-			logit, log, "Saving data in MULTIFIT format into " + outputname
 			res = savedata(outputname)
 			if (res eq 1) then begin
-				logit, log, "Save data in MULTIFIT format to " + outputname + ": success"
+				logit, log, "Saved data in MULTIFIT format to " + outputname
+				noclose = 0
 			endif else begin
 				tmp = DIALOG_MESSAGE(res, /ERROR)
-				logit, log, "Save data in MULTIFIT format: failed"
-				noclose = 1
+				logit, log, "Save data in MULTIFIT format failed for " + outputname
 			endelse
 		endif else begin
 			tmp = DIALOG_MESSAGE(result, /ERROR)
-			logit, log, "Failed reading chi files for " + file
-			noclose = 1
+			logit, log, "Failed reading chi files for " + file + ". Skipping to next dataset."
 		endelse
 	endfor
 	if (noclose eq 0) then WIDGET_CONTROL, ev.TOP, /DESTROY
@@ -729,6 +727,7 @@ common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpds
 WIDGET_CONTROL, ev.TOP, GET_UVALUE=stash
 WIDGET_CONTROL, ev.ID, GET_UVALUE=uval
 log=stash.log
+error = 0
 if (uval eq 'OK') then begin
     WIDGET_CONTROL, stash.inputFilesBaseSt, GET_VALUE=base
     WIDGET_CONTROL, stash.inputFilesFirstSt, GET_VALUE=firstS
@@ -744,17 +743,18 @@ if (uval eq 'OK') then begin
 	filenameshort = strtrim(base) + "_" + fileindex + ".idl"
 	filename = datadirectory + filenameshort
 	if (FILE_TEST(filename) ne 1) then begin
-		tmp = DIALOG_MESSAGE(filenameshort + " is not in your data directory.", /ERROR)
-		logit, log, "Set multiple datasets: failed on " + filenameshort
-		return
-	endif
-	inputText(n) = filenameshort
-	n = n + 1
+		logit, log, "Error: " + filenameshort + " is not in your data directory."
+		error = 1
+	endif else begin
+		inputText(n) = filenameshort
+		n = n + 1
+	endelse
     endfor
     WIDGET_CONTROL, stash.widget, SET_VALUE=inputText
     inputfiles = inputText
     logit, log, "Set multipe datasets: " + strtrim(base) + "_" + intformat(first,digits) + ".idl to " +  strtrim(base) + "_" + intformat(last,digits) + ".idl"
     changeActiveSet, log, stash.widget, 0
+	if (error eq 1) then tmp=DIALOG_MESSAGE("Finished loading. Some files were missing. Details in log window.", /ERROR)
     WIDGET_CONTROL, ev.TOP, /DESTROY
 endif else begin
     logit, log, "Setting multipe input files... Cancel."
