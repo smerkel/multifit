@@ -390,9 +390,17 @@ END
 
 ; Convert series of chi files created by Fit2d multi-chi output for a whole load of images
 PRO converfileseriesmultichi_event, ev
+common inputfiles, inputfiles, activeset
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory
 WIDGET_CONTROL, ev.TOP, GET_UVALUE=stash
 WIDGET_CONTROL, ev.ID, GET_UVALUE=uval
 log=stash.log
+; HELP, /STRUCTURE, ev
+; Catching return keys in WIDGET_TEXT
+tn = tag_names(ev)
+index = where(tn eq "TYPE", nmatch)
+if (nmatch gt 0) then if (ev.TYPE eq 0) then uval='OK'
+;
 if (uval eq 'OK') then begin
     WIDGET_CONTROL, stash.startiText, GET_VALUE=starti
     WIDGET_CONTROL, stash.endiText, GET_VALUE=endi
@@ -408,26 +416,54 @@ if (uval eq 'OK') then begin
     limage = FIX(FLOAT(lastimage[0]))
     ; print, slicesInt, typename(slicesInt), n_elements(slicesInt)
     noclose = 1
+	error = 0
     for  i = fimage,limage do begin
 		file = basename + "_" + intformat(i,3)
 		result = read_multichi(file, startiFlt, endiFlt, slicesInt[0], log)
-		if (result eq 1) then begin
-			logit, log, "Read chi files data for " + file
-			outputname = file + ".idl"
-			res = savedata(outputname)
-			if (res eq 1) then begin
-				logit, log, "Saved data in MULTIFIT format to " + outputname
-				noclose = 0
+		if (isa(result,/number)) then begin
+			if (result eq 1) then begin
+				logit, log, "Read chi files data for " + file
+				outputname = file + ".idl"
+				res = savedata(outputname)
+				if (res eq 1) then begin
+					logit, log, "Saved data in MULTIFIT format to " + outputname
+					noclose = 0
+				endif else begin
+					; tmp = DIALOG_MESSAGE(res, /ERROR)
+					error = 1
+					logit, log, "Save data in MULTIFIT format failed for " + outputname
+				endelse
 			endif else begin
-				tmp = DIALOG_MESSAGE(res, /ERROR)
-				logit, log, "Save data in MULTIFIT format failed for " + outputname
+				; tmp = DIALOG_MESSAGE(result, /ERROR)
+				error = 1
+				logit, log, "Failed reading chi files for " + file + ". Skipping to next dataset."
 			endelse
 		endif else begin
-			tmp = DIALOG_MESSAGE(result, /ERROR)
+			; tmp = DIALOG_MESSAGE(result, /ERROR)
+			error = 1
 			logit, log, "Failed reading chi files for " + file + ". Skipping to next dataset."
 		endelse
 	endfor
-	if (noclose eq 0) then WIDGET_CONTROL, ev.TOP, /DESTROY
+	if (noclose eq 0) then begin
+		n = 0
+		inputText = strarr(limage-fimage+1)
+		for j=fimage,limage do begin
+			fileindex = intformat(j,3);
+			filenameshort = strtrim(basename) + "_" + fileindex + ".idl"
+			filename = datadirectory + filenameshort
+			if (FILE_TEST(filename) eq 1) then begin
+				inputText[n] = filenameshort
+				n = n + 1
+			endif
+		endfor
+		inputText2 = inputText[0:(n-1)]
+		WIDGET_CONTROL, stash.listwidget, SET_VALUE=inputText2
+		inputfiles = inputText
+		logit, log, "Set multipe datasets: " + strtrim(basename) + "_" + intformat(fimage,3) + ".idl to " +  strtrim(basename) + "_" + intformat(limage,3) + ".idl"
+		changeActiveSet, log, stash.listwidget, 0
+		if (error eq 1) then tmp = DIALOG_MESSAGE("Finished converting but there were some error. Have a look at the log window.", /ERROR)
+		WIDGET_CONTROL, ev.TOP, /DESTROY
+	endif else tmp = DIALOG_MESSAGE("Error: no conversion. Have a look at the log window.", /ERROR)
 endif else begin
     logit, log, "Read series of text files: canceled"
     WIDGET_CONTROL, ev.TOP, /DESTROY
@@ -436,7 +472,7 @@ END
 
 
 ; Convert series of chi files created by Fit2d multi-chi output for a whole load of images
-PRO convertfileseriesmultichi, base, log
+PRO convertfileseriesmultichi, base, log, listwidget
 common inputinfo, string
 basedialog = WIDGET_BASE(/COLUMN, /MODAL, GROUP_LEADER=base)
 nameBase =  WIDGET_BASE(basedialog,COLUMN=2, /GRID_LAYOUT, FRAME=1)
@@ -455,7 +491,7 @@ slicesText = WIDGET_TEXT(nameBase, XSIZE=5, /EDITABLE)
 extButtons = WIDGET_BASE(basedialog,/ROW, /GRID_LAYOUT, /ALIGN_CENTER)
 ok = WIDGET_BUTTON(extButtons, VALUE='Ok', UVALUE='OK', xsize=80)
 cancel = WIDGET_BUTTON(extButtons, VALUE='Cancel', UVALUE='CANCEL', xsize=80)
-stash = {log:log, nameText:nameText, slicesText:slicesText, startiText:startiText, endiText:endiText, fimageText: fimageText, limageText:limageText}
+stash = {log:log, listwidget:listwidget, nameText:nameText, slicesText:slicesText, startiText:startiText, endiText:endiText, fimageText: fimageText, limageText:limageText}
 WIDGET_CONTROL, basedialog, SET_UVALUE=stash
 WIDGET_CONTROL, basedialog, /REALIZE
 XMANAGER, 'converfileseriesmultichi', basedialog
@@ -746,11 +782,12 @@ if (uval eq 'OK') then begin
 		logit, log, "Error: " + filenameshort + " is not in your data directory."
 		error = 1
 	endif else begin
-		inputText(n) = filenameshort
+		inputText[n] = filenameshort
 		n = n + 1
 	endelse
     endfor
-    WIDGET_CONTROL, stash.widget, SET_VALUE=inputText
+	inputText2 = inputText[0:(n-1)]
+    WIDGET_CONTROL, stash.widget, SET_VALUE=inputText2
     inputfiles = inputText
     logit, log, "Set multipe datasets: " + strtrim(base) + "_" + intformat(first,digits) + ".idl to " +  strtrim(base) + "_" + intformat(last,digits) + ".idl"
     changeActiveSet, log, stash.widget, 0
@@ -1024,8 +1061,9 @@ CASE ev.id OF
 		'CONVERTMULTIPLECHI': convertmultiplechi, stash.base, stash.log
 		'CONVERTFILESERIES': convertfileseries, stash.base, stash.log
 		'CONVERTONEIMAGEMULTICHI': convertonemultichi, stash.base, stash.log
-		'CONVERTFILESERIESMULTICHI': convertfileseriesmultichi, stash.base, stash.log
+		'CONVERTFILESERIESMULTICHI': convertfileseriesmultichi, stash.base, stash.log, stash.listSets
 		'FIT2DMACID06': fit2dmacID06, stash.base, stash.log
+		'FIT2DMAC2DDATA': fit2dmac2DData, stash.base, stash.log
 		'FIT2DMAC': fit2dmac, stash.base, stash.log
 		'FIT2DMACLONG': fit2dmaclong, stash.base, stash.log
 		'MAUDEXPORT': maudExport, stash.base, stash.listSets, stash.log
