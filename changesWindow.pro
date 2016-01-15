@@ -18,8 +18,11 @@ la = WIDGET_TEXT(infobase, XSIZE=80, YSIZE=30, /ALIGN_LEFT, /EDITABLE, /WRAP)
 ccr = STRING(13B) ; Carriage Return
 clf = STRING([10B]) ; line feed
 text = "Multifit" + clf
-text += "Compiled Dec 28 2015" + clf + clf
+text += "Compiled Jan 14 2016" + clf + clf
 text += "Recent changes" + clf
+text += "- Jan 2016: many improvements to the UI. You can now load IDL data file series with gaps." + clf
+text += "- Jan 2016: updated fit2d macro for regular 2D data. It should be much faster than previous version at fit2d will calculate one cake only per diffraction image. It uses the new multichi export in fit2d" + clf
+text += "- Jan 2016: new fit2d macro for data at ESRF ID06 beamline" + clf
 text += "- Jan 2016: removed specific functions to change experiment type (not used anymore)" + clf
 text += "- Jan 2016: fixed MAUD export, export current dataset only" + clf
 text += "- Dec 2015: removed requirement for azimuth to be integer in automated fitting" + clf
