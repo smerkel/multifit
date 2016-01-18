@@ -211,6 +211,9 @@ END
 PRO readparams, base, log, listSets, stash
 common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory
 common experiment, wavelength, detectordistance, experimenttype
+;stash = {base: base, log:log, baseoptions: baseoptions, $
+;  inputDirText:inputDirText, outputDirText:outputDirText, waveText:waveText, ipDistanceText: ipDistanceText, $
+;  listSets: listSets, defaultBase:defaultBase, bottom:bottom, listBase:listBase, listLa:listLa, mapplot:mapplot, plotactive:plotactive }
 filename=dialog_pickfile(title='Read parameters from...', path=defaultdirectory, DIALOG_PARENT=base, FILTER=['*.par','*.*'], /must_exist)
 if (filename ne '') then begin
   ; print, "Want to open ", filename
@@ -220,10 +223,22 @@ if (filename ne '') then begin
 		readf, lun, row
 		words = strsplit(row, '|', /EXTRACT)
 		case words[0] of
-			'directory': datadirectory = words[1]
-			'outputdirectory': outputdirectory = words[1]
-			'wavelength': wavelength = float(words[1])
-			'detectordistance': detectordistance = float(words[1])
+			'directory': begin
+				datadirectory = words[1]
+				WIDGET_CONTROL, stash.inputDirText, SET_VALUE=datadirectory
+				end
+			'outputdirectory': begin
+				outputdirectory = words[1]
+				WIDGET_CONTROL, stash.outputDirText, SET_VALUE=outputdirectory
+				end
+			'wavelength': begin
+				wavelength = float(words[1])
+				WIDGET_CONTROL, stash.waveText, SET_VALUE=strtrim(string(wavelength),2)
+				end
+			'detectordistance': begin
+				detectordistance = float(words[1])
+				WIDGET_CONTROL, stash.ipDistanceText, SET_VALUE=strtrim(string(detectordistance),2)
+				end
 			'inputfiles': inpufilesFromList, log, listSets, strsplit(words[1], ';', /EXTRACT)
 			'experimenttype': experimenttype = words[1]
 			else:
