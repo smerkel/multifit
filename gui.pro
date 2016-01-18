@@ -28,6 +28,7 @@
 pro readdefault
 common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory
 common experiment, wavelength, detectordistance, experimenttype
+common inputfiles, inputfiles, activeset
 defaultdir = GETENV('HOME')
 ; set default values
 datadirectory = defaultdir
@@ -59,6 +60,10 @@ if (STRUPCASE(!VERSION.OS_FAMILY) eq 'UNIX') then begin
           "WAVELENGTH:": wavelength = float(word[1])
           "DETECTORDISTANCE:": detectordistance = float(word[1])
           "EXPERIMENTTYPE:": experimenttype = word[1]
+          'INPUTFILES': begin
+              inpufiles = strsplit(words[1], ';', /EXTRACT)
+              activeset = 0
+              end
           else:
         endcase
       endif
@@ -72,6 +77,7 @@ end
 pro savedefaults
 common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory
 common experiment, wavelength, detectordistance, experimenttype
+common inputfiles, inputfiles, activeset
 
 if (!D.NAME eq 'WIN') then newline = string([13B, 10B]) else newline = string(10B)
 
@@ -84,6 +90,11 @@ str += "EXTENSTION: " + extension + newline
 str += "WAVELENGTH: " + string(wavelength) + newline
 str += "DETECTORDISTANCE: " + string(detectordistance) + newline
 str += "EXPERIMENTTYPE: " +  experimenttype + newline
+if (size(inputfiles, /TYPE) ne 0) then begin
+	input = STRJOIN( inputfiles, ';' )
+	str += '# Input files' + newline
+	str += 'INPUTFILES|' + input  + newline
+endif
 
 if (STRUPCASE(!VERSION.OS_FAMILY) eq 'UNIX') then begin
   default = GETENV('HOME') + "/" + ".multifit"
@@ -1109,6 +1120,7 @@ PRO gui
 common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory
 common experiment, wavelength, detectordistance, experimenttype
 common fonts, titlefont, boldfont, mainfont, avFontHeight
+common inputfiles, inputfiles, activeset
 ; default values
 load_defaults_startup
 ; base GUI
@@ -1183,7 +1195,9 @@ ipDistanceText = WIDGET_BUTTON(baseoptionsrow4, /ALIGN_LEFT, VALUE=STRTRIM(STRIN
 bottom =  WIDGET_BASE(base,/ROW)
 listBase =  WIDGET_BASE(bottom,/COLUMN, FRAME=1)
 listLa = WIDGET_LABEL(listBase, VALUE='Active datasets', /ALIGN_CENTER)
-listSets = Widget_List(listBase, VALUE='', UVALUE='LISTSETS',YSIZE=15, XSIZE=15)
+if (size(inputfiles, /TYPE) ne 0) then $
+	listSets = Widget_List(listBase, VALUE=inputfiles, UVALUE='LISTSETS',YSIZE=15, XSIZE=15) $
+	else listSets = Widget_List(listBase, VALUE='', UVALUE='LISTSETS',YSIZE=15, XSIZE=15)
 mapplot = WIDGET_BUTTON(listBase, VALUE='Mapplot', UVALUE='MAPPLOT')
 plotactive = WIDGET_BUTTON(listBase, VALUE='Plot', UVALUE='PLOTONESET')
 log = WIDGET_TEXT(bottom, XSIZE=60, YSIZE=22, /ALIGN_CENTER, /EDITABLE, /WRAP, /SCROLL)
