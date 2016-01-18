@@ -113,12 +113,12 @@ if (count eq 0) then indexT = N_ELEMENTS(alpha)-1 else indexT=tmp[count-1]
 datatmp = data(indexB:indexT,indexL:indexR)
 plotdata = ROTATE(datatmp,4) ; 12/2015, this should be 4 to have 2 theta from left to right and azimuth from bottom to top
 contours = contourlevel(plotmin, plotmax)
-rangetheta = float(azMax[0])-float(azMin[0])
-if (rangetheta le 30) then begin
+rangeAz = float(azMax[0])-float(azMin[0])
+if (rangeAz le 30) then begin
 	ticksep = 5
-endif else if (rangetheta le 180) then begin 
+endif else if (rangeAz le 180) then begin 
 	ticksep = 30
-endif else if (rangetheta le 360) then begin
+endif else if (rangeAz le 360) then begin
 	ticksep = 45
 endif else ticksep = 90
 !P.REGION = [0., 0., 0.8, 1.]
@@ -142,12 +142,12 @@ if (count eq 0) then indexT = N_ELEMENTS(alpha)-1 else indexT=tmp[count-1]
 fitarray = fitdata->buildSynthethicData(alpha(indexB:indexT),twotheta(indexL:indexR), indexT-indexB+1, indexR-indexL+1)
 fit = ROTATE(fitarray,4)
 contours = contourlevel(plotmin, plotmax)
-rangetheta = float(azMax[0])-float(azMin[0])
-if (rangetheta le 30) then begin
+rangeAz = float(azMax[0])-float(azMin[0])
+if (rangeAz le 30) then begin
 	ticksep = 5
-endif else if (rangetheta le 180) then begin 
+endif else if (rangeAz le 180) then begin 
 	ticksep = 30
-endif else if (rangetheta le 360) then begin
+endif else if (rangeAz le 360) then begin
 	ticksep = 45
 endif else ticksep = 90
 !P.REGION = [0., 0., 0.8, 1.]
@@ -157,30 +157,41 @@ plotlegend, contours
 !P.REGION = [0., 0., 1., 1.]
 end
 
+
+
 PRO plotBothContour, plotmin, plotmax, thetamin, thetamax, azmin, azmax
 common rawdata, nalpha, ntheta, alpha, twotheta, data
 common fitresults, fitdata
+
 tmp = WHERE(twotheta  GT thetamin[0], count)
 if (count eq 0) then indexL = 0 else indexL = tmp[0]
 tmp = WHERE(twotheta  LT thetamax[0], count)
 if (count eq 0) then indexR = N_ELEMENTS(twotheta)-1 else indexR=tmp[count-1]
-fitarray = fitdata->buildSynthethicData(alpha,twotheta(indexL:indexR), nalpha, indexR-indexL+1)
+tmp  = WHERE(alpha  GT azmin[0], count)
+if (count eq 0) then indexB = 0 else indexB = tmp[0]
+tmp = WHERE(alpha  LT azmax[0], count)
+if (count eq 0) then indexT = N_ELEMENTS(alpha)-1 else indexT=tmp[count-1]
+fitarray = fitdata->buildSynthethicData(alpha(indexB:indexT),twotheta(indexL:indexR), indexT-indexB+1, indexR-indexL+1)
 fit = ROTATE(fitarray,4)
-datatmp = data(*,indexL:indexR)
+datatmp = data(indexB:indexT,indexL:indexR)
 thedata = ROTATE(datatmp,4)
-both = fltarr(indexR-indexL+1,2*nalpha)
-both(*,0:(nalpha-1)) = thedata(*,*)
-both(*,nalpha:(2*nalpha-1)) = fit(*,*)
-alpha2 = fltarr(nalpha*2)
-alpha2(0:(nalpha-1)) = alpha(*)
-alpha2(nalpha:(2*nalpha-1)) = alpha(*)+max(alpha)
+;
+thisnalpha = indexT-indexB+1
+both = fltarr(indexR-indexL+1,2*thisnalpha)
+both[*,0:(thisnalpha-1)] = thedata[*,*]
+both[*,thisnalpha:(2*thisnalpha-1)] = fit[*,*]
+;
+alpha2 = fltarr(thisnalpha*2)
+alpha2[0:(thisnalpha-1)] = alpha[indexB:indexT]
+alpha2[thisnalpha:(2*thisnalpha-1)] = alpha[indexT]+alpha[indexB:indexT]
+; alpha2(nalpha:(2*nalpha-1)) = alpha(*)+max(alpha)
 contours = contourlevel(plotmin, plotmax)
-rangetheta = max(alpha2)-min(alpha2)
-if (rangetheta le 30) then begin
+rangeAz = max(alpha2)-min(alpha2)
+if (rangeAz le 30) then begin
 	ticksep = 5
-endif else if (rangetheta le 180) then begin 
+endif else if (rangeAz le 180) then begin 
 	ticksep = 30
-endif else if (rangetheta le 360) then begin
+endif else if (rangeAz le 360) then begin
 	ticksep = 45
 endif else ticksep = 90
 !P.REGION = [0., 0., 0.8, 1.]
@@ -193,12 +204,17 @@ end
 PRO plotSubstractContour, plotmin, plotmax, thetamin, thetamax, azmin, azmax
 common rawdata, nalpha, ntheta, alpha, twotheta, data
 common fitresults, fitdata
+
 tmp = WHERE(twotheta  GT thetamin[0], count)
 if (count eq 0) then indexL = 0 else indexL = tmp[0]
 tmp = WHERE(twotheta  LT thetamax[0], count)
 if (count eq 0) then indexR = N_ELEMENTS(twotheta)-1 else indexR=tmp[count-1]
-fitarray = fitdata->buildSynthethicData(alpha,twotheta(indexL:indexR), nalpha, indexR-indexL+1)
-datatmp = data(*,indexL:indexR)
+tmp  = WHERE(alpha  GT azmin[0], count)
+if (count eq 0) then indexB = 0 else indexB = tmp[0]
+tmp = WHERE(alpha  LT azmax[0], count)
+if (count eq 0) then indexT = N_ELEMENTS(alpha)-1 else indexT=tmp[count-1]
+fitarray = fitdata->buildSynthethicData(alpha[indexB:indexT],twotheta[indexL:indexR], indexT-indexB+1, indexR-indexL+1)
+datatmp = data[indexB:indexT,indexL:indexR]
 ; we take the subtsraction only where there is a fit, if the fit is equal to zero, we set the 
 ; substraction to 0
 dude = datatmp-fitarray;
@@ -206,17 +222,17 @@ zeros = WHERE(fitarray EQ 0.0)
 dude[zeros] = 0.0  
 dudeplot = ROTATE(dude,4)
 contours = contourlevel(plotmin, plotmax)
-rangetheta = max(alpha)-min(alpha)
-if (rangetheta le 30) then begin
+rangealpha = float(azmax[0])-float(azmin[0])
+if (rangealpha le 30) then begin
 	ticksep = 5
-endif else if (rangetheta le 180) then begin 
+endif else if (rangealpha le 180) then begin 
 	ticksep = 30
-endif else if (rangetheta le 360) then begin
+endif else if (rangealpha le 360) then begin
 	ticksep = 45
 endif else ticksep = 90
 !P.REGION = [0., 0., 0.8, 1.]
 !P.REGION = [0., 0., 0.8, 1.]
-contour, dudeplot, twotheta(indexL:indexR), alpha, /FILL, levels=contours, ystyle=1, xstyle=1, background=255, color = 0, charsize = 1.5, xtitle='two theta', ytitle='azimuth', ytickinterval=ticksep
+contour, dudeplot, twotheta[indexL:indexR], alpha[indexB:indexT], /FILL, levels=contours, ystyle=1, xstyle=1, background=255, color = 0, charsize = 1.5, xtitle='two theta', ytitle='azimuth', ytickinterval=ticksep
 !P.REGION = [0.75, 0.5, 1., 1.]
 plotlegend, contours
 !P.REGION = [0., 0., 1., 1.]
@@ -225,12 +241,17 @@ end
 PRO plotSubstractDataContour, plotmin, plotmax, thetamin, thetamax, azmin, azmax
 common rawdata, nalpha, ntheta, alpha, twotheta, data
 common fitresults, fitdata
+
 tmp = WHERE(twotheta  GT thetamin[0], count)
 if (count eq 0) then indexL = 0 else indexL = tmp[0]
 tmp = WHERE(twotheta  LT thetamax[0], count)
 if (count eq 0) then indexR = N_ELEMENTS(twotheta)-1 else indexR=tmp[count-1]
-fitarray = fitdata->buildSynthethicData(alpha,twotheta(indexL:indexR), nalpha, indexR-indexL+1)
-datatmp = data(*,indexL:indexR)
+tmp  = WHERE(alpha  GT azmin[0], count)
+if (count eq 0) then indexB = 0 else indexB = tmp[0]
+tmp = WHERE(alpha  LT azmax[0], count)
+if (count eq 0) then indexT = N_ELEMENTS(alpha)-1 else indexT=tmp[count-1]
+fitarray = fitdata->buildSynthethicData(alpha[indexB:indexT],twotheta[indexL:indexR], indexT-indexB+1, indexR-indexL+1)
+datatmp = data[indexB:indexT,indexL:indexR]
 ; we take the subtsraction only where there is a fit, if the fit is equal to zero, we set the 
 ; substraction to 0
 dude = datatmp-fitarray;
@@ -238,19 +259,20 @@ zeros = WHERE(fitarray EQ 0.0)
 dude[zeros] = 0.0  
 dude = ROTATE(dude,4)
 datatmp = ROTATE(datatmp,4)
-both = fltarr(indexR-indexL+1,2*nalpha)
-both(*,0:(nalpha-1)) = datatmp(*,*)
-both(*,nalpha:(2*nalpha-1)) = dude(*,*)
+thisnalpha = indexT-indexB+1
+both = fltarr(indexR-indexL+1,2*thisnalpha)
+both[*,0:(thisnalpha-1)] = datatmp[*,*]
+both[*,thisnalpha:(2*thisnalpha-1)] = dude[*,*]
 contours = contourlevel(plotmin, plotmax)
-alpha2 = fltarr(nalpha*2)
-alpha2(0:(nalpha-1)) = alpha(*)
-alpha2(nalpha:(2*nalpha-1)) = alpha(*)+max(alpha)
-rangetheta = max(alpha2)-min(alpha2)
-if (rangetheta le 30) then begin
+alpha2 = fltarr(thisnalpha*2)
+alpha2[0:(thisnalpha-1)] = alpha[indexB:indexT]
+alpha2[thisnalpha:(2*thisnalpha-1)] = alpha[indexB:indexT]+max(alpha[indexB:indexT])
+rangeAz = max(alpha2)-min(alpha2)
+if (rangeAz le 30) then begin
 	ticksep = 5
-endif else if (rangetheta le 180) then begin 
+endif else if (rangeAz le 180) then begin 
 	ticksep = 30
-endif else if (rangetheta le 360) then begin
+endif else if (rangeAz le 360) then begin
 	ticksep = 45
 endif else ticksep = 90
 !P.REGION = [0., 0., 0.8, 1.]
