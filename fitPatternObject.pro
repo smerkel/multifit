@@ -140,7 +140,7 @@ function FitPatternObject::buildSynthethicData, alpha, twotheta, nalpha, ntheta
 builtdata = fltarr(nalpha,ntheta)
 for i=0, nalpha-1 do begin
 	for j=0, self.nsubpat-1 do begin
-		builtdata(i,*) = builtdata(i,*) + (*(self.subpatterns))(j)->syntheticdata(alpha(i),twotheta,ntheta)
+		builtdata[i,*] = builtdata[i,*] + (*(self.subpatterns))[j]->syntheticdata(alpha[i],twotheta,ntheta)
 	endfor
 endfor
 return, builtdata

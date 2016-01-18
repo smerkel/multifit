@@ -442,8 +442,10 @@ end
 ; Otherwise, array of numbers
 function FitSubPatternObject::syntheticdata, alpha,twotheta, ntheta
 spectrum = fltarr(ntheta)
-; Find the index for azimuth
-tmp = WHERE((*(self.deltarange)) EQ alpha, count)
+; finding index for azimuth, we use the azimuth range for the first peak
+; print, (*self.deltarange)
+tmp = WHERE(((alpha+0.01)  gt (*self.deltarange)) and ((alpha-0.01)  lt (*self.deltarange)), count)
+; print, alpha, tmp
 if (count lt 1) then return, spectrum ; No corresponding alpha
 indexalpha = tmp[0]
 ; where are we in 2theta?
@@ -526,7 +528,7 @@ function FitSubPatternObject::readFromascii, lun
 	self.ndelta = fix(readascii(lun, com='#'))
 	;print, 'Npeaks = ' + STRING(self.nPeaks, /PRINT)
 	;print, 'Ndelta = ' + STRING(self.ndelta, /PRINT)
-	self.deltarange=PTR_NEW(intarr(self.ndelta))
+	self.deltarange=PTR_NEW(fltarr(self.ndelta))
 	for i=0, self.ndelta-1 do (*self.deltarange)(i) = float(readascii(lun, com='#'))
 	; Setting up arrays
 	self.twotheta=PTR_NEW(fltarr(self.npeaks,self.ndelta))
