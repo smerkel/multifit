@@ -1170,11 +1170,6 @@ baseoptionsrow1 = WIDGET_BASE(baseoptions,COLUMN=2);
 baseoptionsrow2 = WIDGET_BASE(baseoptions,COLUMN=2);
 baseoptionsrow3 = WIDGET_BASE(baseoptions,COLUMN=2);
 baseoptionsrow4 = WIDGET_BASE(baseoptions,COLUMN=2);
-baseoptionsrow5 = WIDGET_BASE(baseoptions,COLUMN=2);
-baseoptionsrow6 = WIDGET_BASE(baseoptions,COLUMN=2);
-baseoptionsrow7 = WIDGET_BASE(baseoptions,COLUMN=2);
-baseoptionsrow8 = WIDGET_BASE(baseoptions,COLUMN=2);
-baseoptionsrow9 = WIDGET_BASE(baseoptions,COLUMN=2);
 ; Note: SCR_YSIZE=ysizeparams or ysize = ysizeparams: this screws up the displays on Windows systems...
 label1 = WIDGET_LABEL(baseoptionsrow1 , VALUE='Directory with CHI or MULTIFIT data files: ', /ALIGN_LEFT, XSIZE=250 )
 label2 = WIDGET_LABEL(baseoptionsrow2 , VALUE='Directory to save fits: ', /ALIGN_LEFT, XSIZE=250)
