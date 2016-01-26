@@ -80,6 +80,7 @@
 ;  - nloops: number of loops (20)
 ;  - startSmall: 2
 ;  - endSmall: 10
+;  - ignoreration: 0. Calculate (maxIntensity-medianIntensity)/medianIntensity. Do not run fit if below the threshold. Increase this value if you want to skip fit for peaks at orientations where there is no more intensity (texture effects). Only used in automatic fitting
 ; *******************************************************************
 
 ; REMEMEBER: ALL FITS ARE DONE IN PIXELS! THERE ARE CONVERSIONS TO
@@ -87,7 +88,7 @@
 
 pro gaussNpeaksbg, theta, x, y, npeaks, fit, hardbg, sidebg, peakmodel, alpha, AUTO = automatic
 common bginfo, bgdegree, bgCoefs
-common fitoptions, basescale, smallDetection, nLoop, startSmall, endSmall
+common fitoptions, basescale, smallDetection, nLoop, startSmall, endSmall, ignoreratio
 if (keyword_set(automatic)) then auto = 1 else auto = 0
 
 ; Parameters for the fit
@@ -262,12 +263,12 @@ diff = fltarr(maxX+1)
 if (auto eq 0) then begin
 	xleg = xplotmin+0.05*(xplotmax-xplotmin)
     for peak = 0, npeaks-1 do begin
-        estimates(peak) = PTR_NEW(/ALLOCATE_HEAP)
-        xtmp(peak) = PTR_NEW(/ALLOCATE_HEAP)
-        ytmp(peak) = PTR_NEW(/ALLOCATE_HEAP)
-        thetatmp(peak) = PTR_NEW(/ALLOCATE_HEAP)
-        coeffs(peak) = PTR_NEW(/ALLOCATE_HEAP)
-        yfit(peak) = PTR_NEW(/ALLOCATE_HEAP)
+        estimates[peak] = PTR_NEW(/ALLOCATE_HEAP)
+        xtmp[peak] = PTR_NEW(/ALLOCATE_HEAP)
+        ytmp[peak] = PTR_NEW(/ALLOCATE_HEAP)
+        thetatmp[peak] = PTR_NEW(/ALLOCATE_HEAP)
+        coeffs[peak] = PTR_NEW(/ALLOCATE_HEAP)
+        yfit[peak] = PTR_NEW(/ALLOCATE_HEAP)
                                 ; get position of this peak from the user
         string = "Click on peak " + string(peak + 1, /print)
 		yleg = yplotmax-0.04*(yplotmax-yplotmin)
@@ -278,10 +279,10 @@ if (auto eq 0) then begin
         cursor,xH,yH,/down
         xC = theta2pixels(scaledtheta, N_ELEMENTS(scaledtheta), xC)+minX
         xH = theta2pixels(scaledtheta, N_ELEMENTS(scaledtheta), xH)+minX
-        *estimates(peak) =  fltarr(5+shiftNterms)
-        (*estimates(peak))(1) = xC ; position
-        (*estimates(peak))(0) = yC ; intensity
-        (*estimates(peak))(2) = max([2,abs(xC-xH)]) ; half width
+        *estimates[peak] =  fltarr(5+shiftNterms)
+        (*estimates[peak])[1] = xC ; position
+        (*estimates[peak])[0] = yC ; intensity
+        (*estimates[peak])[2] = max([2,abs(xC-xH)]) ; half width
 
                                 ; we remove the peaks found before
         tofittmp(*,1) = 0.0
@@ -291,12 +292,12 @@ if (auto eq 0) then begin
         endfor
                                 ; we limit the zone to fit the peak, so it doesn't
                                 ; fit everything
-        minZoneX = minmaxval(minX,maxX-1,(*estimates(peak))(1)-baseScaling*(*estimates(peak))(2))
-        maxZoneX = minmaxval(minX,maxX-1,(*estimates(peak))(1)+baseScaling*(*estimates(peak))(2))
-                                ; print, N_ELEMENTS(tofittmp), XC2, estimates2(2), minxx, maxxx
-        *xtmp(peak) = tofittmp(minZonex:maxZonex,0)
-        *ytmp(peak) = tofittmp(minZonex:maxZonex,1)
-        *thetatmp(peak) = scaledtheta(minZonex-x(0):maxZonex-x(0))
+        minZoneX = minmaxval(minX,maxX-1,(*estimates[peak])[1]-baseScaling*(*estimates[peak])[2])
+        maxZoneX = minmaxval(minX,maxX-1,(*estimates[peak])[1]+baseScaling*(*estimates[peak])[2])
+                                ; print, N_ELEMENTS(tofittmp), XC2, estimates2[2], minxx, maxxx
+        *xtmp[peak] = tofittmp(minZonex:maxZonex,0)
+        *ytmp[peak] = tofittmp(minZonex:maxZonex,1)
+        *thetatmp[peak] = scaledtheta(minZonex-x[0]:maxZonex-x[0])
                                 ; fit the gaussian or pseudovoigt with
                                 ; a linear background
 
@@ -307,35 +308,35 @@ if (auto eq 0) then begin
                                 ; real problem
         parinfo = replicate({limited:[0,0], $
                              limits:[0,0]}, 3+shiftNterms)
-        parinfo(1).limited(0) = 1
-        parinfo(1).limits(0)  = 0.0
+        parinfo[1].limited[0] = 1
+        parinfo[1].limits[0]  = 0.0
 
         if (peakmodel eq 1) then begin
-            *yfit(peak) = MPFITPEAK(*xtmp(peak),*ytmp(peak),(*coeffs(peak)), $
-                                    nterms=5+shiftNterms, estimates=(*estimates(peak)), /pseudoV, parinfo = parinfo)
+            *yfit[peak] = MPFITPEAK(*xtmp[peak],*ytmp[peak],(*coeffs[peak]), $
+                                    nterms=5+shiftNterms, estimates=(*estimates[peak]), /pseudoV, parinfo = parinfo)
         endif else if (peakmodel eq 2) then begin
-            *yfit(peak) = MPFITPEAK(*xtmp(peak),*ytmp(peak),(*coeffs(peak)), $
-                                    nterms=5+shiftNterms, estimates=(*estimates(peak)), /LORENTZIAN, parinfo = parinfo)
+            *yfit[peak] = MPFITPEAK(*xtmp[peak],*ytmp[peak],(*coeffs[peak]), $
+                                    nterms=5+shiftNterms, estimates=(*estimates[peak]), /LORENTZIAN, parinfo = parinfo)
         endif else begin
-            *yfit(peak) = MPFITPEAK(*xtmp(peak),*ytmp(peak),(*coeffs(peak)), $
-                                    nterms=5+shiftNterms, estimates=(*estimates(peak)), parinfo = parinfo)
+            *yfit[peak] = MPFITPEAK(*xtmp[peak],*ytmp[peak],(*coeffs[peak]), $
+                                    nterms=5+shiftNterms, estimates=(*estimates[peak]), parinfo = parinfo)
         endelse
                                 ; show the result
         diff(x) = y-bg
         for j = 0, peak do begin
             diff((*xtmp(j))) = (diff((*xtmp(j)))-(*yfit(j)))
         endfor
-        diff((*xtmp(peak))) = (diff((*xtmp(peak)))+(*coeffs(peak))(3+shiftNterms)+(*xtmp(peak))*(*coeffs(peak))(4+shiftNterms))
+        diff((*xtmp[peak])) = (diff((*xtmp[peak]))+(*coeffs[peak])(3+shiftNterms)+(*xtmp[peak])*(*coeffs[peak])(4+shiftNterms))
 		yplotmin = min(y-bg) - 0.05* (max(y-bg)-min(y-bg))
 		yplotmax = max(y-bg) + 0.05* (max(y-bg)-min(y-bg))
 		!X.STYLE = 1
 		!Y.STYLE = 1
 		!P.NOERASE = 0
         plot, scaledtheta, y-bg, background=255, color = 0, yrange=[yplotmin,yplotmax]
-        oplot, *thetatmp(peak), *yfit(peak), color = 100
+        oplot, *thetatmp[peak], *yfit[peak], color = 100
         oplot, scaledtheta, diff(x), color=200
                                 ; we remove the linear background from the fit
-        *yfit(peak) = *yfit(peak)-(*coeffs(peak))(3+shiftNterms)-(*xtmp(peak)) *(*coeffs(peak))(4+shiftNterms)
+        *yfit[peak] = *yfit[peak]-(*coeffs[peak])(3+shiftNterms)-(*xtmp[peak]) *(*coeffs[peak])(4+shiftNterms)
     endfor
 endif
 
@@ -343,7 +344,7 @@ endif
 if (auto eq 0) then begin
     plot, scaledtheta, y, background=255, color = 0
     for peak = 0, npeaks-1 do $
-      oplot, *thetatmp(peak), *yfit(peak), color = 100
+      oplot, *thetatmp[peak], *yfit[peak], color = 100
     oplot, scaledtheta, bg, color = 200
                                 ; plot, x, y, background=255, color = 0
                                 ; tofittmp(*,1) = 0.0
@@ -359,20 +360,20 @@ endif
 ; to regenerate the peak profiles from their position, half-width and intensity.
 if (auto ne 0) then begin
     for peak = 0, npeaks-1 do begin
-        estimates(peak) = PTR_NEW(/ALLOCATE_HEAP)
-        xtmp(peak) = PTR_NEW(/ALLOCATE_HEAP)
-        ytmp(peak) = PTR_NEW(/ALLOCATE_HEAP)
-        coeffs(peak) = PTR_NEW(/ALLOCATE_HEAP)
-        yfit(peak) = PTR_NEW(/ALLOCATE_HEAP)
-        thetatmp(peak) = PTR_NEW(/ALLOCATE_HEAP)
-        *estimates(peak) =  fltarr(5+shiftNterms)
+        estimates[peak] = PTR_NEW(/ALLOCATE_HEAP)
+        xtmp[peak] = PTR_NEW(/ALLOCATE_HEAP)
+        ytmp[peak] = PTR_NEW(/ALLOCATE_HEAP)
+        coeffs[peak] = PTR_NEW(/ALLOCATE_HEAP)
+        yfit[peak] = PTR_NEW(/ALLOCATE_HEAP)
+        thetatmp[peak] = PTR_NEW(/ALLOCATE_HEAP)
+        *estimates[peak] =  fltarr(5+shiftNterms)
                                 ; guess for position and half width have to be scaled
         position = minX+(fit(peak,0)-minX)*scaling
         halfwidth = max([5,fit(peak,2)])*scaling
         intensity = fit(peak,1)
-        (*estimates(peak))(1) = position ; position
-        (*estimates(peak))(0) = intensity ; intensity
-        (*estimates(peak))(2) = halfwidth ; half width
+        (*estimates[peak])[1] = position ; position
+        (*estimates[peak])[0] = intensity ; intensity
+        (*estimates[peak])[2] = halfwidth ; half width
                                 ; we don't fit anything, just regenerate the peak profiles
                                 ; we remove the peaks found before
         tofittmp(*,1) = 0.0
@@ -381,18 +382,18 @@ if (auto ne 0) then begin
             tofittmp((*xtmp(j)),1) = (tofittmp((*xtmp(j)),1)-(*yfit(j)))
         endfor
                                 ; we limit the zone where the peak resides
-        minZoneX = minmaxval(minX,maxX-1,(*estimates(peak))(1)-baseScaling*(*estimates(peak))(2))
-        maxZoneX = minmaxval(minX,maxX-1,(*estimates(peak))(1)+baseScaling*(*estimates(peak))(2))
-        *xtmp(peak) = tofittmp(minZonex:maxZonex,0)
-        *ytmp(peak) = tofittmp(minZonex:maxZonex,1)
-        *thetatmp(peak) = scaledtheta(minZonex-x(0):maxZonex-x(0))
+        minZoneX = minmaxval(minX,maxX-1,(*estimates[peak])[1]-baseScaling*(*estimates[peak])[2])
+        maxZoneX = minmaxval(minX,maxX-1,(*estimates[peak])[1]+baseScaling*(*estimates[peak])[2])
+        *xtmp[peak] = tofittmp(minZonex:maxZonex,0)
+        *ytmp[peak] = tofittmp(minZonex:maxZonex,1)
+        *thetatmp[peak] = scaledtheta(minZonex-x[0]:maxZonex-x[0])
                                 ; generate the gaussian or pseudovoigt with no background
                                 ; since we lost the weigth between
                                 ; gaussian and lorentzian, we just use
                                 ; a gaussian model
                                 ; y = intensity * exp (-0.5 *((x-center)/half-width)^2)
-        *yfit(peak) = intensity*exp(-0.5*((*xtmp(peak)-position)/halfwidth)^2)
-        *coeffs(peak) = *estimates(peak)
+        *yfit[peak] = intensity*exp(-0.5*((*xtmp[peak]-position)/halfwidth)^2)
+        *coeffs[peak] = *estimates[peak]
     endfor
 endif
 
@@ -403,41 +404,35 @@ doSmall = 0
 compteBg = 0
 doPeak = intArr(npeaks)
 for i = 0, nLoop do begin
-                                ; If there is a very small peak, we
-                                ; don't optimize it at the same time,
-                                ; we do
-                                ;   - the big ones from 0 to startSmall
-                                ;   - the small ones from startSmall
-                                ;     to endSmall
-                                ;   - the big ones later
+	; If there is a very small peak, we do n0t optimize it at the same time,
+	; we do
+	;   - the big ones from 0 to startSmall
+	;   - the small ones from startSmall to endSmall
+	;   - the big ones later
+	;
+	; Also, we we are in doSmall mode, the peak width is automatically divided by 2 before refitting...
+	; In that case, we also fit a local background in order to avoid the effects of the surrounding peaks...
+	;
+	; Small peak is also ignored when fitting the rest...
 
-                                ; Also, we we are in doSmall mode, the
-                                ; peak width is automatically divided
-                                ; by 2 before refitting...
-                                ; In that case, we also fit a local
-                                ; background in order to avoid the
-                                ; effects of the surrounding peaks...
-
-                                ; Small peak is also ignored when
-                                ; fitting the rest...
-                                ; Factor for detecting small peak
+	; Detect wheter we should do anything about small peaks at all...
     if (npeaks gt 1) then begin
         maxIntensity = 0.0
         minIntensity = 100000000000
         for j = 0, npeaks-1  do begin
-            if ((*coeffs(j))(0) gt maxIntensity) then maxIntensity=(*coeffs(j))(0)
-            if ((*coeffs(j))(0) lt minIntensity) then minIntensity=(*coeffs(j))(0)
+            if ((*coeffs(j))[0] gt maxIntensity) then maxIntensity=(*coeffs(j))[0]
+            if ((*coeffs(j))[0] lt minIntensity) then minIntensity=(*coeffs(j))[0]
         endfor
         if (maxIntensity gt (smallDetection*minIntensity)) then begin
             if ((i lt startSmall) or (i gt endSmall)) then begin
                 doSmall = 0
                 for j = 0, npeaks-1  do begin
-                    if ((*coeffs(j))(0) lt (smallDetection*minIntensity)) then doPeak(j) = 0 else doPeak(j) = 1
+                    if ((*coeffs(j))[0] lt (smallDetection*minIntensity)) then doPeak(j) = 0 else doPeak(j) = 1
                 endfor
             endif else begin
                 doSmall = 1
                 for j = 0, npeaks-1  do begin
-                    if ((*coeffs(j))(0) lt (smallDetection*minIntensity)) then doPeak(j) = 1 else doPeak(j) = 0
+                    if ((*coeffs(j))[0] lt (smallDetection*minIntensity)) then doPeak(j) = 1 else doPeak(j) = 0
                 endfor
             endelse
         endif else begin
@@ -446,19 +441,20 @@ for i = 0, nLoop do begin
         endelse
     endif else begin
         doSmall = 0
-        doPeak(0) = 1
+        doPeak[0] = 1
     endelse
 
+	;
     if ((compteBg eq fitBg) and (sidebg eq 0)) then begin
                                 ; we fit a quadratic background to the
                                 ; data minus the two previous fits
-        tofittmp(*,1) = 0.0
-        tofittmp(x,1) =  y
+        tofittmp[*,1] = 0.0
+        tofittmp[x,1] =  y
         for j = 0, npeaks-1 do begin
-            tofittmp((*xtmp(j)),1) = tofittmp((*xtmp(j)),1)-(*yfit(j))
+            tofittmp[(*xtmp[j]),1] -= -(*yfit[j])
         endfor
         xbg = x
-        ybg = tofittmp(minX:maxX,1)
+        ybg = tofittmp[minX:maxX,1]
         bgCoefs = POLY_FIT(xbg,ybg,bgdegree)
         bg = fltarr(n_elements(x))
         for deg=0, bgdegree do begin
@@ -469,178 +465,150 @@ for i = 0, nLoop do begin
                                 ;plot, xbg, ybg, background=255, color = 0
                                 ;oplot, x, bg, color = 100
                                 ;cursor,xH,yH,/down
-                                ; loop on peaks
+
+	; loop on peaks
     for peak = 0, npeaks-1 do begin
-        if (doPeak(peak) eq 1) then begin
-                                ; we take the original data, minus the other peaks and the bg
+        if (doPeak[peak] eq 1) then begin
+			; we take the original data, minus the other peaks and the bg
             tofittmp(*,1) = 0.0
             tofittmp(x,1) =  y-bg
-                                ; If there is a very small beak, we
-                                ; ignore it when fitting the others
-                                ; If we are fitting a small peak, we
-                                ; take care of everything
-                                ; Also, if we are working on a small
-                                ; peak, the background has to be
-                                ; lifted up because of the surrounding
-                                ; ones, otherwise the fit fucks up
-                                ; This is done later once, we have
-                                ; restricted the zone...
-            if (doSmall eq 1) then begin
-                for j = 0, npeaks-1  do begin
-                    if (j ne peak)then $
-                      tofittmp((*xtmp(j)),1) = tofittmp((*xtmp(j)),1)-(*yfit(j))
-                endfor
-            endif else begin
-                for j = 0, npeaks-1  do begin
-                    if ((j ne peak) and (doPeak(j) eq 1))then $
-                      tofittmp((*xtmp(j)),1) = tofittmp((*xtmp(j)),1)-(*yfit(j))
-                endfor
-            endelse
-                                ; we have to apply a weight, otherwise, it fucks, if the fit from
-                                ; other peaks is high, the weight is small, so the peaks don't
-                                ; shift towards each other
-            weighttmp(*) = 0.0
-            for j = 0, npeaks-1  do begin
-                if (j ne peak) then $
-                  weighttmp((*xtmp(j))) = weighttmp((*xtmp(j)))+abs((*yfit(j)))
-            endfor
+			; If there is a very small beak, we ignore it when fitting the others
+			; If we are fitting a small peak, we take care of everything
+			; Also, if we are working on a small peak, the background has to be lifted up because of the surrounding ones, otherwise the fit fucks up
+			; This is done later once, we have restricted the zone...
+			if (doSmall eq 1) then begin
+				for j = 0, npeaks-1  do begin
+					if (j ne peak)then $
+						tofittmp[(*xtmp(j)),1] = tofittmp[(*xtmp(j)),1]-(*yfit[j])
+				endfor
+			endif else begin
+				for j = 0, npeaks-1  do begin
+					if ((j ne peak) and (doPeak(j) eq 1))then $
+						tofittmp[(*xtmp(j)),1] = tofittmp[(*xtmp(j)),1]-(*yfit[j])
+				endfor
+			endelse
+			; we have to apply a weight, otherwise, it fucks, if the fit from other peaks is high, the weight is small, so the peaks don't shift towards each other
+			weighttmp(*) = 0.0
+			for j = 0, npeaks-1  do begin
+				if (j ne peak) then $
+					weighttmp[(*xtmp[j])] = weighttmp[(*xtmp[j])]+abs((*yfit[j]))
+			endfor
+			; We apply another weight to give more importance to the top of the peak..
+			; weighttmp((*xtmp[peak])) = weighttmp((*xtmp[peak]))-abs((*yfit[peak]))
+			; Removed it does not help at all...
+			; Normalization...
+			maxweigth = max(weighttmp)
+			if (maxweigth lt 1) then maxweigth = 1
+			; Coefficient to change to strength of the weighting...
+			coeffWeight = 3.
+			weighttmp[*] = (coeffWeight*weighttmp[*] + 0.1 * maxweigth)/coeffWeight
+			; results from previous fit on this peak becomes estimation
+            *estimates[peak] = *coeffs[peak]
+			; avoid getting a fitting zone that is too small in X, forcing 5 pixels minimum
+            (*estimates[peak])[2] = max([5,(*estimates[peak])[2]])
 
-                                ; We apply another weight to give more
-                                ; importance to the top of the peak..
-                                ; weighttmp((*xtmp(peak))) =
-                                ; weighttmp((*xtmp(peak)))-abs((*yfit(peak)))
-                                ; Removed it does not help at all...
-                                ; Normalization...
-            maxweigth = max(weighttmp)
-            if (maxweigth lt 1) then maxweigth = 1
-                                ; Coefficient to change to strength of the weighting...
-            coeffWeight = 3.
-            weighttmp(*) = (coeffWeight*weighttmp(*) + 0.1 * maxweigth)/coeffWeight
-                                ; results from previous fit on this peak becomes estimation
-            *estimates(peak) = *coeffs(peak)
-                                ; avoid getting a fitting zone that is too small
-            (*estimates(peak))(2) = max([5,(*estimates(peak))(2)])
+			; we limit the zone to fit the peak, so it doesn't fit everything
+			; This part is tricky...
+			; At first, I was restricting at baseScaling * peak width, but it works badly if one peak is much smaller that the other... So now, it is weighted by the peak intensity...
+			; find Max Intensity
+			if (npeaks gt 1) then begin
+				maxIntensity = 0.0
+				minIntensity = 100000000000
+				for j = 0, npeaks-1  do begin
+					if ((*coeffs[j])[0] gt maxIntensity) then maxIntensity=(*coeffs[j])[0]
+					if ((*coeffs[j])[0] lt minIntensity) then minIntensity=(*coeffs[j])[0]
+				endfor
+				; factor for zoneWidth is baseScaling for peak with maxIntensity, and
+				; 0.5*baseScaling for lowest peak
+				thisScaling = (0.5 + 0.5*((*coeffs[peak])[0]-minIntensity)/(maxIntensity-minIntensity)) * baseScaling
+				; We restrict the zone
+			endif else thisScaling = baseScaling
 
-                                ; we limit the zone to fit the peak, so it doesn't
-                                ; fit everything
-                                ; This part is tricky...
-                                ; At first, I was restricting at
-                                ; baseScaling * peak width, but it
-                                ; works badly if one peak is much
-                                ; smaller that the other... So now, it
-                                ; is weighted by the peak intensity...
-                                ; find Max Intensity
-            if (npeaks gt 1) then begin
-                maxIntensity = 0.0
-                minIntensity = 100000000000
-                for j = 0, npeaks-1  do begin
-                    if ((*coeffs(j))(0) gt maxIntensity) then maxIntensity=(*coeffs(j))(0)
-                    if ((*coeffs(j))(0) lt minIntensity) then minIntensity=(*coeffs(j))(0)
-                endfor
-                                ; factor for zoneWidth is baseScaling
-                                ; for peak with maxIntensity, and
-                                ; 0.5*baseScaling for lowest peak
-                thisScaling = (0.5 + 0.5*((*coeffs(peak))(0)-minIntensity)/(maxIntensity-minIntensity)) * baseScaling
-                                ; We restrict the zone
-            endif else thisScaling = baseScaling
+			; If we are working on a small peak, we divide its width by 3 before refiting
+			if (doSmall eq 1) then (*estimates[peak])[2] = (*estimates[peak])[2]/2.
 
+			minZoneX = minmaxval(minX,maxX-1,(*estimates[peak])[1]-4.*thisScaling*(*estimates[peak])[2])
+			maxZoneX = minmaxval(minX,maxX-1,(*estimates[peak])[1]+4.*thisScaling*(*estimates[peak])[2])
+			if ((maxZoneX- minZoneX) lt 5) then minZoneX = minzoneX -10
+			minZoneX = minmaxval(0,maxX-1,minZoneX)
+			if ((maxZoneX- minZoneX) lt 5) then  maxZoneX = maxZoneX + 10
 
-                                ; If we are working on a small peak,
-                                ; we divide its width by 3 before
-                                ; refiting
-            if (doSmall eq 1) then (*estimates(peak))(2) = (*estimates(peak))(2)/2.
+			*xtmp[peak] = tofittmp[minZonex:maxZonex,0]
+			*ytmp[peak] = tofittmp[minZonex:maxZonex,1]
+			*thetatmp[peak] = scaledtheta[minZonex-x[0]:maxZonex-x[0]]
+			; If it is a small peak, we take a straight line between left and right to remove it otherwise the peak is too high
+			if (doSmall eq 1) then begin
+				bg2 = fltarr(n_elements(*xtmp[peak]))
+				fitBgX2 = fltarr(4)
+				fitBgY2 = fltarr(4)
+				for j = 0, 1 do begin
+					fitBgX2[j] = (*xtmp[peak])[j]
+					fitbgX2[2+j] = (*xtmp[peak])(N_ELEMENTS(*xtmp[peak])-1-j)
+					fitBgY2[j] = (*ytmp[peak])[j]
+					fitbgY2[2+j] = (*ytmp[peak])(N_ELEMENTS(*xtmp[peak])-1-j)
+				endfor
+				bgCoefs2 = POLY_FIT(fitBgX2,fitBgY2,1)
+				for deg=0, 1 do begin
+					bg2 = bg2 + bgCoefs2[deg]*(*xtmp[peak])^deg
+				endfor
+				; Another weight... So the intensity of the not so small peaks are not reduced to much...
+				coeffBg = (minIntensity*smallDetection-(*estimates[peak])[1])/(smallDetection*minIntensity)
+				(*ytmp[peak]) = (*ytmp[peak]) - coeffBg * bg2
+			endif
 
-
-            minZoneX = minmaxval(minX,maxX-1,(*estimates(peak))(1)-4.*thisScaling*(*estimates(peak))(2))
-            maxZoneX = minmaxval(minX,maxX-1,(*estimates(peak))(1)+4.*thisScaling*(*estimates(peak))(2))
-            if ((maxZoneX- minZoneX) lt 5) then minZoneX = minzoneX -10
-            minZoneX = minmaxval(0,maxX-1,minZoneX)
-            if ((maxZoneX- minZoneX) lt 5) then  maxZoneX = maxZoneX + 10
-
-            *xtmp(peak) = tofittmp(minZonex:maxZonex,0)
-            *ytmp(peak) = tofittmp(minZonex:maxZonex,1)
-            *thetatmp(peak) = scaledtheta(minZonex-x(0):maxZonex-x(0))
-                                ; If it is a small peak, we take a
-                                ; straight line between left and right
-                                ; to remove it otherwise the peak is
-                                ; to high
-            if (doSmall eq 1) then begin
-                bg2 = fltarr(n_elements(*xtmp(peak)))
-                fitBgX2 = fltarr(4)
-                fitBgY2 = fltarr(4)
-                for j = 0, 1 do begin
-                    fitBgX2(j) = (*xtmp(peak))(j)
-                    fitbgX2(2+j) = (*xtmp(peak))(N_ELEMENTS(*xtmp(peak))-1-j)
-                    fitBgY2(j) = (*ytmp(peak))(j)
-                    fitbgY2(2+j) = (*ytmp(peak))(N_ELEMENTS(*xtmp(peak))-1-j)
-                endfor
-                bgCoefs2 = POLY_FIT(fitBgX2,fitBgY2,1)
-                for deg=0, 1 do begin
-                    bg2 = bg2 + bgCoefs2(deg)*(*xtmp(peak))^deg
-                endfor
-                                ; Another weight... So the intensity
-                                ; of the not so small peaks are not reduced to much...
-                coeffBg = (minIntensity*smallDetection-(*estimates(peak))(1))/(smallDetection*minIntensity)
-                (*ytmp(peak)) = (*ytmp(peak)) - coeffBg * bg2
-            endif
-
-            weigthtmp2 = fltarr(maxZonex-minZonex+1)
-            weighttmp2 = weighttmp(minZonex:maxZonex)
+			weigthtmp2 = fltarr(maxZonex-minZonex+1)
+			weighttmp2 = weighttmp(minZonex:maxZonex)
                                 ; print, 'le poids  ', weighttmp2
                                 ;print, minZoneX, maxZoneX
                                 ; fit the gaussian with no background
 
-            parinfo = replicate({limited:[0,0], $
+			parinfo = replicate({limited:[0,0], $
                                  limits:[0,0]}, 3+shiftNterms)
-                                ; force the peaks width to be
-                                ; positive... Forcing peak height to
-                                ; be positive causes crashes... I
-                                ; can't understand why, and it's a
-                                ; real problem
-            parinfo(1).limited(0) = 1
-            parinfo(1).limits(0)  = 0.0
+			; force the peaks width to be positive... Forcing peak height to be positive causes crashes... I can't understand why, and it's a real problem
+			parinfo[1].limited[0] = 1
+			parinfo[1].limits[0]  = 0.0
 
-            if (peakmodel eq 1) then begin
-                *yfit(peak) = MPFITPEAK(*xtmp(peak),*ytmp(peak),(*coeffs(peak)), $
-                                        nterms=3+shiftNterms, $
-                                        estimates=(*estimates(peak)), error = weighttmp2, $
-                                        parinfo = parinfo, /pseudoV)
-            endif else if (peakmodel eq 2) then begin
-                *yfit(peak) = MPFITPEAK(*xtmp(peak),*ytmp(peak),(*coeffs(peak)), $
-                                        nterms=3+shiftNterms, estimates=(*estimates(peak)), /LORENTZIAN)
-            endif else begin
-                *yfit(peak) = MPFITPEAK(*xtmp(peak),*ytmp(peak),(*coeffs(peak)), $
-                                        nterms=3+shiftNterms, $
-                                        estimates=(*estimates(peak)), error = weighttmp2)
-            endelse
+			if (peakmodel eq 1) then begin
+				*yfit[peak] = MPFITPEAK(*xtmp[peak],*ytmp[peak],(*coeffs[peak]), $
+										nterms=3+shiftNterms, $
+										estimates=(*estimates[peak]), error = weighttmp2, $
+										parinfo = parinfo, /pseudoV)
+			endif else if (peakmodel eq 2) then begin
+				*yfit[peak] = MPFITPEAK(*xtmp[peak],*ytmp[peak],(*coeffs[peak]), $
+										nterms=3+shiftNterms, estimates=(*estimates[peak]), /LORENTZIAN)
+			endif else begin
+				*yfit[peak] = MPFITPEAK(*xtmp[peak],*ytmp[peak],(*coeffs[peak]), $
+										nterms=3+shiftNterms, $
+										estimates=(*estimates[peak]), error = weighttmp2)
+			endelse
                                 ; check the result... If we get
                                 ; negative height, we make it 0
                                 ; does not work, still need to find
                                 ; something better. Has been a problem
                                 ; for 3 years...
-                                ;if ((*coeffs(peak))(0)<0.0) then begin
+                                ;if ((*coeffs[peak])[0]<0.0) then begin
                                 ;    print, 'Warning: negative peak for number', peak, '... Canceling...'
-                                ;    (*coeffs(peak))(0) = 0.0
-                                ;    *yfit(peak) = *yfit(peak)-*yfit(peak)
+                                ;    (*coeffs[peak])[0] = 0.0
+                                ;    *yfit[peak] = *yfit[peak]-*yfit[peak]
                                 ;endif
 
 
-                                ; *yfit(peak) = *yfit(peak)-(*coeffs(peak))(3)
-                                ; plot, *xtmp(peak), *ytmp(peak), background=255, color = 0
-                                ; oplot, *xtmp(peak), *yfit(peak), color = 100
+                                ; *yfit[peak] = *yfit[peak]-(*coeffs[peak])(3)
+                                ; plot, *xtmp[peak], *ytmp[peak], background=255, color = 0
+                                ; oplot, *xtmp[peak], *yfit[peak], color = 100
                                 ; cursor,xH,yH,/down
-        endif
-    endfor
+		endif
+	endfor
 endfor
 ; print, 'le poids  ', weighttmp2
 ; preparing to plot the result...
 ; results of the fit = bg + all peaks
-tofittmp(*,1) = 0.0
-tofittmp(x,1) =  bg
+tofittmp[*,1] = 0.0
+tofittmp[x,1] =  bg
 for j = 0, npeaks-1 do begin
-    tofittmp((*xtmp(j)),1) = tofittmp((*xtmp(j)),1)+(*yfit(j))
+	tofittmp[(*xtmp[j]),1] = tofittmp[(*xtmp[j]),1]+(*yfit[j])
 endfor
-newfit = tofittmp(minX:maxX,1)
+newfit = tofittmp[minX:maxX,1]
 ; plot the original curve
 plotmin = min(y)-.3*(max(y)-min(y))
 plotmax = max(y)+.1*(max(y)-min(y))
@@ -657,27 +625,27 @@ xyouts, xleg,yleg, "scale fac. x = "+STRING(scaling,format='(I3)'),  color = 0, 
 oplot, scaledtheta, newfit, color = 100
 ; and the gaussians
 for peak = 0, npeaks-1 do begin
-    oplot, *thetatmp(peak), *yfit(peak), color = 200
+    oplot, *thetatmp[peak], *yfit[peak], color = 200
 endfor
 ; plot the residuals
-diff(x) = y-bg-.1*(max(y)-min(y))
+diff[x] = y-bg-.1*(max(y)-min(y))
 for j = 0, npeaks-1 do begin
-    diff((*xtmp(j))) = (diff((*xtmp(j)))-(*yfit(j)))
+    diff[(*xtmp[j])] = diff[(*xtmp[j])]-(*yfit[j])
 endfor
-oplot, scaledtheta, diff(x), color=50
+oplot, scaledtheta, diff[x], color=50
 ; prepare the results to send them back...
 fit = fltarr(npeaks,3)
 for peak = 0, npeaks-1 do begin
                                 ; position has to be corrected for scaling
-    scaledposition = (*coeffs(peak))(1)
+    scaledposition = (*coeffs[peak])[1]
     position = minX + (scaledposition-minX)/scaling
                                 ; same for half width
-    scaledHWidth = (*coeffs(peak))(2)
+    scaledHWidth = (*coeffs[peak])[2]
     hWidth = scaledHWidth/scaling
-    fit(peak,0) = position      ; position
-    fit(peak,1) = (*coeffs(peak))(0) ; intensity
-    fit(peak,2) = hWidth        ; half width
-    ptr_free, estimates(peak),  xtmp(peak), ytmp(peak), coeffs(peak), yfit(peak)
+    fit[peak,0] = position      ; position
+    fit[peak,1] = (*coeffs[peak])[0] ; intensity
+    fit[peak,2] = hWidth        ; half width
+    ptr_free, estimates[peak],  xtmp[peak], ytmp[peak], coeffs[peak], yfit[peak]
 endfor
 wait, 0.3
 end
