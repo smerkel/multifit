@@ -202,6 +202,7 @@ while (completed eq 0) do begin
         if ((autocorrect eq 0) or (manual eq 1)) then begin
             fitted = fitit(manual, restrictheta, xx, yy, npeaks, alpha(i), fit, hardbg, sidebg, peakmodel)
         endif else begin
+			oldfit = fit
             fitted = fitandcheck(restrictheta, xx, yy, npeaks, alpha(i), fit, hardbg, sidebg, peakmodel, stopNegIntensity, stopTooWide, stopIntensityChge)
         endelse
         if (fitted eq 0) then begin
@@ -211,6 +212,10 @@ while (completed eq 0) do begin
                 position(peak,i) = fit(peak,0)
                 intensity(peak,i) = fit(peak,1)
                 halfwidth(peak,i) = fit(peak,2)
+				; If we have a NaN somewhere, the fit failed, we store the NaN as fit results but get previous guesses as future starting values
+				if ((fit(peak,0) eq !VALUES.F_NAN) or  (fit(peak,1) eq !VALUES.F_NAN) or (fit(peak,2) eq !VALUES.F_NAN)) then begin
+                    fit = oldfit
+				endif
             endfor
             completed = 1
             anythingdoneyet = 1

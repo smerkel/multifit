@@ -80,7 +80,7 @@
 ;  - nloops: number of loops (20)
 ;  - startSmall: 2
 ;  - endSmall: 10
-;  - ignoreration: 0. Calculate (maxIntensity-medianIntensity)/medianIntensity. Do not run fit if below the threshold. Increase this value if you want to skip fit for peaks at orientations where there is no more intensity (texture effects). Only used in automatic fitting
+;  - ignoreration: 0. Calculate (maxIntensity-medianIntensity)/medianIntensity. Do not run fit if below the threshold. Increase this value if you want to skip fit for peaks at orientations where there is no more intensity (texture effects). Only used in automatic fitting. This function was tested in 01/2016. It does not work well right now. Forced set to 0
 ; *******************************************************************
 
 ; REMEMEBER: ALL FITS ARE DONE IN PIXELS! THERE ARE CONVERSIONS TO
@@ -90,6 +90,8 @@ pro gaussNpeaksbg, theta, x, y, npeaks, fit, hardbg, sidebg, peakmodel, alpha, A
 common bginfo, bgdegree, bgCoefs
 common fitoptions, basescale, smallDetection, nLoop, startSmall, endSmall, ignoreratio
 if (keyword_set(automatic)) then auto = 1 else auto = 0
+
+ignoreratio = 0.
 
 ; Parameters for the fit
 fitBg = 10
@@ -502,8 +504,8 @@ for i = 0, nLoop do begin
 			; Coefficient to change to strength of the weighting...
 			coeffWeight = 3.
 			weighttmp[*] = (coeffWeight*weighttmp[*] + 0.1 * maxweigth)/coeffWeight
-			; results from previous fit on this peak becomes estimation
-            *estimates[peak] = *coeffs[peak]
+			; results from previous fit on this peak becomes estimation, if they were not set no NaN
+			if (FINITE((*coeffs[peak])[0])) then *estimates[peak] = *coeffs[peak]
 			; avoid getting a fitting zone that is too small in X, forcing 5 pixels minimum
             (*estimates[peak])[2] = max([5,(*estimates[peak])[2]])
 
@@ -520,7 +522,7 @@ for i = 0, nLoop do begin
 				endfor
 				; factor for zoneWidth is baseScaling for peak with maxIntensity, and
 				; 0.5*baseScaling for lowest peak
-				thisScaling = (0.5 + 0.5*((*coeffs[peak])[0]-minIntensity)/(maxIntensity-minIntensity)) * baseScaling
+				if (((maxIntensity-minIntensity)/maxIntensity) gt 0.1) then thisScaling = (0.5 + 0.5*((*coeffs[peak])[0]-minIntensity)/(maxIntensity-minIntensity)) * baseScaling else thisScaling = baseScaling
 				; We restrict the zone
 			endif else thisScaling = baseScaling
 
@@ -529,6 +531,7 @@ for i = 0, nLoop do begin
 
 			minZoneX = minmaxval(minX,maxX-1,(*estimates[peak])[1]-4.*thisScaling*(*estimates[peak])[2])
 			maxZoneX = minmaxval(minX,maxX-1,(*estimates[peak])[1]+4.*thisScaling*(*estimates[peak])[2])
+			
 			if ((maxZoneX- minZoneX) lt 5) then minZoneX = minzoneX -10
 			minZoneX = minmaxval(0,maxX-1,minZoneX)
 			if ((maxZoneX- minZoneX) lt 5) then  maxZoneX = maxZoneX + 10
@@ -568,18 +571,31 @@ for i = 0, nLoop do begin
 			parinfo[1].limited[0] = 1
 			parinfo[1].limits[0]  = 0.0
 
-			if (peakmodel eq 1) then begin
-				*yfit[peak] = MPFITPEAK(*xtmp[peak],*ytmp[peak],(*coeffs[peak]), $
+			; Check if we should do anything at all. Calculate (maxIntensity-medianIntensity)/medianIntensity. Do not run fit if below the threshold.
+			medianY = median(*ytmp[peak])
+			maxY = max(*ytmp[peak])
+			if ((maxY-medianY)/abs(medianY) lt ignoreratio) then begin
+				(*coeffs[peak])[0] = !VALUES.F_NAN
+				(*coeffs[peak])[1] = !VALUES.F_NAN
+				(*coeffs[peak])[2] = !VALUES.F_NAN
+				(*yfit[peak])[*] = 0.
+				print, "Ignore peak ", peak, maxY, medianY
+				print, *ytmp[peak]
+				print, (*yfit[peak])
+			endif else begin
+				if (peakmodel eq 1) then begin
+					*yfit[peak] = MPFITPEAK(*xtmp[peak],*ytmp[peak],(*coeffs[peak]), $
 										nterms=3+shiftNterms, $
 										estimates=(*estimates[peak]), error = weighttmp2, $
 										parinfo = parinfo, /pseudoV)
-			endif else if (peakmodel eq 2) then begin
-				*yfit[peak] = MPFITPEAK(*xtmp[peak],*ytmp[peak],(*coeffs[peak]), $
+				endif else if (peakmodel eq 2) then begin
+					*yfit[peak] = MPFITPEAK(*xtmp[peak],*ytmp[peak],(*coeffs[peak]), $
 										nterms=3+shiftNterms, estimates=(*estimates[peak]), /LORENTZIAN)
-			endif else begin
-				*yfit[peak] = MPFITPEAK(*xtmp[peak],*ytmp[peak],(*coeffs[peak]), $
+				endif else begin
+					*yfit[peak] = MPFITPEAK(*xtmp[peak],*ytmp[peak],(*coeffs[peak]), $
 										nterms=3+shiftNterms, $
 										estimates=(*estimates[peak]), error = weighttmp2)
+				endelse
 			endelse
                                 ; check the result... If we get
                                 ; negative height, we make it 0

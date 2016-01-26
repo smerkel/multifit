@@ -54,7 +54,7 @@
 
 
 pro fitMultiplePeaks, x, y, npeaks, fit, bgcoefs, peakmodel, loop, azimuth, plotlevel, extralabels = extralabels
-common fitoptions, basescale, smallDetection, nLoop, startSmall, endSmall
+common fitoptions, basescale, smallDetection, nLoop, startSmall, endSmall, ignoreratio
 
 if (keyword_set(extralabels)) then addlabel = 1 else addlabel = 0
 

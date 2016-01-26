@@ -33,7 +33,7 @@ END
 PRO fitit, stash
 common rawdata, nalpha, ntheta, alpha, twotheta, data
 common fitit, def, base, draw
-common fitoptions, basescale, smallDetection, nLoop, startSmall, endSmall
+common fitoptions, basescale, smallDetection, nLoop, startSmall, endSmall, ignoreratio
 ; Get list of spectra to fit
 tofit = WIDGET_INFO(stash.listID, /LIST_SELECT)
 if (tofit(0) eq -1) then begin

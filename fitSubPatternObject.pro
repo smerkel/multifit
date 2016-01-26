@@ -270,7 +270,7 @@ end
 pro FitSubPatternObject::optimizeWithCurrentDataset, log, plotlevel, wfactor, subpatn
 ; Info about the active dataset (file name)
 common inputfiles, inputfiles, activeset
-common fitoptions, basescale, smallDetection, nLoop, startSmall, endSmall
+common fitoptions, basescale, smallDetection, nLoop, startSmall, endSmall, ignoreratio
 ; Setting fit options for the fitting routine
 basescale = 3.0
 smalldetection = 100
@@ -371,7 +371,7 @@ end
 pro FitSubPatternObject::optimizeJCPDSWithCurrentDatasetFirstDelta, plotlevel, widthregion, wfactor
 ; Info about the active dataset (file name)
 common inputfiles, inputfiles, activeset
-common fitoptions, basescale, smallDetection, nLoop, startSmall, endSmall
+common fitoptions, basescale, smallDetection, nLoop, startSmall, endSmall, ignoreratio
 ; Setting fit options for the fitting routine
 basescale = wfactor
 smalldetection = 100
@@ -401,7 +401,7 @@ end
 pro FitSubPatternObject::optimizeJCPDSWithCurrentDataset, plotlevel, widthregion, wfactor, peaklabels
 ; Info about the active dataset (file name)
 common inputfiles, inputfiles, activeset
-common fitoptions, basescale, smallDetection, nLoop, startSmall, endSmall
+common fitoptions, basescale, smallDetection, nLoop, startSmall, endSmall, ignoreratio
 ; Setting fit options for the fitting routine
 basescale = wfactor
 smalldetection = 100
