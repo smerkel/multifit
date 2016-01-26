@@ -36,17 +36,17 @@ common rawdata, nalpha, ntheta, alpha, twotheta, data
 printf, lun, "_pd_block_id noTitle|#0"
 printf, lun, ""
 printf, lun, "_diffrn_detector Image Plate"
-printf, lun, "_diffrn_detector_type ?"
+printf, lun, "_diffrn_detector_type Image Plate"
 printf, lun, "_pd_meas_step_count_time ?"
 printf, lun, "_diffrn_measurement_method ?"
-printf, lun, "_diffrn_measurement_distance_unit cm"
+printf, lun, "_diffrn_measurement_distance_unit mm"
 printf, lun, "_pd_instr_dist_spec/detc " + STRTRIM(STRING(distance, /PRINT),2)
 printf, lun, "_diffrn_radiation_wavelength ?"
 printf, lun, "_diffrn_source_target ?"
 printf, lun, "_diffrn_source_power ?"
 printf, lun, "_diffrn_source_current ?"
-printf, lun, "_pd_meas_angle_omega 90.0"
-printf, lun, "_pd_meas_angle_chi 90.0"
+printf, lun, "_pd_meas_angle_omega 0.0"
+printf, lun, "_pd_meas_angle_chi 0.0"
 printf, lun, "_pd_meas_angle_phi 0.0"
 printf, lun, "_riet_par_spec_displac_x 0"
 printf, lun, "_riet_par_spec_displac_y 0"
@@ -54,13 +54,13 @@ printf, lun, "_riet_par_spec_displac_z 0"
 printf, lun, "_riet_meas_datafile_calibrated false"
 ;string = "Adding data for azimuth = " + STRING(alpha(0), /PRINT)
 ;logit, log, string
-printdataesg, lun, 0
+printdataesg, lun, 0, distance
 for i=1,nalpha-1 do begin
     ;string = "Adding data for azimuth = " + STRING(alpha(i), /PRINT)
     ;logit, log, string
     printf, lun, "_pd_block_id noTitle|#" + STRTRIM(STRING(i, /PRINT),2)
     printf, lun, ""
-    printdataesg, lun, i
+    printdataesg, lun, i, distance
 endfor
 end
 
@@ -78,7 +78,7 @@ end
 ;
 ; *******************************************************************
 
-pro printdataesg, lun, index
+pro printdataesg, lun, index, distance
 common rawdata, nalpha, ntheta, alpha, twotheta, data
 printf, lun, "_pd_meas_angle_eta " + STRTRIM(STRING(alpha(index),/PRINT),2)
 printf, lun, ""
@@ -97,8 +97,9 @@ printf, lun, "_pd_calc_intensity_total"
 ;       angle = angle + interval
 ;    endwhile
 ;endif
+; This is a trick in MAUD... What is called 2theta_corrected is not 2theta, it's d = D tg(2theta) with D detector distance
 for i=0, ntheta-1 do begin
-    printf, lun, " " + STRTRIM(STRING(twotheta(i),/PRINT),2) + " " + STRTRIM(STRING(data(index,i),/PRINT),2)
+    printf, lun, " " + STRTRIM(STRING(distance*tan(!PI*twotheta[i]/180.),/PRINT),2) + " " + STRTRIM(STRING(data[index,i],/PRINT),2)
 endfor
 printf, lun, ""
 end

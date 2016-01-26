@@ -963,9 +963,8 @@ END
 
 FUNCTION saveesg, file
 common experiment, wavelength, detectordistance, experimenttype
-distance = detectordistance/10
 openw, lun, file, /get_lun
-printdataesgall, lun, distance
+printdataesgall, lun, detectordistance
 free_lun, lun
 return, 1
 END
