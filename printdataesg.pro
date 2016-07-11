@@ -75,6 +75,8 @@ end
 ; - i: index for azimuth
 ;
 ; Created 03/2005, S. Merkel
+; 
+; 07/2016: added a shift to the data. Maud is giving us shit otherwise
 ;
 ; *******************************************************************
 
@@ -85,6 +87,13 @@ printf, lun, ""
 printf, lun, "loop_"
 printf, lun, "_pd_proc_2theta_corrected"
 printf, lun, "_pd_calc_intensity_total"
+
+minI = min(data)
+rangeI = max(data)-min(data)
+shiftI = 0.
+if (minI lt 0.) then begin
+	shiftI = -minI + rangeI/100.
+endif
 
 ; This is not necessary. I thought data might have to start from 2theta=0
 ; but it's not true. Similarly, interval between data points is not critical.
@@ -99,7 +108,7 @@ printf, lun, "_pd_calc_intensity_total"
 ;endif
 ; This is a trick in MAUD... What is called 2theta_corrected is not 2theta, it's d = D tg(2theta) with D detector distance
 for i=0, ntheta-1 do begin
-    printf, lun, " " + STRTRIM(STRING(distance*tan(!PI*twotheta[i]/180.),/PRINT),2) + " " + STRTRIM(STRING(data[index,i],/PRINT),2)
+    printf, lun, " " + STRTRIM(STRING(distance*tan(!PI*twotheta[i]/180.),/PRINT),2) + " " + STRTRIM(STRING(data[index,i] + shiftI,/PRINT),2)
 endfor
 printf, lun, ""
 end

@@ -1092,6 +1092,7 @@ CASE ev.id OF
 		'FIT2DMAC': fit2dmac, stash.base, stash.log
 		'FIT2DMACLONG': fit2dmaclong, stash.base, stash.log
 		'MAUDEXPORT': maudExport, stash.base, stash.listSets, stash.log
+		'MAUDEXPORTALL': maudExportAllFiles, stash.base, stash.listSets, stash.log
 		'LISTSETS': changeActiveSet, stash.log, stash.listSets, active[0]
 		'MAPPLOT': mapplotActiveSet, stash.base, stash.log, stash.listSets, active[0]
 		'PLOTONESET': plotWindow, stash.base
@@ -1148,8 +1149,9 @@ fit2d_bttn4 = WIDGET_BUTTON(fit2d_old, VALUE='Convert CHI created by Multifit ma
 dataset_menu = WIDGET_BUTTON(bar, VALUE='Current dataset', /MENU)
 plotactive = WIDGET_BUTTON(dataset_menu, VALUE='Plot 2D', UVALUE='PLOTONESET')
 mapplot = WIDGET_BUTTON(dataset_menu, VALUE='Mapplot', UVALUE='MAPPLOT')
-maud_bttn1 = WIDGET_BUTTON(dataset_menu, VALUE='Export active datasets for Maud', UVALUE='MAUDEXPORT', /SEPARATOR)
+maud_bttn1 = WIDGET_BUTTON(dataset_menu, VALUE='Export active dataset for Maud', UVALUE='MAUDEXPORT', /SEPARATOR)
 data_bttn3 = WIDGET_BUTTON(dataset_menu, VALUE='Remove slice from active dataset', UVALUE='REMOVESLICE', /SEPARATOR)
+maud_bttn1 = WIDGET_BUTTON(dataset_menu, VALUE='Export all active datasets for Maud (careful!)', UVALUE='MAUDEXPORTALL', /SEPARATOR)
 ; Image fit menu
 fit_menu = WIDGET_BUTTON(bar, VALUE='Peak fitting', /MENU) 
 fit_bttn1 = WIDGET_BUTTON(fit_menu, VALUE='Fit active dataset (manual)', UVALUE='FITONESET')
