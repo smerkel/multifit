@@ -33,20 +33,21 @@ PRO plotit, stash
 	
 	; Set up CATCH error handler for conversion issues
 	Catch, theError
-	IF theError NE 0 THEN BEGIN
-	  Catch, /Cancel
-	  bad_io:
-	    tmp = DIALOG_MESSAGE('Some numbers are not correct in your settings', /ERROR)
-	    return
-	ENDIF
+	;IF theError NE 0 THEN BEGIN
+	;  Catch, /Cancel
+	;  bad_io:
+	;    tmp = DIALOG_MESSAGE('Some numbers are not correct in your settings', /ERROR)
+	;    return
+	;ENDIF
 	; Set up file I/O error handling.
-	ON_IOError, bad_io
+	;ON_IOError, bad_io
 	
 	separate_Y = WIDGET_INFO(stash.stretchBut, /BUTTON_SET)
 	WIDGET_CONTROL, stash.stretchVa, GET_VALUE=sep
 	separation = float(sep[0])
 	addlegend = WIDGET_INFO(stash.legendeBut, /BUTTON_SET)
 	stack = WIDGET_INFO(stash.stackBut, /BUTTON_SET)
+	addnav = WIDGET_INFO(stash.navBut, /BUTTON_SET)
 	base = stash.base
 	rangeSet = WIDGET_INFO(stash.thetaBut, /BUTTON_SET)
 	if (rangeSet eq 1) then begin
@@ -74,9 +75,12 @@ PRO plotit, stash
 	endif else begin
 		ydata[0,*] = data[toplot[0],*]
 		for i=1,n_elements(toplot)-1 do ydata[0,*] += data[toplot[i],*]
+		leg[0] = "Staked data"
 		addlegend = 0
 	endelse
-	if (addlegend eq 1) then begin
+	if (addnav eq 1) then begin ; if navigation, we force the legend
+		plotinteractive1D, base, xdata, ydata, xlabel='2 theta', ylabel='Intensity', legend = leg, range=[tthetamin, tthetamax], nav = 1
+	endif else if (addlegend eq 1) then begin
 		plotinteractive1D, base, xdata, ydata, xlabel='2 theta', ylabel='Intensity', legend = leg, range=[tthetamin, tthetamax]
 	endif else begin
 		plotinteractive1D, base, xdata, ydata, xlabel='2 theta', ylabel='Intensity', range=[tthetamin, tthetamax]
@@ -141,11 +145,16 @@ PRO plotWindow, parent
 	legendeCh = Widget_Base(legendeBase, /NonExclusive)
 	legendeBut = Widget_Button(legendeCh, Value='Include legend', UVALUE='DUMMY')
 	Widget_Control, legendeBut, Set_Button=0
-	; legende
+	; stacking
 	stackBase = WIDGET_BASE(optBase,/ROW)
 	stackCh = Widget_Base(stackBase, /NonExclusive)
 	stackBut = Widget_Button(stackCh, Value='Stack datasets', UVALUE='DUMMY')
 	Widget_Control, stackBut, Set_Button=0
+	; navigation
+	navBase = WIDGET_BASE(optBase,/ROW)
+	navCh = Widget_Base(navBase, /NonExclusive)
+	navBut = Widget_Button(navCh, Value='Navigate datasets', UVALUE='DUMMY')
+	Widget_Control, navBut, Set_Button=0
 	; range in 2theta
 	mintt = strtrim(string(min(twotheta)),2)
 	maxtt = strtrim(string(max(twotheta)),2)
@@ -162,7 +171,7 @@ PRO plotWindow, parent
 	closeBut = WIDGET_BUTTON(butBase, VALUE='Close', UVALUE='EXIT')
 	; Create an anonymous structure to hold widget IDs
 	stash = {base:base, listID: listID, stretchBut:stretchBut, stretchVa:stretchVa, $
-			legendeBut:legendeBut, stackBut:stackBut, thetaBut:thetaBut, thetaMinVa:thetaMinVa, thetaMaxVa:thetaMaxVa} 
+			legendeBut:legendeBut, stackBut:stackBut,  navBut:navBut, thetaBut:thetaBut, thetaMinVa:thetaMinVa, thetaMaxVa:thetaMaxVa} 
 	WIDGET_CONTROL, base, SET_UVALUE=stash
 	WIDGET_CONTROL, base, /REALIZE
 	XMANAGER, 'plotWindow', base

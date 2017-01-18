@@ -182,30 +182,39 @@ pro plotinteractive1D_doplot, pstate, postscript=postscript
   ymax = max([(*pstate).ymin,(*pstate).ymax])
   if (postscript eq 0) then begin ; plotting to screen
     ; ensure that data are being plotted in the draw window
+    ; print, "Getting ready to plot"
     wset, (*pstate).w_id
     ; plot data
-    plot,  (*pstate).xdata, (*pstate).ydata[0,*], xrange = [xmin,xmax], yrange=[ymin,ymax], background=255, color=0, xtitle=(*pstate).xlabel, ytitle=(*pstate).ylabel, title=(*pstate).title, ystyle = 1, xstyle=1
-    if ((*pstate).ncolumns gt 1) then for i=1, (*pstate).ncolumns-1 do oplot, (*pstate).xdata, (*pstate).ydata[i,*], color=10*i
+	if ((*pstate).nav eq 0) then begin ; we plot everything
+		plot,  (*pstate).xdata, (*pstate).ydata[0,*], xrange = [xmin,xmax], yrange=[ymin,ymax], background=255, color=0, xtitle=(*pstate).xlabel, ytitle=(*pstate).ylabel, title=(*pstate).title, ystyle = 1, xstyle=1
+		if ((*pstate).ncolumns gt 1) then for i=1, (*pstate).ncolumns-1 do oplot, (*pstate).xdata, (*pstate).ydata[i,*], color=10*i
+	endif else begin ; we only plot one dataset (the "current" one)
+		plot,  (*pstate).xdata, (*pstate).ydata[(*pstate).current,*], xrange = [xmin,xmax], yrange=[ymin,ymax], background=255, color=0, xtitle=(*pstate).xlabel, ytitle=(*pstate).ylabel, title=(*pstate).title, ystyle = 1, xstyle=1
+	endelse
     ; if we are scaling, plot a red rectangle
     if ((*pstate).scaling eq 1) then begin
       oplot, [(*pstate).sc_xmin,(*pstate).sc_xmax,(*pstate).sc_xmax,(*pstate).sc_xmin,(*pstate).sc_xmin], [(*pstate).sc_ymin,(*pstate).sc_ymin,(*pstate).sc_ymax,(*pstate).sc_ymax,(*pstate).sc_ymin], color=10
     endif
     ; add the legend, if necessary
     if ((*pstate).plotlegend) then begin
-      x1 = xmax-0.2*(xmax-xmin)
-      x2 = xmax-0.15*(xmax-xmin)
-      x3 = xmax-0.13*(xmax-xmin)
+      x1 = xmax-0.3*(xmax-xmin)
+      x2 = xmax-0.25*(xmax-xmin)
+      x3 = xmax-0.3*(xmax-xmin)
       y1 = ymax-0.05*(ymax-ymin)
       oplot, [x1,x2], [y1,y1], color=0
-      xyouts, x3, y1, (*pstate).legend[0], color=0
-      if ((*pstate).ncolumns gt 1) then begin
-        for i=1, (*pstate).ncolumns-1 do begin
-          y1 = y1 - 0.05*(ymax-ymin)
-          oplot, [x1,x2], [y1,y1], color=10*i
-          xyouts, x3, y1, (*pstate).legend[i],  color=10*i
-        endfor
-      endif
-    endif
+	  if ((*pstate).nav eq 0) then begin ; we add all legends
+		xyouts, x3, y1, (*pstate).legend[0], color=0
+		if ((*pstate).ncolumns gt 1) then begin
+			for i=1, (*pstate).ncolumns-1 do begin
+				y1 = y1 - 0.05*(ymax-ymin)
+				oplot, [x1,x2], [y1,y1], color=10*i
+				xyouts, x3, y1, (*pstate).legend[i],  color=10*i
+			endfor
+		endif
+	   endif else begin ; we only add the right legend
+			xyouts, x3, y1, (*pstate).legend[(*pstate).current], color=0
+	   endelse
+	endif
   endif else begin ; postscript, simply plot the data
     plot,  (*pstate).xdata,  (*pstate).ydata[0,*], xrange = [xmin,xmax], yrange=[ymin,ymax], background=255, color=0, xtitle=(*pstate).xlabel, ytitle=(*pstate).ylabel, title=(*pstate).title, xthick=2, ythick=2, thick=2, ystyle = 1, xstyle=1
     if ((*pstate).ncolumns gt 1) then for i=1, (*pstate).ncolumns-1 do oplot, (*pstate).xdata,  (*pstate).ydata[i,*], color=10*i
@@ -231,19 +240,43 @@ end
 ; ***************************************************************************
 
 ; handle resize of window events (resize the plot)
-pro plotinteractive1D_resize, event
-  ; get the pstate pointer
-  widget_control, event.top, get_uvalue=pstate
-  ; getting size available for the plot
-  statusg = widget_info((*pstate).status, /geometry)
-  tlbg = widget_info(event.top, /geometry)
-  newx = event.x - 2*tlbg.xpad
-  newy = event.y - statusg.scr_ysize - 2*tlbg.ypad - 2*tlbg.space
-  ; setting a new size
-  widget_control, (*pstate).draw, xsize=newx, ysize=newy
-  ; replot
-  plotinteractive1D_doplot, pstate
-end
+pro plotinteractive1D_event, event
+	; get the pstate pointer
+	widget_control, event.top, get_uvalue=pstate
+	WIDGET_CONTROL, event.ID, GET_UVALUE=uval
+	if (TYPENAME(uval) eq 'STRING') then begin
+		; print, TYPENAME(uval)
+		CASE uval OF
+			'PREVIOUSDATASET': BEGIN
+				;print, "Previous"
+				if ((*pstate).current gt 0) then (*pstate).current -= 1
+				plotinteractive1D_doplot, pstate
+				;movebackActiveSet, stash.log, stash.listsets
+				;updateRangeLabels, stash
+				;plotDataContour, ev.TOP, plotmin, plotmax, thetamin, thetamax, azmin, azmax
+				END
+			'NEXTDATASET': BEGIN
+				;print, "Next", (*pstate).current, (*pstate).ncolumns
+				if ((*pstate).current lt ((*pstate).ncolumns-2)) then (*pstate).current += 1
+				plotinteractive1D_doplot, pstate
+				;advanceActiveSet, stash.log, stash.listsets
+				;updateRangeLabels, stash
+				;plotDataContour, ev.TOP, plotmin, plotmax, thetamin, thetamax, azmin, azmax
+				END
+			ELSE: 
+		ENDCASE
+	endif else begin ; it is a resize event
+		; getting size available for the plot
+		statusg = widget_info((*pstate).status, /geometry)
+		tlbg = widget_info(event.top, /geometry)
+		newx = event.x - 2*tlbg.xpad
+		newy = event.y - statusg.scr_ysize - 2*tlbg.ypad - 2*tlbg.space
+		; setting a new size
+		widget_control, (*pstate).draw, xsize=newx, ysize=newy
+		; replot
+		plotinteractive1D_doplot, pstate
+	endelse
+END
 
 ; ***************************************************************************
 ; cleaning up
@@ -267,10 +300,11 @@ end
 ; setting up
 ; ***************************************************************************
 
-pro plotinteractive1D, base, xdata, sendydata, title = title, xlabel = xlabel, ylabel = ylabel, legend = legend, range = range
+pro plotinteractive1D, base, xdata, sendydata, title = title, xlabel = xlabel, ylabel = ylabel, legend = legend, range = range, nav = nav
   IF N_Elements(title) EQ 0 THEN title = "Plot"
   IF N_Elements(xlabel) EQ 0 THEN xlabel = ""
   IF N_Elements(ylabel) EQ 0 THEN ylabel = ""
+  IF N_Elements(nav) EQ 0 THEN nav = 0
   IF N_Elements(legend) EQ 0 THEN BEGIN
     plotlegend = 0
     legend = ''
@@ -300,6 +334,12 @@ pro plotinteractive1D, base, xdata, sendydata, title = title, xlabel = xlabel, y
   file_bttn3 = WIDGET_BUTTON(file_menu, VALUE='Export plot to PS', event_pro = 'plotinteractive1D_exportps' )
   file_bttn4 = WIDGET_BUTTON(file_menu, VALUE='Export data in chi format', event_pro ='plotinteractive1D_exportchi', /SEPARATOR)
   file_bttn4 = WIDGET_BUTTON(file_menu, VALUE='Close window', event_pro ='plotinteractive1D_cleanupmenu', /SEPARATOR)
+	; navigaton between sets
+	if (nav eq 1) then begin
+		buttons2 = WIDGET_BASE(tlb,/ALIGN_CENTER, /ROW, /GRID_LAYOUT)
+		previous = WIDGET_BUTTON(buttons2, VALUE='Previous dataset', UVALUE='PREVIOUSDATASET')
+		next = WIDGET_BUTTON(buttons2, VALUE='Next dataset', UVALUE='NEXTDATASET')
+	endif
   ; other
   status = widget_label(tlb, value=' ', /dynamic_resize)
   draw = widget_draw(tlb, xsize=500, ysize=300, /motion_events, /button_events, event_pro='plotinteractive1D_draw')
@@ -309,7 +349,8 @@ pro plotinteractive1D, base, xdata, sendydata, title = title, xlabel = xlabel, y
   Widget_Control, draw, get_value=w_id
   ymin = min(ydata,/NAN)
   ymax = max(ydata,/NAN)
-  state = {xdata: xdata, ydata:ydata, ncolumns: ncolumns, tlb: tlb, w_id:w_id, draw:draw, status:status, xlabel:xlabel, ylabel:ylabel, title: title, xmin:xmin, xmax:xmax, ymin:ymin, ymax:ymax, sc_xmin:0.0, sc_xmax:0.0, sc_ymin:0.0, sc_ymax:0.0, scaling:0, plotlegend: plotlegend, legend: legend}
+  current = 0
+  state = {xdata: xdata, ydata:ydata, ncolumns: ncolumns, tlb: tlb, w_id:w_id, draw:draw, status:status, xlabel:xlabel, ylabel:ylabel, title: title, xmin:xmin, xmax:xmax, ymin:ymin, ymax:ymax, sc_xmin:0.0, sc_xmax:0.0, sc_ymin:0.0, sc_ymax:0.0, scaling:0, plotlegend: plotlegend, legend: legend, nav:nav, current:current}
   ; create a pointer to the state structure and put that pointer
   ; into the user value of the top-level base
   pstate = ptr_new(state,/no_copy)
@@ -323,5 +364,5 @@ pro plotinteractive1D, base, xdata, sendydata, title = title, xlabel = xlabel, y
   plotinteractive1D_doplot, pstate
   ; Register with XMANAGER so you can receive events.
   Widget_Control, tlb, Kill_Notify='plotinteractive1D_cleanup'
-  xmanager, 'plotinteractive1D', tlb, event_handler='plotinteractive1D_resize', cleanup='plotinteractive1D_cleanup'
+  xmanager, 'plotinteractive1D', tlb, event_handler='plotinteractive1D_event', cleanup='plotinteractive1D_cleanup'
 end
