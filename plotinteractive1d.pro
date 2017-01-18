@@ -337,8 +337,8 @@ pro plotinteractive1D, base, xdata, sendydata, title = title, xlabel = xlabel, y
 	; navigaton between sets
 	if (nav eq 1) then begin
 		buttons2 = WIDGET_BASE(tlb,/ALIGN_CENTER, /ROW, /GRID_LAYOUT)
-		previous = WIDGET_BUTTON(buttons2, VALUE='Previous dataset', UVALUE='PREVIOUSDATASET')
-		next = WIDGET_BUTTON(buttons2, VALUE='Next dataset', UVALUE='NEXTDATASET')
+		previous = WIDGET_BUTTON(buttons2, VALUE='Previous set', UVALUE='PREVIOUSDATASET')
+		next = WIDGET_BUTTON(buttons2, VALUE='Next set', UVALUE='NEXTDATASET')
 	endif
   ; other
   status = widget_label(tlb, value=' ', /dynamic_resize)
