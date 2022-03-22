@@ -18,8 +18,9 @@ la = WIDGET_TEXT(infobase, XSIZE=80, YSIZE=30, /ALIGN_LEFT, /EDITABLE, /WRAP)
 ccr = STRING(13B) ; Carriage Return
 clf = STRING([10B]) ; line feed
 text = "Multifit" + clf
-text += "Compiled Jan 18 2017" + clf + clf
+text += "Compiled Mar 22 2022" + clf + clf
 text += "Recent changes" + clf
+text += "- Mar 2022: new function to read cake files exported from dioptas (used txt export in dioptas)." + clf
 text += "- Jan 2017: new features in 1D plot: navigate between orientations in 1D plots." + clf
 text += "- Jan 2016: fixed export into esg format for Maud. There was an issue with 2theta conversions." + clf
 text += "- Jan 2016: fixed plot of fit results for non integer azimuth values." + clf
