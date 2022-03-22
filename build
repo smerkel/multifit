@@ -22,7 +22,8 @@
 ; RESET IDL Session
 .RESET_SESSION
 
-; Compile project files                                                                                                                  
+; Compile project files            
+.COMPILE 'getInteger.pro'
 .COMPILE 'plotinteractive1d.pro'      
 .COMPILE 'changesWindow.pro'                                                                                                                                    
 .COMPILE 'intformat.pro'  
@@ -35,6 +36,7 @@
 .COMPILE 'mpfit.pro'
 .COMPILE 'binarydata.pro'
 .COMPILE 'chifiles.pro'
+.COMPILE 'dioptasfiles.pro'
 .COMPILE 'compareFit1DWindow.pro'
 .COMPILE 'compareFitWindow.pro'
 .COMPILE 'createModelWindow.pro'
