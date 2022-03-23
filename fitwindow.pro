@@ -172,9 +172,9 @@ titleLa = WIDGET_LABEL(base, VALUE='Multipeak fitting functions', font=titlefont
 top = WIDGET_BASE(base,/ROW)
                                 ; display default parameters
 dataBase =  WIDGET_BASE(top,/COLUMN, FRAME=1)
-alphaminLabel = 'Delta min: ' + STRTRIM(STRING(alphastart,/PRINT),1)
+alphaminLabel = 'Min azimuth: ' + STRTRIM(STRING(alphastart,/PRINT),1)
 alphaminLa = WIDGET_LABEL(dataBase, VALUE=alphaminLabel, /ALIGN_LEFT)
-alphamaxLabel = 'Delta max: ' + STRTRIM(STRING(alphaend,/PRINT),1)
+alphamaxLabel = 'Max azimuth: ' + STRTRIM(STRING(alphaend,/PRINT),1)
 alphamaxLa = WIDGET_LABEL(dataBase, VALUE=alphamaxLabel, /ALIGN_LEFT)
 intervalLabel = 'Interval: ' + STRTRIM(STRING(intervalle,/PRINT),1)
 intervalLa = WIDGET_LABEL(dataBase, VALUE=intervalLabel, /ALIGN_LEFT)
@@ -183,7 +183,7 @@ listBase =  WIDGET_BASE(top,/COLUMN, FRAME=1)
 alphaText = strarr(nalpha)
 alphaU = intarr(nalpha)
 for i=0, nalpha[0]-1 do begin
-    alphaText(i) = 'delta = ' + STRTRIM(STRING(alpha(i),/PRINT))
+    alphaText(i) = 'Az = ' + STRTRIM(STRING(alpha(i),/PRINT))
     alphaU(i) = i
 endfor
 listID = Widget_List(listBase, VALUE=alphaText, UVALUE='LISTDELTA', /MULTIPLE)

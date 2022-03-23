@@ -375,13 +375,13 @@ alphaplot = alpha(include)
 ; So changed it to hard coded plot positions... Please do not go back to
 ; multiplot!
 plot, alphaplot,  results(*,0,0), background=255, color=0, yrange=[min2theta,max2theta],$
-      xtitle = 'delta', ytitle='2 theta', charsize=1.5, position= [0.15, 0.73, 0.97, 0.99]
+      xtitle = 'Azimuth', ytitle='2 theta', charsize=1.5, position= [0.15, 0.73, 0.97, 0.99]
 for j=1, npeaks -1 do oplot,  alphaplot, results(*,0,j), color = 0
 plot, alphaplot,  results(*,2,0), background=255, color=0, yrange=[minInt,maxInt],$
-      xtitle = 'delta', ytitle='intensity', charsize=1.5, position= [0.15, 0.40, 0.97, 0.66], /noerase
+      xtitle = 'Azimuth', ytitle='intensity', charsize=1.5, position= [0.15, 0.40, 0.97, 0.66], /noerase
 for j=1, npeaks -1 do oplot,  alphaplot, results(*,2,j), color = 0
 plot, alphaplot,  results(*,3,0), background=255, color=0, yrange=[minHW,maxHW],$
-      xtitle = 'delta', ytitle='half-width', charsize=1.5, position= [0.15, .07, 0.97, 0.33], /noerase
+      xtitle = 'Azimuth', ytitle='half-width', charsize=1.5, position= [0.15, .07, 0.97, 0.33], /noerase
 for j=1, npeaks -1 do oplot,  alphaplot, results(*,3,j), color = 0
 !P.MULTI = 0
 ; eventually, save it into a file
