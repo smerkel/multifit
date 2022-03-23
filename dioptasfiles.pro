@@ -28,12 +28,16 @@ alpha = fltarr(nalpha)
 data = fltarr(nalpha,ntheta)
 for i = 0,nalpha-1  do begin
 	alpha[i] = datafile[0,i]
-	data[i,*] = datafile[1:*,1]
+	data[i,*] = datafile[1:*,i]
 endfor
 
 
 ; Rebinning data to improve resolution (1 file every degree is not great)
-rebinFactor = getInteger('Rebin data in azimuth', 'Rebin data in azimuth ? Set 1 to keep the same number of azimuths, 2 to divide it by 2 and improve signal to noise ration, etc.', widgetBase, value=1)
+extramessages = strarr(3)
+extramessages[0] = " - Current number of azimuths: " + STRTRIM(string(nalpha, /print),2) + ", range from " + STRTRIM(string(min(alpha), /print),2) + " to " + STRTRIM(string(max(alpha), /print),2) + " degrees"
+extramessages[1] = " - Set 1 to keep the same number of azimuths, 2 to divide it by 2 and improve signal to noise ration, etc."
+extramessages[2] = " - 1 spectrum every 5 degrees is often good for stress and strain analysis"
+rebinFactor = getInteger('Rebin data in azimuth', 'Rebin data in azimuth ?', widgetBase, value=5, extramessages=extramessages)
 test = 0 ; the new number of bins needs to be an integer multiple of the old one
 while (test eq 0) do begin
 	if( fix(nalpha / rebinFactor) ne (1.0 * nalpha / rebinFactor)) then begin
@@ -56,8 +60,8 @@ intervalle = alpha[1]-alpha[0]
 date = systime(0)
 
 logit, widgetlog, "Read cake image from " + filename + "."
-logit, widgetlog, "  - number of azimuth (after rebinning): " + string(nalpha, /print) 
-logit, widgetlog, "  - number of 2theta: " + string(ntheta, /print)
+logit, widgetlog, "  - number of azimuth (after rebinning): " + STRTRIM(string(nalpha, /print),2)
+logit, widgetlog, "  - number of 2theta: " +  STRTRIM(string(ntheta, /print),2)
 return, 1
 BADINPUT: return, !ERR_STRING
 end

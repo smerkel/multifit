@@ -9,14 +9,18 @@ endif
 WIDGET_CONTROL, ev.TOP, /DESTROY
 END
 
-Function getInteger, title, message, widgetBase, value=value
+Function getInteger, title, message, widgetBase, value=value, extramessages = extramessages
 if (not keyword_set(value)) then begin
 	value = ''
 endif
 basedialog = WIDGET_BASE(/COLUMN, /MODAL, GROUP_LEADER=widgetBase)
-intBase =  WIDGET_BASE(basedialog,/ROW)
-intText = cw_field(intBase, TITLE=message, /INTEGER, UVALUE=pReturnValue, VALUE=value, /COLUMN)
-; intLa = WIDGET_LABEL(intBase, VALUE=message, /ALIGN_LEFT)
+intBase =  WIDGET_BASE(basedialog,/COLUMN)
+if (keyword_set(extramessages)) then begin
+	for i=0,n_elements(extramessages)-1 do begin
+		intLa = WIDGET_LABEL(intBase, VALUE=extramessages[i], /ALIGN_LEFT)
+	endfor
+endif
+intText = cw_field(intBase, TITLE=message, /INTEGER, UVALUE=pReturnValue, VALUE=value)
 ; intText = WIDGET_TEXT(intBase, XSIZE=10, VALUE=STRING(value,/PRINT), /EDITABLE)
 buttons = WIDGET_BASE(basedialog,/ROW, /GRID_LAYOUT, /ALIGN_CENTER)
 ok = WIDGET_BUTTON(buttons, VALUE='Ok', UVALUE='OK')
