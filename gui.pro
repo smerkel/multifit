@@ -768,6 +768,8 @@ if (result ne '') then begin
 				inputText(0) = outputname
 				inputfiles = inputText
 				WIDGET_CONTROL, widgetList, SET_VALUE=inputText
+				activeset = 0
+				WIDGET_CONTROL, widgetList, SET_LIST_SELECT=activeset
 			endif else begin
 				; tmp = DIALOG_MESSAGE(res, /ERROR)
 				logit, log, "Save data in MULTIFIT format: failed"
