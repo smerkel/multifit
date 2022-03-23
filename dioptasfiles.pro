@@ -32,12 +32,13 @@ for i = 0,nalpha-1  do begin
 endfor
 
 
-; Rebinning data to improve resolution (1 file every degree is not great)
+; Rebinning data to improve resolution (1 file every degree or more is not great)
+guess = fix(5. / ((max(alpha)-min(alpha))/nalpha)) ; guess try to get 1 file every 5 degrees
 extramessages = strarr(3)
 extramessages[0] = " - Current number of azimuths: " + STRTRIM(string(nalpha, /print),2) + ", range from " + STRTRIM(string(min(alpha), /print),2) + " to " + STRTRIM(string(max(alpha), /print),2) + " degrees"
 extramessages[1] = " - Set 1 to keep the same number of azimuths, 2 to divide it by 2 and improve signal to noise ration, etc."
 extramessages[2] = " - 1 spectrum every 5 degrees is often good for stress and strain analysis"
-rebinFactor = getInteger('Rebin data in azimuth', 'Rebin data in azimuth ?', widgetBase, value=5, extramessages=extramessages)
+rebinFactor = getInteger('Rebin data in azimuth', 'Rebin data in azimuth ?', widgetBase, value=guess, extramessages=extramessages)
 test = 0 ; the new number of bins needs to be an integer multiple of the old one
 while (test eq 0) do begin
 	if( fix(nalpha / rebinFactor) ne (1.0 * nalpha / rebinFactor)) then begin
