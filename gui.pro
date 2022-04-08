@@ -797,6 +797,7 @@ endelse
 END
 
 ; ****************************************** DIOPTAS TXT CAKE FILES: ONE FILE **************
+; this function is not used anymore. We only the use the one above, manyInputDioptasFile, which can work with one or many files
 
 pro oneInputDioptasFile, widgetBase, widgetList, widgetDataDir, widgetOutputDir, log
 common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory
