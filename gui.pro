@@ -734,7 +734,69 @@ END
 ;XMANAGER, 'createmultiplefitfromdat', basedialog
 ;END
 
-; ****************************************** DIOPTAS TXT CAKE FILES **************
+; ****************************************** DIOPTAS TXT CAKE FILES: FILE SERIES **************
+
+PRO manyInputDioptasFile, widgetBase, widgetList, widgetDataDir, widgetOutputDir, log
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory
+common inputfiles, inputfiles, activeset
+common diotasfilesparameter, rebinFactor, setRebinFactor
+result=dialog_pickfile(title='Select all Dioptas txt cake file...', path=datadirectory, DIALOG_PARENT=base, FILTER=['*.txt','*.*'], /must_exist, /MULTIPLE_FILES)
+if (n_elements(result) gt 0) then begin
+	nfiles = n_elements(result)
+	setRebinFactor = 1 ; need to set a rebin factor at first file
+	for i=0, nfiles-1 do begin
+		FDECOMP, result[i], disk, dir, name, qual, version
+		filename = datadirectory + name + "." + Qual
+		filenameshort = name + "." + Qual
+		if (FILE_TEST(result[i])) then begin
+			logit, log, "Reading dioptas cake file from from: " + result[i]
+			resultread = read_dioptas_txt_cake(result[i], widgetBase, log)
+			if (resultread eq 1) then begin
+				logit, log, "Read dioptas cake file: success"
+				setRebinFactor = 0 ; no need to set a rebin factor for next file
+				if (i eq 0) then begin
+					; Forcing data and output directory to be where we are
+					datadirectory = disk + dir
+					inputDirLabel = 'Input directory set to: ' + datadirectory
+					WIDGET_CONTROL, widgetDataDir, SET_VALUE=datadirectory
+					logit, log, inputDirLabel
+					outputdirectory = disk + dir
+					outputDirLabel = 'Output directory set to: ' + outputdirectory
+					WIDGET_CONTROL, widgetOutputDir, SET_VALUE=outputdirectory
+					logit, log, outputDirLabel
+				endif
+				outputname = name + ".idl"
+				logit, log, "Saving data in MULTIFIT format into " + outputname
+				res = savedata(outputname)
+				if (res eq 1) then begin
+					logit, log, "Save data in MULTIFIT format to " + outputname + ": success"
+					if (i eq 0) then begin ; will be used to fill the gui
+						inputText = strarr(nfiles)
+					endif
+					inputText(i) = outputname
+				endif else begin
+					; tmp = DIALOG_MESSAGE(res, /ERROR)
+					logit, log, "Save data in MULTIFIT format: failed"
+				endelse
+			endif else begin
+				logit, log, "Reading of dioptas cake file failed"
+			endelse
+		endif else begin
+			tmp = DIALOG_MESSAGE(result + " not found.", /ERROR)
+			logit, log, "Set one dataset: failed"
+		endelse
+	endfor
+	; Setting a new list of files in the gui
+	inputfiles = inputText
+	WIDGET_CONTROL, widgetList, SET_VALUE=inputText
+	activeset = 0
+	WIDGET_CONTROL, widgetList, SET_LIST_SELECT=activeset	
+endif else begin
+    logit, log, "Read file in dioptas format: canceled"
+endelse
+END
+
+; ****************************************** DIOPTAS TXT CAKE FILES: ONE FILE **************
 
 pro oneInputDioptasFile, widgetBase, widgetList, widgetDataDir, widgetOutputDir, log
 common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory
@@ -1131,7 +1193,7 @@ CASE ev.id OF
 		'REMOVESLICE': removeSlice, stash.base
 		'WAVE': chgWavelength, stash.base, stash.log, stash.waveText
 		'DETECTORDISTANCE': chgDetectorDistance, stash.base, stash.log, stash.ipDistanceText
-		'ONEDIOPTAS': oneInputDioptasFile,  stash.base, stash.listSets, stash.inputDirText,  stash.outputDirText, stash.log
+		'MANYDIOPTAS': manyInputDioptasFile,  stash.base, stash.listSets, stash.inputDirText,  stash.outputDirText, stash.log
 		'ONEIDL': oneInputFile, stash.listSets, stash.log
 		'MULTIPLEIDL': multipleInputFiles, stash.base, stash.listSets, stash.log
 		'CONVERTONECHI': convertonechi, stash.base, stash.log
@@ -1181,7 +1243,7 @@ base = WIDGET_BASE(Title='Multipeak superfit!',/COLUMN, MBAR=bar, /TLB_SIZE_EVEN
 file_menu = WIDGET_BUTTON(bar, VALUE='File', /MENU)
 file_bttn3 = WIDGET_BUTTON(file_menu, VALUE='Save parameters', UVALUE='SAVEPARAM')
 file_bttn4 = WIDGET_BUTTON(file_menu, VALUE='Read parameters', UVALUE='READPARAM')
-file_bttn1 = WIDGET_BUTTON(file_menu, VALUE='Dioptas txt cake file', UVALUE='ONEDIOPTAS', /SEPARATOR)
+file_bttn1 = WIDGET_BUTTON(file_menu, VALUE='Dioptas txt cake file', UVALUE='MANYDIOPTAS', /SEPARATOR)
 file_bttn1 = WIDGET_BUTTON(file_menu, VALUE='Single input file', UVALUE='ONEIDL', /SEPARATOR)
 file_bttn2 = WIDGET_BUTTON(file_menu, VALUE='Multiple input files', UVALUE='MULTIPLEIDL')
 file_bttn5 = WIDGET_BUTTON(file_menu, VALUE='Exit', UVALUE='EXIT', /SEPARATOR)
