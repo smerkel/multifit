@@ -850,6 +850,61 @@ endelse
 END
 
 
+; ****************************************** DIOPTAS BATCH NXS: ONE FILE **************
+; Reads HDF5 created by Batch mode in dioptas. Usually not related to stress-strain analysis, but most probably a time dependent measurement
+
+pro inputDioptasBatchNXS, widgetBase, widgetList, widgetDataDir, widgetOutputDir, log
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory
+common inputfiles, inputfiles, activeset
+result=dialog_pickfile(title='Input data from Dioptas Batch NXS file...', path=datadirectory, DIALOG_PARENT=base, FILTER=['*.nxs','*.*'], /must_exist)
+if (result ne '') then begin
+	FDECOMP, result, disk, dir, name, qual, version
+	filename = datadirectory + name + "." + Qual
+	filenameshort = name + "." + Qual
+	if (FILE_TEST(result)) then begin
+		logit, log, "Reading dioptas Batch NXS from from: " + result
+		resultread = read_dioptas_Batch_NXS(result, widgetBase, log)
+		if (resultread eq 1) then begin
+			logit, log, "Read dioptas Batch NXS: success"
+			; Forcing data and output directory to be where we are
+			datadirectory = disk + dir
+			inputDirLabel = 'Input directory set to: ' + datadirectory
+			WIDGET_CONTROL, widgetDataDir, SET_VALUE=datadirectory
+			logit, log, inputDirLabel
+			outputdirectory = disk + dir
+			outputDirLabel = 'Output directory set to: ' + outputdirectory
+			WIDGET_CONTROL, widgetOutputDir, SET_VALUE=outputdirectory
+			logit, log, outputDirLabel
+			outputname = name + ".idl"
+			logit, log, "Saving data in MULTIFIT format into " + outputname
+			res = savedata(outputname)
+			if (res eq 1) then begin
+				logit, log, "Save data in MULTIFIT format to " + outputname + ": success"
+				; WIDGET_CONTROL, ev.TOP, /DESTROY
+				inputText = strarr(1)
+				inputText(0) = outputname
+				inputfiles = inputText
+				WIDGET_CONTROL, widgetList, SET_VALUE=inputText
+				activeset = 0
+				WIDGET_CONTROL, widgetList, SET_LIST_SELECT=activeset
+			endif else begin
+				; tmp = DIALOG_MESSAGE(res, /ERROR)
+				logit, log, "Save data in MULTIFIT format: failed"
+			endelse
+		endif else begin
+			logit, log, "Reading of dioptas Batch NXS file failed"
+		endelse
+	endif else begin
+		tmp = DIALOG_MESSAGE(result + " not found.", /ERROR)
+		logit, log, "Set one dataset: failed"
+	endelse
+endif else begin
+    logit, log, "Read file in MULTIFIT format: canceled"
+endelse
+END
+
+
+
 ; ****************************************** SETUP INPUT (DATA) FILES **************
 
 pro oneInputFile, widget, log
@@ -1195,6 +1250,7 @@ CASE ev.id OF
 		'WAVE': chgWavelength, stash.base, stash.log, stash.waveText
 		'DETECTORDISTANCE': chgDetectorDistance, stash.base, stash.log, stash.ipDistanceText
 		'MANYDIOPTAS': manyInputDioptasFile,  stash.base, stash.listSets, stash.inputDirText,  stash.outputDirText, stash.log
+		'DIOPTASNXS': inputDioptasBatchNXS,  stash.base, stash.listSets, stash.inputDirText,  stash.outputDirText, stash.log
 		'ONEIDL': oneInputFile, stash.listSets, stash.log
 		'MULTIPLEIDL': multipleInputFiles, stash.base, stash.listSets, stash.log
 		'CONVERTONECHI': convertonechi, stash.base, stash.log
@@ -1245,6 +1301,7 @@ file_menu = WIDGET_BUTTON(bar, VALUE='File', /MENU)
 file_bttn3 = WIDGET_BUTTON(file_menu, VALUE='Save parameters', UVALUE='SAVEPARAM')
 file_bttn4 = WIDGET_BUTTON(file_menu, VALUE='Read parameters', UVALUE='READPARAM')
 file_bttn1 = WIDGET_BUTTON(file_menu, VALUE='Dioptas txt cake file', UVALUE='MANYDIOPTAS', /SEPARATOR)
+file_bttn1 = WIDGET_BUTTON(file_menu, VALUE='Dioptas batch NXS file', UVALUE='DIOPTASNXS', /SEPARATOR)
 file_bttn1 = WIDGET_BUTTON(file_menu, VALUE='Single input file', UVALUE='ONEIDL', /SEPARATOR)
 file_bttn2 = WIDGET_BUTTON(file_menu, VALUE='Multiple input files', UVALUE='MULTIPLEIDL')
 file_bttn5 = WIDGET_BUTTON(file_menu, VALUE='Exit', UVALUE='EXIT', /SEPARATOR)

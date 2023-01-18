@@ -75,3 +75,42 @@ logit, widgetlog, "  - number of 2theta: " +  STRTRIM(string(ntheta, /print),2)
 return, 1
 BADINPUT: return, !ERR_STRING
 end
+
+
+function read_dioptas_Batch_NXS, filename, widgetBase, widgetlog
+common rawdata, nalpha, ntheta, alpha, twotheta, data
+common datainfo, filenames, alphastart, alphaend, intervalle, date
+common files, extension, datadirectory, outputdirectory, defaultdirectory, jcpdsdirectory
+common diotasfilesparameter, rebinFactor, setRebinFactor
+ON_IOERROR, BADINPUT
+
+file_id = H5F_OPEN(filename)
+bins_id = H5D_OPEN(file_id, '/processed/result/binning')
+data_id = H5D_OPEN(file_id, '/processed/result/data')
+bins = H5D_READ(bins_id)
+data = H5D_READ(data_id)
+H5D_CLOSE, bins_id
+H5D_CLOSE, data_id
+H5F_CLOSE, file_id
+
+twotheta = bins
+ntheta = n_elements(bins)
+data_size=size(data)
+nalpha = data_size[2]
+alpha = indgen(nalpha)
+alpha += 1
+data = transpose(data)
+
+; saving basic informations about the data
+filenames = filename
+alphastart = alpha[0]
+alphaend = alpha[-1]
+intervalle = alpha[1]-alpha[0]
+date = systime(0)
+
+logit, widgetlog, "Read image from " + filename + "."
+logit, widgetlog, "  - number of spectra: " + STRTRIM(string(nalpha, /print),2)
+logit, widgetlog, "  - number of 2theta (or whatever is in X): " +  STRTRIM(string(ntheta, /print),2)
+return, 1
+BADINPUT: return, !ERR_STRING
+end
