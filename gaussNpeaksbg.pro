@@ -272,12 +272,12 @@ if (auto eq 0) then begin
         coeffs[peak] = PTR_NEW(/ALLOCATE_HEAP)
         yfit[peak] = PTR_NEW(/ALLOCATE_HEAP)
                                 ; get position of this peak from the user
-        string = "Click on peak " + string(peak + 1, /print)
+        string = "Click on peak maximum " + string(peak + 1, /print)
 		yleg = yplotmax-0.04*(yplotmax-yplotmin)
 		xyouts, xleg,yleg, string,  color = 0, charsize=1.5, charthick=2
         cursor,xC,yC,/down
 		yleg = yleg-0.04*(yplotmax-yplotmin)
-		xyouts, xleg,yleg, "Define half-width", color = 0, charsize=1.5, charthick=2
+		xyouts, xleg,yleg, "Click on peak's left or right side", color = 0, charsize=1.5, charthick=2
         cursor,xH,yH,/down
         xC = theta2pixels(scaledtheta, N_ELEMENTS(scaledtheta), xC)+minX
         xH = theta2pixels(scaledtheta, N_ELEMENTS(scaledtheta), xH)+minX

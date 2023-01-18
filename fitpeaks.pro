@@ -115,10 +115,10 @@ endif else if (manual eq 1) then begin
         ; the user defines the zone
 		xleg = min(theta)+0.05*(max(theta)-min(theta))
 		yleg = maxy-0.04*(maxy-miny)
-		xyouts, xleg,yleg, "Click on left side of peaks",  color = 0, charsize=1.5, charthick=2
+		xyouts, xleg,yleg, "Click on LEFT side of region with peaks",  color = 0, charsize=1.5, charthick=2
         cursor,xl,yl,/down
 		yleg = maxy-0.08*(maxy-miny)
-		xyouts, xleg,yleg, "Click on right side of peaks",  color = 0, charsize=1.5, charthick=2
+		xyouts, xleg,yleg, "Click on RIGHT side of region with peaks",  color = 0, charsize=1.5, charthick=2
         cursor,xr,yr,/down
         xr = theta2pixels(theta, N_ELEMENTS(theta), xr)
         xl = theta2pixels(theta, N_ELEMENTS(theta), xl)
@@ -341,11 +341,11 @@ for i=0, nalpha-1 do begin
           plot,twotheta,data(i,*), background=255, color=0, yrange=[miny,maxy]
           xleg = minx+0.05*(maxx-minx)
           yleg = maxy-0.04*(maxy-miny)
-          xyouts, xleg,yleg, "Click on left side of peaks",  color = 0, charsize=1.5, charthick=2
+          xyouts, xleg,yleg, "Click on LEFT side of region with peaks",  color = 0, charsize=1.5, charthick=2
           cursor,xl,yl,/down
           xleg = minx+0.05*(maxx-minx)
           yleg = maxy-0.08*(maxy-miny)
-          xyouts, xleg,yleg, "Click on right side of peaks",  color = 0, charsize=1.5, charthick=2
+          xyouts, xleg,yleg, "Click on RIGHT side of region with peaks",  color = 0, charsize=1.5, charthick=2
           cursor,xr,yr,/down
           xl = theta2pixels(twotheta, ntheta, xl)
           xr = theta2pixels(twotheta, ntheta, xr)
@@ -378,10 +378,10 @@ plot, alphaplot,  results(*,0,0), background=255, color=0, yrange=[min2theta,max
       xtitle = 'Azimuth', ytitle='2 theta', charsize=1.5, position= [0.15, 0.73, 0.97, 0.99]
 for j=1, npeaks -1 do oplot,  alphaplot, results(*,0,j), color = 0
 plot, alphaplot,  results(*,2,0), background=255, color=0, yrange=[minInt,maxInt],$
-      xtitle = 'Azimuth', ytitle='intensity', charsize=1.5, position= [0.15, 0.40, 0.97, 0.66], /noerase
+      xtitle = 'Azimuth', ytitle='Intensity', charsize=1.5, position= [0.15, 0.40, 0.97, 0.66], /noerase
 for j=1, npeaks -1 do oplot,  alphaplot, results(*,2,j), color = 0
 plot, alphaplot,  results(*,3,0), background=255, color=0, yrange=[minHW,maxHW],$
-      xtitle = 'Azimuth', ytitle='half-width', charsize=1.5, position= [0.15, .07, 0.97, 0.33], /noerase
+      xtitle = 'Azimuth', ytitle='HWHM or Gaussian Sigma', charsize=1.5, position= [0.15, .07, 0.97, 0.33], /noerase
 for j=1, npeaks -1 do oplot,  alphaplot, results(*,3,j), color = 0
 !P.MULTI = 0
 ; eventually, save it into a file
@@ -467,7 +467,7 @@ if (outfile ne '') then begin
     openw, lun, outfile, /get_lun
     printf, lun, '# ' + titre
     if (savehalfwidth eq 1) then $
-      printf, lun, '# delta, then 2 theta, d, intensity, and half-width (and maybe relative weight gauss/lorentz) for each peak' $
+      printf, lun, '# delta, then 2 theta, d, intensity, and HWHM or Gaussian sigma (and maybe relative weight gauss/lorentz) for each peak' $
     else $
       printf, lun, '# delta, then 2 theta, d, and intensity (and maybe relative weight gauss/lorentz) for each peak'
     thispeak=-1
